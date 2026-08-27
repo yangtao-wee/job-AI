@@ -5,7 +5,7 @@ from ..database import SessionLocal
 from ..dependencies import get_current_user,get_db
 from ..models import Job,User
 from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult
-from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score
+from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills
 from ..services.job_service import get_all_jobs
 from ..services.ai_job_service import analyze_job_with_ai
 
@@ -32,18 +32,18 @@ def match_job(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='简历分析或岗位不存在'
         )
-    skill_match = calculate_skill_score(analysis.skills,job.skills)
-    keyword_match = calculate_keyword_score(analysis.skills,job.description)
     job_requirements = analyze_job_with_ai(job.description)
-    required_skill_match=calculate_required_skill_score(
-             analysis.skills,
-             job_requirements.required_skills
-        )
+    merged_job_skills = merge_job_skills(
+         job.skills,job_requirements.required_skills
+    )
+    skill_match = calculate_skill_score(analysis.skills,merged_job_skills)
+    keyword_match = calculate_keyword_score(analysis.skills,job.description)
+    required_skill_match = calculate_required_skill_score(analysis.skills,job_requirements.required_skills)
     return JobMatchResponse(
         resume_id=request.resume_id,
         job_id=request.job_id,
-        current_score=skill_match.score + keyword_match.score +  required_skill_match.score,
-        current_max_score=60,
+        current_score=skill_match.score + keyword_match.score,
+        current_max_score=45,
         skill_match=skill_match,
         keyword_match=keyword_match,
         required_skill_match=required_skill_match

@@ -14,7 +14,7 @@
 <p v-if="keywordScore !== undefined">关键词覆盖：{{ keywordScore }}/10</p>
 <p v-if="matchedKeywords?.length">已覆盖关键词：{{ matchedKeywords.join('、') }}</p>
 <p v-if="missingKeywords?.length">缺失关键词：{{ missingKeywords.join('、') }}</p>
-<p v-if="requiredSkillScore !== undefined">AI必备技能匹配:{{ requiredSkillScore }}/15</p>
+<p v-if="requiredSkillScore !== undefined">AI必备技能参考(不计总分):{{ requiredSkillScore }}/15</p>
 <p v-if="matchedRequiredSkills?.length">已满足必备技能：{{matchedRequiredSkills.join('、')}}</p>
 <p v-if="missingRequiredSkills?.length">缺失必备技能：{{ missingRequiredSkills.join('、') }}</p>
 <div v-if="requirements">

@@ -7,14 +7,27 @@ JOB_KEYWORDS = [
     'Docker','RAG','Agent','Vue'
 ]
 
+# 合并函数
+def merge_job_skills(
+        job_skills:str,
+        ai_required_skills:list[str]
+)->list[str]:
+    manual_skills = job_skills.split(',')
+    all_skills=manual_skills + ai_required_skills
+    return sorted({
+        skill.strip().lower()
+        for skill in all_skills
+        if skill.strip()
+    })
+
 def calculate_skill_score(
         resume_skill:list[str],
-        job_skills:str
+        job_skills:list[str]
 )->SkillMatchResult:
     resume_set = {skill.strip().lower() for skill in resume_skill}
     job_set = {
         skill.strip().lower()
-        for skill in job_skills.split(',')
+        for skill in job_skills
         if skill.strip()
     }
     matched_skills = resume_set & job_set

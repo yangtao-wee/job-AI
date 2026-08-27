@@ -1,0 +1,45 @@
+from fastapi import APIRouter,Depends,HTTPException,status
+from sqlalchemy.orm  import Session
+
+from ..database import SessionLocal
+from ..dependencies import get_current_user,get_db
+from ..models import Job,User
+from ..schemas import JobMatchRequest,JobMatchResponse
+from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score
+from ..services.job_service import get_all_jobs
+
+
+router = APIRouter()
+
+@router.get('/jobs')
+def get_jobs():
+    db = SessionLocal()
+    jobs = get_all_jobs(db)
+    db.close()
+    return jobs
+
+@router.post('/jobs/match',response_model=JobMatchResponse)
+
+def match_job(
+    request:JobMatchRequest,
+    current_user:User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    analysis = get_user_resume_analysis(db,request.resume_id,current_user.id)
+    job = db.query(Job).filter(Job.id == request.job_id).first()
+    if not analysis or not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='简历分析或岗位不存在'
+        )
+    skill_match = calculate_skill_score(analysis.skills,job.skills)
+    keyword_match = calculate_keyword_score(analysis.skills,job.description)
+    return JobMatchResponse(
+        resume_id=request.resume_id,
+        job_id=request.job_id,
+        current_score=skill_match.score + keyword_match.score,
+        current_max_score=45,
+        skill_match=skill_match,
+        keyword_match=keyword_match
+    )
+

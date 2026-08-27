@@ -14,13 +14,26 @@
 <p v-if="keywordScore !== undefined">关键词覆盖：{{ keywordScore }}/10</p>
 <p v-if="matchedKeywords?.length">已覆盖关键词：{{ matchedKeywords.join('、') }}</p>
 <p v-if="missingKeywords?.length">缺失关键词：{{ missingKeywords.join('、') }}</p>
+<div v-if="requirements">
+    <h4>岗位结构化要求</h4>
+    <p>岗位职责：{{ requirements.responsibilities.join('、') || '未说明' }}</p>
+    <p>必备技能：{{ requirements.required_skills.join('、') || '未说明'}}</p>
+    <p>工作经验：{{ requirements.experience.join('、') || '未说明'}}</p>
+    <p>学历要求：{{ requirements.education.join('、') || '未说明'}}</p>
+    <p>加分项：{{ requirements.bonus_points.join('、') || '未说明'}}</p>
+
+</div>
 <button :disabled="matching" @click="emit('match')">{{ matching?'匹配中...' : '开始匹配' }}</button>
+<button :disabled="analyzing" @click="emit('analyze')">
+    {{ analyzing ? '分析中...' : '分析岗位' }}
+</button>
 <!-- 【框架提供】，向父页面发出名为match的消息 -->
 </div>
 
 </template>
 
 <script setup>
+// defineProps() 是 Vue 3 提供的固定语法；这个子组件允许父组件传这些数据进来，并且规定每个数据应该是什么类型。括号里面的 prop 名称是你自己定义的，类型 String/Number/Array/Boolean/Object 是 JavaScript 提供的。
 defineProps({
     title:String,
     salary:String,
@@ -32,10 +45,14 @@ defineProps({
     keywordScore:Number,
     matchedKeywords:Array,
     missingKeywords:Array,
-    matching:Boolean
+    matching:Boolean,
+    requirements:Object,
+    analyzing:Boolean
     // Boolean：【语言固定】，只有true或false。
 })
-const emit = defineEmits(['match'])
+const emit = defineEmits(['match','analyze'])
+// 【框架提供】，登记组件允许发送的事件。
+
 </script>
 
 <style scoped>

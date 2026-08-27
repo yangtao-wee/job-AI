@@ -11,3 +11,11 @@ export function matchJob(resumeId,jobId){
         job_id:jobId
     })
 }
+
+export function analyzeJob(jobId){
+    if(!jobId){
+        throw new Error('缺少岗位ID')
+    // throw、new、Error：【语言固定】。主动停止并报告清楚的前端错误。
+    }
+    return request.post(`/jobs/${jobId}/analysis`)
+}

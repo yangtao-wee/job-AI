@@ -1,4 +1,4 @@
-from app.services.matching_service import calculate_required_skill_score,calculate_skill_score,merge_job_skills,calculate_experience_score
+from app.services.matching_service import calculate_required_skill_score,calculate_skill_score,merge_job_skills,calculate_experience_score,score_role
 
 def test_partial_match():
     result = calculate_required_skill_score(
@@ -37,3 +37,14 @@ def test_exp_partial():
 def test_exp_empty():
     result = calculate_experience_score(['负责vue页面'],[])
     assert result.score==0
+
+def test_role_hit():
+    res=score_role('Python开发工程师',['Python后端开发工程师'])
+    assert res.score==10
+    assert res.hit is True
+    assert res.note=='共同方向:Python'
+
+def test_role_miss():
+    res=score_role('销售经理',['Python后端开发工程师'])
+    assert res.score==0
+    assert res.hit is False

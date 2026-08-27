@@ -5,7 +5,7 @@ from ..database import SessionLocal
 from ..dependencies import get_current_user,get_db
 from ..models import Job,User
 from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult
-from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score
+from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role
 from ..services.job_service import get_all_jobs
 from ..services.ai_job_service import analyze_job_with_ai
 
@@ -43,15 +43,17 @@ def match_job(
          analysis.work_experience,
          job_requirements.responsibilities
     )
+    role = score_role(job.title,analysis.recommended_positions)
     return JobMatchResponse(
         resume_id=request.resume_id,
         job_id=request.job_id,
-        current_score=skill_match.score + keyword_match.score + exp_match.score,
-        current_max_score=75,
+        current_score=skill_match.score + keyword_match.score + exp_match.score + role.score,
+        current_max_score=85,
         skill_match=skill_match,
         keyword_match=keyword_match,
         required_skill_match=required_skill_match,
-        experience_match=exp_match
+        experience_match=exp_match,
+        role_match=role
     )
 
 @router.post('/jobs/{job_id}/analysis',

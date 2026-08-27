@@ -1,4 +1,4 @@
-from ..schemas import SkillMatchResult,KeywordMatchResult,ExpMatch,Dutyproof
+from ..schemas import SkillMatchResult,KeywordMatchResult,ExpMatch,Dutyproof,RoleMatch
 from sqlalchemy.orm import Session
 from ..models import  Resume,ResumeAnalysis
 
@@ -8,7 +8,7 @@ JOB_KEYWORDS = [
 ]
 
 EXPERIENCE_KEYWORDS = JOB_KEYWORDS + ['AI','接口','数据库','部署','测试','需求','文档']
-
+ROLE_KEYS=['Python','Vue','AI','后端','前端','产品']
 def find_resume_evidence(
         responsibility:str,work_experience:list[str]
 )->str | None:
@@ -42,6 +42,20 @@ def calculate_experience_score(
     return ExpMatch(
         score=round(len(matches)/len(responsibilities)*30),
         matches=matches,missing_responsibilities=missing)
+
+
+# 拿岗位名称＋拿AI给简历推荐的岗位方向
+def score_role(title:str,roles:list[str])->RoleMatch:
+    text=''.join(roles).lower()
+    # join负责连接文字
+    hits=[
+        key for key in ROLE_KEYS
+        if key.lower() in title.lower() and key.lower() in text
+    ]
+    if hits:
+        return RoleMatch(
+            score=10,hit=True,note=f"共同方向:{','.join(hits)}")
+    return RoleMatch(score=0,hit=False,note='岗位方向未匹配')
 # 合并函数
 def merge_job_skills(
         job_skills:str,

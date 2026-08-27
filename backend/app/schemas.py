@@ -91,6 +91,12 @@ class ExpMatch(BaseModel):
      matches:list[Dutyproof]
      missing_responsibilities:list[str]
 
+class RoleMatch(BaseModel):
+     score:int
+     hit:bool
+     note:str
+
+# 岗位匹配接口
 class JobMatchResponse(BaseModel):
      resume_id:int
      job_id:int
@@ -100,4 +106,5 @@ class JobMatchResponse(BaseModel):
      keyword_match:KeywordMatchResult
      required_skill_match:SkillMatchResult
      experience_match:ExpMatch
+     role_match:RoleMatch
 

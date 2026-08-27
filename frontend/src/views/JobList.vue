@@ -37,6 +37,8 @@
     :exp-score="job.expScore"
     :exp-hits="job.expHits"
     :exp-miss="job.expMiss"
+    :role-score="job.roleScore"
+    :role-note="job.roleNote"
     @analyze="handleAnalyze(job)"
     @match="handleMatch(job)"
     />
@@ -88,6 +90,9 @@ async function handleMatch(job) {
         job.expScore=exp.score
         job.expHits=exp.matches
         job.expMiss=exp.missing_responsibilities
+        const role=response.data.role_match
+        job.roleScore=role.score
+        job.roleNote=role.note
     }catch(error){
         matchError.value=error.response?.data?.detail ?? '岗位匹配失败'
     }finally{

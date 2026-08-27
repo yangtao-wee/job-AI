@@ -19,6 +19,8 @@
 <p v-if="missingRequiredSkills?.length">缺失必备技能：{{ missingRequiredSkills.join('、') }}</p>
 
 <p v-if="expScore !== undefined">经历匹配：{{ expScore }}/30</p>
+<p v-if="roleScore !== undefined">岗位方向：{{ roleScore }}/10</p>
+<p v-if="roleNote">方向说明：{{ roleNote }}</p>
 <div v-for="hit in expHits" :key="hit.responsibility">
     <p>岗位职责：{{ hit.responsibility }}</p>
     <p>简历证据：{{ hit.resume_evidence }}</p>
@@ -64,7 +66,9 @@ defineProps({
     analyzing:Boolean,
     expScore:Number,
     expHits:Array,
-    expMiss:Array
+    expMiss:Array,
+    roleScore:Number,
+    roleNote:String
     // Boolean：【语言固定】，只有true或false。
 })
 const emit = defineEmits(['match','analyze'])

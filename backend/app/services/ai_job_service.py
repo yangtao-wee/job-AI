@@ -18,14 +18,25 @@ def build_job_analysis_prompt(job_description:str)->str:
 '''.strip()
 
 def call_job_analysis_model(job_description:str)->JobRequirementResult:
-    respose = get_llm_client().responses.parse(
+    response = get_llm_client().responses.parse(
  # responses.parse：负责让模型按指定格式返回【第三方库】，OpenAI SDK提供的结构化解析功能。
         model=settings.llm_model,
         input=build_job_analysis_prompt(job_description),
         text_format=JobRequirementResult
     )
-    result = respose.output_parsed
+    result = response.output_parsed
     # output_parsed：【第三方库】，取得已经通过Pydantic验证的结果。
     if result is None:
         raise RuntimeError('大模型没有返回有效的岗位分析结果')
     return result
+
+def analyze_job_with_ai(job_description:str)->JobRequirementResult:
+    if settings.llm_mock_mode:
+        return JobRequirementResult(
+            responsibilities=['开发AI求职应用'],
+            required_skills=['Python','FastAPI'],
+            experience=['1年以上'],
+            education=['大专及以上'],
+            bonus_points=['有RAG项目经验']
+        )
+    return call_job_analysis_model(job_description)

@@ -4,10 +4,10 @@ from sqlalchemy.orm  import Session
 from ..database import SessionLocal
 from ..dependencies import get_current_user,get_db
 from ..models import Job,User
-from ..schemas import JobMatchRequest,JobMatchResponse
+from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult
 from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score
 from ..services.job_service import get_all_jobs
-
+from ..services.ai_job_service import analyze_job_with_ai
 
 router = APIRouter()
 
@@ -42,4 +42,17 @@ def match_job(
         skill_match=skill_match,
         keyword_match=keyword_match
     )
+
+@router.post('/jobs/{job_id}/analysis',
+             response_model=JobRequirementResult)
+# response_model：【框架提供】，检查返回结果必须符 
+def analyze_job(
+    job_id:int,
+    _current_user:User=Depends(get_current_user),
+    db:Session=Depends(get_db)
+):
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+            raise HTTPException(status_code=404,detail='岗位不存在')
+    return analyze_job_with_ai(job.description)
 

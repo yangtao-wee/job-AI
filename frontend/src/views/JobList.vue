@@ -31,6 +31,9 @@
     :matching="matchingId === job.id"
     :requirements="job.requirements"
     :analyzing="analyzingId===job.id"
+    :required-skill-score="job.requiredSkillScore"
+    :matched-required-skills="job.matchedRequiredSkills"
+    :missing-required-skills="job.missingRequiredSkills"
     @analyze="handleAnalyze(job)"
     @match="handleMatch(job)"
     />
@@ -69,6 +72,10 @@ async function handleMatch(job) {
         job.matchedSkills = skillMatch.matched_skills
         job.missingSkills = skillMatch.missing_skills
         const keywordMatch = response.data.keyword_match
+        const requiredSkillMatch = response.data.required_skill_match
+        job.requiredSkillScore = requiredSkillMatch.score
+        job.matchedRequiredSkills=requiredSkillMatch.matched_skills
+        job.missingRequiredSkills=requiredSkillMatch.missing_skills
         job.keywordScore = keywordMatch.score
         job.matchedKeywords = keywordMatch.matched_keywords
         job.missingKeywords = keywordMatch.missing_keywords

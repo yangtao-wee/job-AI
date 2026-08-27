@@ -89,3 +89,18 @@ def calculate_keyword_score(
         matched_keywords=sorted(matched_keywords),
         missing_keywords=sorted(job_keywords - matched_keywords)
     )
+
+def calculate_required_skill_score(
+        resume_skills:list[str],
+        required_skills:list[str]
+)->SkillMatchResult:
+    resume_set ={skill.strip().lower() for skill in resume_skills}
+    required_set={skill.strip().lower() for skill in required_skills if skill.strip()}
+    matched_skills = resume_set & required_set
+    # &：【语言固定】，计算两个集合的交集。
+    if not required_set:
+        return SkillMatchResult(score=0,matched_skills=[],missing_skills=[])
+    return SkillMatchResult(score=round(len(matched_skills)/len(required_set)*15),
+        matched_skills=sorted(matched_skills),
+        missing_skills=sorted(required_set-resume_set)
+        )

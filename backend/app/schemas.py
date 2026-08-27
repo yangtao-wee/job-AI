@@ -10,8 +10,7 @@ class JobSchema(BaseModel):
     location:str
     skills:str
     description:str
-    class Config:
-        from_attributes=True
+    model_config=ConfigDict(from_attributes=True)
 
 class UserCreate(BaseModel):
 
@@ -85,4 +84,5 @@ class JobMatchResponse(BaseModel):
      current_max_score:int
      skill_match:SkillMatchResult
      keyword_match:KeywordMatchResult
+     required_skill_match:SkillMatchResult
 

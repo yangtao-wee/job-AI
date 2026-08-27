@@ -2,6 +2,8 @@ from openai import OpenAI
 from ..config import settings
 from ..schemas import ResumeAIAnalysis
 
+
+# 告诉AI需要提取什么
 def build_resume_analysis_prompt(resume_text:str)->str:
     return f'''
 你是一名互联网公司的高级招聘专家。
@@ -14,6 +16,7 @@ def build_resume_analysis_prompt(resume_text:str)->str:
 3. strengths：候选人优势
 4. improvement_suggestions：改进建议
 5. recommended_positions：推荐岗位
+6. work_experience：工作经历列表，只提取简历明确存在的经历
 
 不要编造简历中不存在的经历。
 
@@ -22,6 +25,8 @@ def build_resume_analysis_prompt(resume_text:str)->str:
 </resume>
 '''.strip()
 
+
+# Mock补充测试数据
 def build_mock_resume_analysis(
         resume_id:int,
         resume_text:str
@@ -30,6 +35,7 @@ def build_mock_resume_analysis(
         resume_id=resume_id,
         summary=f'模拟分析：已读取{len(resume_text)}个字符。',
         skills=['Python','FastAPI','Vue3'],
+        work_experience=['模拟经历：负责Python接口开发'],
         strengths=['具备完整项目开发实践'],
         improvement_suggestions=['补充可量化的项目成果'],
         recommended_positions=['Python后端开发工程师','AI应用开发工程师']

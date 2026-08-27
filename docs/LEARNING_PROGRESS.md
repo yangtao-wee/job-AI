@@ -40,3 +40,10 @@
 - 修复：改为`test_`前缀，确认`collected 4 items`和`4 passed`。
 - 项目证据：形成“多来源技能合并—去重—单次计分”的可解释评分链路。
 - 下一步：为简历增加结构化经历数据，为30分职责/经历匹配做准备。
+- 完成功能：为简历分析增加结构化 `work_experience` 字段，并通过迁移、ORM、Schema、Mock和保存Service接通数据库。
+- 用户亲手完成：SQLite迁移脚本、模型字段、结构化输出字段、Prompt要求、Mock数据和保存赋值。
+- 验收结果：真实数据库字段存在；临时内存数据库可以保存并重新读取工作经历；原有4个匹配测试继续通过。
+- Bug：迁移文件最初放在 `app/migrations` 且文件名误写为 `worl`，导致模块找不到；SQL字符串还缺少空格。
+- 修复：移动到 `backend/migrations`、统一文件名为 `work`，并修正完整的 `ALTER TABLE` SQL。
+- 项目证据：掌握已有SQLite表的向后兼容字段迁移，以及Schema—ORM—Service持久化链路。
+- 下一步：实现工作经历与岗位职责的30分匹配结果Schema和第一版纯函数。

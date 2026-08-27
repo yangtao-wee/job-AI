@@ -111,6 +111,8 @@ nullable=False,index=True)
     file_size = Column(Integer,nullable=False)
     created_at = Column(DateTime,server_default=func.now(),nullable=False)
 
+
+# ORM模型增加字段
 class ResumeAnalysis(Base):
     __tablename__ = 'resume_analyses'
     id = Column(Integer,primary_key=True,index=True)
@@ -123,6 +125,7 @@ class ResumeAnalysis(Base):
     )
     summary = Column(Text,nullable=False)
     skills = Column(JSON,nullable=False)
+    work_experience = Column(JSON,nullable=False,default=list)
     strengths = Column(JSON,nullable=False)
     improvement_suggestions = Column(JSON,nullable=False)
     recommended_positions = Column(JSON,nullable=False)

@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from ..models import ResumeAnalysis
 from  ..schemas import ResumeAIAnalysis
 
+# //保存数据到数据库
 def save_resume_analysis(
         db:Session,
         analysis:ResumeAIAnalysis
@@ -20,6 +21,7 @@ def save_resume_analysis(
         db.add(record)
     record.summary = analysis.summary
     record.skills = analysis.skills
+    record.work_experience=analysis.work_experience
     record.strengths = analysis.strengths
     record.improvement_suggestions=(
         analysis.improvement_suggestions

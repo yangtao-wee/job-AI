@@ -44,6 +44,7 @@ class ResumeAIAnalysis(BaseModel):
     resume_id:int
     summary:str
     skills:list[str]
+    work_experience:list[str]
     strengths:list[str]
     improvement_suggestions:list[str]
     recommended_positions:list[str]

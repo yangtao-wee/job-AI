@@ -1,4 +1,4 @@
-from ..schemas import SkillMatchResult,KeywordMatchResult
+from ..schemas import SkillMatchResult,KeywordMatchResult,ExpMatch,Dutyproof
 from sqlalchemy.orm import Session
 from ..models import  Resume,ResumeAnalysis
 
@@ -7,6 +7,41 @@ JOB_KEYWORDS = [
     'Docker','RAG','Agent','Vue'
 ]
 
+EXPERIENCE_KEYWORDS = JOB_KEYWORDS + ['AI','接口','数据库','部署','测试','需求','文档']
+
+def find_resume_evidence(
+        responsibility:str,work_experience:list[str]
+)->str | None:
+    responsibility_lower = responsibility.lower()
+    for evidence in work_experience:
+        evidence_lower=evidence.lower()
+        has_shared_keyword = any(
+            # any检查双方是否至少拥有一个相同关键词。
+            keyword.lower() in responsibility_lower
+            and keyword.lower() in evidence_lower
+            # in/and【语言固定】关键词必须同时出现在岗位职责和简历经历中。
+            for keyword in EXPERIENCE_KEYWORDS
+        )
+        if has_shared_keyword:
+            return evidence
+    return None
+
+def calculate_experience_score(
+        work_experience:list[str],responsibilities:list[str]
+)->ExpMatch:
+    if not responsibilities:
+        return ExpMatch(score=0,matches=[],missing_responsibilities=[])
+    matches,missing=[],[]
+    for responsibility in responsibilities:
+
+        evidence = find_resume_evidence(responsibility,work_experience)
+        if evidence:
+            matches.append(Dutyproof(responsibility=responsibility,resume_evidence=evidence))
+        else:
+            missing.append(responsibility)
+    return ExpMatch(
+        score=round(len(matches)/len(responsibilities)*30),
+        matches=matches,missing_responsibilities=missing)
 # 合并函数
 def merge_job_skills(
         job_skills:str,

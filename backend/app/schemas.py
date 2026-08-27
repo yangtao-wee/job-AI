@@ -2,6 +2,7 @@ from pydantic import BaseModel,ConfigDict
 from datetime import datetime
 # 数据验证数据格式转换
 
+#  岗位数据返回格式
 class JobSchema(BaseModel):
     id:int
     title:str
@@ -12,6 +13,7 @@ class JobSchema(BaseModel):
     description:str
     model_config=ConfigDict(from_attributes=True)
 
+# 用户注册时，前端提交的数据格式
 class UserCreate(BaseModel):
 
     username:str
@@ -21,6 +23,7 @@ class UserCreate(BaseModel):
     password:str
 # UserCreate：规定前端可以提交什么。
 # UserResponse：规定后端可以返回什么。
+# 用户信息返回格式
 class UserResponse(BaseModel):
         id:int
         username:str
@@ -78,6 +81,16 @@ class JobRequirementResult(BaseModel):
      education: list[str]
      bonus_points: list[str]
 
+# 职责证据 为什么判定匹配
+class Dutyproof(BaseModel):
+     responsibility:str
+     resume_evidence:str
+# 岗位要求的职责。
+class ExpMatch(BaseModel):
+     score:int
+     matches:list[Dutyproof]
+     missing_responsibilities:list[str]
+
 class JobMatchResponse(BaseModel):
      resume_id:int
      job_id:int
@@ -86,4 +99,5 @@ class JobMatchResponse(BaseModel):
      skill_match:SkillMatchResult
      keyword_match:KeywordMatchResult
      required_skill_match:SkillMatchResult
+     experience_match:ExpMatch
 

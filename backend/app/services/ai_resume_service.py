@@ -35,7 +35,7 @@ def build_mock_resume_analysis(
         resume_id=resume_id,
         summary=f'模拟分析：已读取{len(resume_text)}个字符。',
         skills=['Python','FastAPI','Vue3'],
-        work_experience=['模拟经历：负责Python接口开发'],
+        work_experience=['模拟经历：负责Python接口开发和AI应用开发'],
         strengths=['具备完整项目开发实践'],
         improvement_suggestions=['补充可量化的项目成果'],
         recommended_positions=['Python后端开发工程师','AI应用开发工程师']

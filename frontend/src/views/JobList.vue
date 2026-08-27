@@ -34,6 +34,9 @@
     :required-skill-score="job.requiredSkillScore"
     :matched-required-skills="job.matchedRequiredSkills"
     :missing-required-skills="job.missingRequiredSkills"
+    :exp-score="job.expScore"
+    :exp-hits="job.expHits"
+    :exp-miss="job.expMiss"
     @analyze="handleAnalyze(job)"
     @match="handleMatch(job)"
     />
@@ -81,6 +84,10 @@ async function handleMatch(job) {
         job.missingKeywords = keywordMatch.missing_keywords
         job.currentScore=response.data.current_score
         job.currentMaxScore=response.data.current_max_score
+        const exp =response.data.experience_match
+        job.expScore=exp.score
+        job.expHits=exp.matches
+        job.expMiss=exp.missing_responsibilities
     }catch(error){
         matchError.value=error.response?.data?.detail ?? '岗位匹配失败'
     }finally{

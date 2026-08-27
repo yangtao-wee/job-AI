@@ -17,6 +17,13 @@
 <p v-if="requiredSkillScore !== undefined">AI必备技能参考(不计总分):{{ requiredSkillScore }}/15</p>
 <p v-if="matchedRequiredSkills?.length">已满足必备技能：{{matchedRequiredSkills.join('、')}}</p>
 <p v-if="missingRequiredSkills?.length">缺失必备技能：{{ missingRequiredSkills.join('、') }}</p>
+
+<p v-if="expScore !== undefined">经历匹配：{{ expScore }}/30</p>
+<div v-for="hit in expHits" :key="hit.responsibility">
+    <p>岗位职责：{{ hit.responsibility }}</p>
+    <p>简历证据：{{ hit.resume_evidence }}</p>
+</div>
+<p v-if="expMiss?.length">待补经历：{{ expMiss.join('、') }}</p>
 <div v-if="requirements">
     <h4>岗位结构化要求</h4>
     <p>岗位职责：{{ requirements.responsibilities.join('、') || '未说明' }}</p>
@@ -27,7 +34,8 @@
 
 </div>
 <button :disabled="matching" @click="emit('match')">{{ matching?'匹配中...' : '开始匹配' }}</button>
-<button :disabled="analyzing" @click="emit('analyze')">
+
+<button :disabled="analyzing"  @click="emit('analyze')">
     {{ analyzing ? '分析中...' : '分析岗位' }}
 </button>
 <!-- 【框架提供】，向父页面发出名为match的消息 -->
@@ -53,7 +61,10 @@ defineProps({
     missingRequiredSkills:Array,
     matching:Boolean,
     requirements:Object,
-    analyzing:Boolean
+    analyzing:Boolean,
+    expScore:Number,
+    expHits:Array,
+    expMiss:Array
     // Boolean：【语言固定】，只有true或false。
 })
 const emit = defineEmits(['match','analyze'])

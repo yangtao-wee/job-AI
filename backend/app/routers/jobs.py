@@ -4,10 +4,11 @@ from sqlalchemy.orm  import Session
 from ..database import SessionLocal
 from ..dependencies import get_current_user,get_db
 from ..models import Job,User
-from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult
+from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch
 from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref
 from ..services.job_service import get_all_jobs
 from ..services.ai_job_service import analyze_job_with_ai
+from ..services.semantic_service import calc_sim,MODEL
 
 router = APIRouter()
 
@@ -45,6 +46,14 @@ def match_job(
     )
     role = score_role(job.title,analysis.recommended_positions)
     pref = score_pref(job.location,job.salary,request.city,request.min_pay)
+    r_text=' '.join([analysis.summary or '',*analysis.skills,*analysis.work_experience])
+    # or ''：如果数据为空，就使用空文字，避免拼接报错。
+    # *analysis.skills：把技能列表中的每一项展开。
+    # round(sim,3)：保留3位小数。
+    j_text=' '.join([job.title or '',job.skills or '',job.description or ''])
+    sim = calc_sim(r_text,j_text)
+    sem = SemMatch(sim=round(sim,3),model=MODEL,note='语义相似度,仅作参考')
+
     return JobMatchResponse(
         resume_id=request.resume_id,
         job_id=request.job_id,
@@ -55,7 +64,8 @@ def match_job(
         required_skill_match=required_skill_match,
         experience_match=exp_match,
         role_match=role,
-        pref_match=pref
+        pref_match=pref,
+        sem_match=sem
     )
 
 @router.post('/jobs/{job_id}/analysis',

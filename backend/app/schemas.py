@@ -106,6 +106,16 @@ class PrefMatch(BaseModel):
      pay_ok:bool
      notes:list[str]
 
+# 规定后端返回的语义匹配结果必须包含相似度、模型名称和中文说明。
+# 以后 Vue 可以稳定读取语义结果，不需要猜后端返回什么。
+class SemMatch(BaseModel):
+     sim:float
+     # sim：相似度，必须是小数。
+     model:str
+     # model：记录使用了哪个AI模型，必须是文字。
+     note:str
+     # note：给用户看的中文说明。
+
 # 岗位匹配接口
 class JobMatchResponse(BaseModel):
      resume_id:int
@@ -118,6 +128,7 @@ class JobMatchResponse(BaseModel):
      experience_match:ExpMatch
      role_match:RoleMatch
      pref_match:PrefMatch | None=None
-#      | None：【语言固定】，暂时允许没有偏好结果。
+     sem_match:SemMatch | None=None
+#      | None：【语言固定】，暂时允许没有数据。
 # =None：当前评分函数还没接入时不让旧接口报错。
 

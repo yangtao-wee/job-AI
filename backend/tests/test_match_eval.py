@@ -1,3 +1,5 @@
+
+# 读取固定评测数据，调用五个评分函数，检查最终排名和基线分数。
 import json
 from app.services.matching_service import calculate_skill_score,calculate_keyword_score,calculate_experience_score,score_role,score_pref
 

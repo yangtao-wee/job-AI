@@ -47,6 +47,7 @@
     :role-note="job.roleNote"
     :pref-score="job.prefScore"
     :pref-notes="job.prefNotes"
+    :sem="job.sem"
     @analyze="handleAnalyze(job)"
     @match="handleMatch(job)"
     />
@@ -108,6 +109,7 @@ async function handleMatch(job) {
         const pref =response.data.pref_match
         job.prefScore=pref.score
         job.prefNotes=pref.notes
+        job.sem=response.data.sem_match
     }catch(error){
         matchError.value=error.response?.data?.detail ?? '岗位匹配失败'
     }finally{

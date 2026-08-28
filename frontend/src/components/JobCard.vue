@@ -20,6 +20,8 @@
 
 <p v-if="expScore !== undefined">经历匹配：{{ expScore }}/30</p>
 <p v-if="roleScore !== undefined">岗位方向：{{ roleScore }}/10</p>
+<p v-if="prefScore !== undefined">求职偏好：{{ prefScore }}/15</p>
+<p v-for="note in prefNotes" :key="note">{{ note }}</p>
 <p v-if="roleNote">方向说明：{{ roleNote }}</p>
 <div v-for="hit in expHits" :key="hit.responsibility">
     <p>岗位职责：{{ hit.responsibility }}</p>
@@ -68,7 +70,9 @@ defineProps({
     expHits:Array,
     expMiss:Array,
     roleScore:Number,
-    roleNote:String
+    roleNote:String,
+    prefScore:Number,
+    prefNotes:Array
     // Boolean：【语言固定】，只有true或false。
 })
 const emit = defineEmits(['match','analyze'])

@@ -1,5 +1,7 @@
-from ..schemas import SkillMatchResult,KeywordMatchResult,ExpMatch,Dutyproof,RoleMatch
 from sqlalchemy.orm import Session
+import re
+# re【Python自带】，正则表达式工具，负责从文字中寻找数字。
+from ..schemas import SkillMatchResult,KeywordMatchResult,ExpMatch,Dutyproof,RoleMatch,PrefMatch
 from ..models import  Resume,ResumeAnalysis
 
 JOB_KEYWORDS = [
@@ -56,6 +58,31 @@ def score_role(title:str,roles:list[str])->RoleMatch:
         return RoleMatch(
             score=10,hit=True,note=f"共同方向:{','.join(hits)}")
     return RoleMatch(score=0,hit=False,note='岗位方向未匹配')
+
+# 偏好评分函数
+def score_pref(
+        job_city:str, pay_text:str,
+        city:str, min_pay:int
+)->PrefMatch:
+    nums=[int(n) for n in re.findall(r'\d+',pay_text)]
+    # re.findall(...)：【Python自带】，从薪资文字中找出全部数字。
+    # r'\d+'：【固定规则】，表示寻找连续数字。
+    # int(n)：【语言固定】，把文字数字转换成真正的整数。
+    top=max(nums,default=0)
+    # max()：【语言固定】，取得最大数字。
+    # default=0：没有找到数字时使用0，避免程序报错。
+    city_ok=not city or city in job_city
+    # city in job_city：检查期望城市是否出现在岗位城市中
+    pay_ok=min_pay<=0 or top>=min_pay
+    score=(5 if city_ok else 0)+(10 if pay_ok else 0)
+    notes=[
+        f"城市：{'符合'if city_ok else '不符合'}",
+        f"薪资：{'符合'if pay_ok else '不符合'}"
+    ]
+    return PrefMatch(
+        score=score,city_ok=city_ok,pay_ok=pay_ok,notes=notes
+    )
+
 # 合并函数
 def merge_job_skills(
         job_skills:str,

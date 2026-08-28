@@ -60,9 +60,12 @@ class ResumeAnalysisResponse(ResumeAIAnalysis):
           from_attributes=True
      )
 
+# 岗位匹配请求
 class JobMatchRequest(BaseModel):
      resume_id:int
      job_id:int
+     city:str=''
+     min_pay:int=0
 
 class SkillMatchResult(BaseModel):
      score:int
@@ -96,6 +99,13 @@ class RoleMatch(BaseModel):
      hit:bool
      note:str
 
+# 规定偏好匹配结果
+class PrefMatch(BaseModel):
+     score:int
+     city_ok:bool
+     pay_ok:bool
+     notes:list[str]
+
 # 岗位匹配接口
 class JobMatchResponse(BaseModel):
      resume_id:int
@@ -107,4 +117,7 @@ class JobMatchResponse(BaseModel):
      required_skill_match:SkillMatchResult
      experience_match:ExpMatch
      role_match:RoleMatch
+     pref_match:PrefMatch | None=None
+#      | None：【语言固定】，暂时允许没有偏好结果。
+# =None：当前评分函数还没接入时不让旧接口报错。
 

@@ -1,4 +1,4 @@
-from app.services.matching_service import calculate_required_skill_score,calculate_skill_score,merge_job_skills,calculate_experience_score,score_role
+from app.services.matching_service import calculate_required_skill_score,calculate_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref
 
 def test_partial_match():
     result = calculate_required_skill_score(
@@ -48,3 +48,15 @@ def test_role_miss():
     res=score_role('销售经理',['Python后端开发工程师'])
     assert res.score==0
     assert res.hit is False
+
+def test_pref_hit():
+    res=score_pref('深圳','15-20K','深圳',18)
+    assert res.score==15
+
+def test_pref_miss():
+    res=score_pref('广州','12-15K','深圳',18)
+    assert res.score==0
+
+def test_pay_equal():
+    res=score_pref('深圳','15-20K','深圳',20)
+    assert res.pay_ok is True

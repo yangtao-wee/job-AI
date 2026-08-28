@@ -14,6 +14,12 @@
     </select>
     <p v-if="resumes.length===0">请先上传简历</p>
     </div>
+    <div>
+        <label>期望城市：</label>
+        <input v-model.trim="city" placeholder="例如：深圳">
+        <label>最低月薪(K)：</label>
+        <input v-model.number="minPay" type="number" min="0">
+    </div>
     <p v-if="matchError">{{ matchError }}</p>
     <JobCard 
     v-for="job in jobs"
@@ -39,6 +45,8 @@
     :exp-miss="job.expMiss"
     :role-score="job.roleScore"
     :role-note="job.roleNote"
+    :pref-score="job.prefScore"
+    :pref-notes="job.prefNotes"
     @analyze="handleAnalyze(job)"
     @match="handleMatch(job)"
     />
@@ -49,12 +57,16 @@ import { ref,onMounted } from 'vue'
 import {fetchJobs,matchJob,analyzeJob} from '../api/jobs.js'
 import JobCard from '../components/JobCard.vue'
 import { fetchMyResumes } from '../api/resumes.js'
+
 const jobs = ref([])
 const resumes = ref([])
 const selectedResumeId = ref(null)
+const city = ref('深圳')
+const minPay = ref(15)
 const matchingId = ref(null)
 const analyzingId = ref(null)
 const matchError = ref('')
+
 async function getJobs(){
     const response = await fetchJobs()
     jobs.value=response.data
@@ -71,7 +83,7 @@ async function handleMatch(job) {
     matchingId.value=job.id
     matchError.value=''
     try{
-        const response = await matchJob(selectedResumeId.value,job.id)
+        const response = await matchJob(selectedResumeId.value,job.id,city.value,minPay.value)
         const skillMatch = response.data.skill_match
         job.score=skillMatch.score
         job.matchedSkills = skillMatch.matched_skills
@@ -93,6 +105,9 @@ async function handleMatch(job) {
         const role=response.data.role_match
         job.roleScore=role.score
         job.roleNote=role.note
+        const pref =response.data.pref_match
+        job.prefScore=pref.score
+        job.prefNotes=pref.notes
     }catch(error){
         matchError.value=error.response?.data?.detail ?? '岗位匹配失败'
     }finally{

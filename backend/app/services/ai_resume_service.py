@@ -47,7 +47,9 @@ def get_llm_client()->OpenAI:
         raise RuntimeError('未配置 LLM_API_KEY')
     return OpenAI(
         api_key=settings.llm_api_key,
-        base_url=settings.llm_base_url or None
+        base_url=settings.llm_base_url or None,
+        timeout=settings.llm_timeout,
+        max_retries=settings.llm_max_retries
     )
 
 def analyze_resume_with_ai(

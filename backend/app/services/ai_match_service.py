@@ -1,8 +1,13 @@
+import logging
+# logging【语言固定，Python自带标准库】，负责记录程序运行信息
+
 from ..schemas import MatchExplain
 from ..config import settings
 from .ai_resume_service import get_llm_client
 # settings里面保存Mock开关、模型名称等。
 # get_llm_client，中文“取得大模型客户端”，负责创建OpenAI连接。
+
+log=logging.getLogger(__name__)
 
 def make_prompt(score:int,sem:float,reasons:list[str],gaps:list[str])->str:
     return f'''
@@ -46,11 +51,19 @@ def make_mock(reasons:list[str],gaps:list[str])->MatchExplain:
 def explain(score:int,sem:float,reasons:list[str],gaps:list[str])->MatchExplain:
     if settings.llm_mock_mode:
         return make_mock(reasons,gaps)
-    res=get_llm_client().responses.parse(
-        model=settings.llm_model,
-        input=make_prompt(score,sem,reasons,gaps),
-        text_format=MatchExplain
-    )
-    if res.output_parsed is None:
-        raise RuntimeError('大模型没有返回有效的匹配解释')
-    return res.output_parsed
+
+    try:
+        res=get_llm_client().responses.parse(
+            # responses.parse：【第三方库】，调用模型并验证结构化结果。
+            model=settings.llm_model,
+            input=make_prompt(score,sem,reasons,gaps),
+            text_format=MatchExplain
+        )
+        if res.output_parsed is None:
+            raise RuntimeError('大模型没有返回有效的匹配解释')
+        return res.output_parsed
+    except Exception:
+        log.exception('LLM岗位解释失败，已使用降级结果')
+        note=make_mock(reasons,gaps)
+        note.summary='AI解释暂时不可用，当前展示规则结果'
+        return note

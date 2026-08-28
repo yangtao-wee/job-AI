@@ -1,7 +1,11 @@
+import logging
+
 from openai import OpenAI
 from ..config import settings
 from ..schemas import ResumeAIAnalysis
 
+log=logging.getLogger(__name__)
+# getLogger：【标准库提供】取得当前文件的日志记录器。
 
 # 告诉AI需要提取什么
 def build_resume_analysis_prompt(resume_text:str)->str:
@@ -42,6 +46,21 @@ def build_mock_resume_analysis(
     )
 
 
+# 项目用途：以后真实模型失败时，调用它返回安全结果。
+# 生活类比：体检机器坏了，医院应该说“暂时无法检查”，不能随便编造检查结果。
+def make_fail(resume_id:int)->ResumeAIAnalysis:
+    return ResumeAIAnalysis(
+        resume_id=resume_id,
+        summary='AI简历分析暂时不可用，请稍后重试',
+        skills=[],
+        work_experience=[],
+        strengths=[],
+        improvement_suggestions=[],
+        recommended_positions=[],
+        ai_ok=False
+    )
+
+
 def get_llm_client()->OpenAI:
     if not settings.llm_api_key:
         raise RuntimeError('未配置 LLM_API_KEY')
@@ -63,17 +82,26 @@ def analyze_resume_with_ai(
         )
     if not settings.llm_model:
         raise RuntimeError('未配置 LLM_MODEL')
-
-    client = get_llm_client()
+    try:
+        client = get_llm_client()
+    except Exception:
+        log.exception('LLM简历分析连接失败，已使用降级结果')
+        # log.exception：【标准库提供】保存错误原因和出错位置。
+        return make_fail(resume_id)
     prompt = build_resume_analysis_prompt(resume_text)
 
-    response = client.responses.parse(
-        model=settings.llm_model,
-        input=f'简历编号：{resume_id}\n\n{prompt}',
-        text_format=ResumeAIAnalysis
+    try:
+        response = client.responses.parse(
+            model=settings.llm_model,
+            input=f'简历编号：{resume_id}\n\n{prompt}',
+            text_format=ResumeAIAnalysis
     )
+    except Exception:
+        log.exception('LLM简历分析请求失败，已使用降级结果')
+        return make_fail(resume_id)
     result = response.output_parsed
     if result is None:
-        raise RuntimeError('大模型没有返回有效分析结果')
+        log.error('LLM简历分析返回空结果，已使用降级结果')
+        return make_fail(resume_id)
     result.resume_id = resume_id
     return result

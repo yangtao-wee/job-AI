@@ -51,6 +51,7 @@ class ResumeAIAnalysis(BaseModel):
     strengths:list[str]
     improvement_suggestions:list[str]
     recommended_positions:list[str]
+    ai_ok:bool=True
 
 class ResumeAnalysisResponse(ResumeAIAnalysis):
      id:int

@@ -186,10 +186,11 @@ def analyze_resume(
             resume_id=resume_id,
             resume_text=text
         )
-        save_resume_analysis(
-            db=db,
-            analysis=analysis
-        )
+        if analysis.ai_ok:
+            save_resume_analysis(
+                db=db,
+                analysis=analysis
+            )
         return analysis
     except RuntimeError as error:
         raise HTTPException(

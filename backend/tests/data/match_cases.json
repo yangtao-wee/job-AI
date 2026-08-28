@@ -1,0 +1,14 @@
+{
+  "user": {
+    "skills": ["Python", "FastAPI", "Vue3"],
+    "work": ["使用FastAPI开发Python接口"],
+    "roles": ["Python后端开发工程师"],
+    "city": "深圳",
+    "min_pay": 15
+  },
+  "jobs": [
+    {"id": 1, "title": "Python开发工程师", "city": "深圳", "pay": "15-20K", "skills": ["Python", "FastAPI"], "desc": "Python FastAPI MySQL Redis", "duties": ["负责Python接口开发"], "want": 1},
+    {"id": 2, "title": "Vue前端工程师", "city": "广州", "pay": "12-18K", "skills": ["Vue3"], "desc": "Vue JavaScript CSS", "duties": ["负责Vue页面开发"], "want": 2},
+    {"id": 3, "title": "销售经理", "city": "深圳", "pay": "20-30K", "skills": [], "desc": "客户销售沟通", "duties": ["负责客户销售"], "want": 3}
+  ]
+}

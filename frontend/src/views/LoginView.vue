@@ -46,7 +46,6 @@ async function handleLogin(){
         const userResponse = await request.get('/users/me')
         currentUser.value=userResponse.data
         await router.push({name:'jobs'})
-        console.log('登录成功',response.data)
     }catch(error){
         errorMessage.value=error.response?.data?.detail || '登录失败,请稍后重试'
         // 某层数据不存在时不会再次报错。

@@ -1,0 +1,33 @@
+fastapi==0.141.1
+uvicorn==0.52.4
+SQLAlchemy==2.0.52
+pydantic==2.13.4
+pydantic-settings==2.15.0
+python-jose==3.5.0
+passlib==1.7.4
+bcrypt==4.0.1
+python-multipart==0.0.32
+aiofiles==25.1.0
+pypdf==6.16.2
+openai==3.3.1
+python-dotenv==1.2.3
+sentence-transformers==6.0.0
+torch==2.13.0
+
+# fastapi：后端接口框架。
+# uvicorn：启动FastAPI服务器。
+# SQLAlchemy：操作数据库。
+# pydantic：验证接口数据。
+# pydantic-settings：读取.env配置。
+# python-jose：生成和解析JWT。
+# passlib、bcrypt：加密并验证密码。
+# python-multipart：接收表单和上传文件。
+# aiofiles：异步保存上传文件。
+# pypdf：解析PDF简历。
+# openai：调用兼容的大模型API。
+# python-dotenv：读取环境变量文件。
+# sentence-transformers：加载Embedding模型。
+# torch：执行本地神经网络计算。
+# ==用于锁定版本，提高项目可复现性。
+# venv是当前电脑的环境，requirements.txt是可以带走的安装清单。
+# 运行依赖和测试依赖可以分开管理。

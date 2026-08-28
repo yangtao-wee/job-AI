@@ -1,0 +1,4 @@
+-r requirements.txt
+# -r requirements.txt先读取运行依赖清单。
+pytest==9.1.1
+# pytest：再安装自动化测试工具。

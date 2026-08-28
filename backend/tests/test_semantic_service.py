@@ -1,3 +1,5 @@
+import json
+# 【语言自带模块】，负责读取JSON，名字不能修改。
 import pytest
 # 自动化测试框架。
 from app.services.semantic_service import calc_sim
@@ -14,3 +16,18 @@ def test_sim():
     assert near>far
     # near：接近的意思
 # assert：断言，要求后面的条件必须成立。
+
+
+# 【整段代码作用】：计算3个岗位的语义相似度，并检查推荐排名。
+# 【在项目中的用途】：证明Embedding确实把Python岗位排在最前面。
+@pytest.mark.slow
+def test_sem_rank():
+    data=json.load(open('tests/data/match_cases.json',encoding='utf-8'))
+    user=data['user']
+    cv_text=' '.join(user['skills']+user['work']+user['roles'])
+    rows=[]
+    for job in data['jobs']:
+        job_text=' '.join([job['title'],job['desc']]+job['skills']+job['duties'])
+        rows.append((calc_sim(cv_text,job_text),job['id']))
+    rows.sort(reverse=True)
+    assert [row[1] for row in rows]==[1,2,3]

@@ -10,7 +10,9 @@ def get_model():
     if _model is None:
         # 只有第一次才加载模型。
 
-        _model=SentenceTransformer(MODEL)
+        _model=SentenceTransformer(MODEL,local_files_only=True)
+        # 从电脑本地仓库加载指定的Embedding模型，不再访问互联网检查更新。
+        # local_files_only：【第三方库固定参数】，中文是“仅使用本地文件”，不能改名。
     return _model
 
 def calc_sim(a:str,b:str)->float:

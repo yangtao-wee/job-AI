@@ -26,6 +26,13 @@
     <p>模型：{{ sem.model }}</p>
     <p>{{ sem.note }}</p>
 </div>
+<div v-if="aiNote">
+    <h4>AI岗位建议</h4>
+    <p>{{ aiNote.summary }}</p>
+    <p v-if="aiNote.reasons?.length">推荐理由：{{ aiNote.reasons.join('、') }}</p>
+    <p v-if="aiNote.gaps?.length">能力缺口：{{ aiNote.gaps.join('、') }}</p>
+    <p v-if="aiNote.actions?.length">行动建议：{{ aiNote.actions.join('、') }}</p>
+</div>
 <p v-for="note in prefNotes" :key="note">{{ note }}</p>
 <p v-if="roleNote">方向说明：{{ roleNote }}</p>
 <div v-for="hit in expHits" :key="hit.responsibility">
@@ -78,7 +85,8 @@ defineProps({
     roleNote:String,
     prefScore:Number,
     prefNotes:Array,
-    sem:Object
+    sem:Object,
+    aiNote:Object
     // Boolean：【语言固定】，只有true或false。
 })
 const emit = defineEmits(['match','analyze'])

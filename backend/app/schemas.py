@@ -116,6 +116,20 @@ class SemMatch(BaseModel):
      note:str
      # note：给用户看的中文说明。
 
+
+# 【整段代码作用】：规定大模型的岗位推荐解释必须返回哪些内容。
+# 【在项目中的用途】：以后Vue可以稳定展示推荐理由、能力缺口和简历优化建议
+class MatchExplain(BaseModel):
+     summary:str
+     # 总结
+     reasons:list[str]
+     # 推荐理由
+     gaps:list[str]
+     # 能力缺口
+     actions:list[str]
+     # 行动建议
+
+
 # 岗位匹配接口
 class JobMatchResponse(BaseModel):
      resume_id:int
@@ -129,6 +143,7 @@ class JobMatchResponse(BaseModel):
      role_match:RoleMatch
      pref_match:PrefMatch | None=None
      sem_match:SemMatch | None=None
+     ai_explain:MatchExplain | None=None
 #      | None：【语言固定】，暂时允许没有数据。
 # =None：当前评分函数还没接入时不让旧接口报错。
 

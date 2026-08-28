@@ -9,6 +9,7 @@ from ..services.matching_service import calculate_skill_score,get_user_resume_an
 from ..services.job_service import get_all_jobs
 from ..services.ai_job_service import analyze_job_with_ai
 from ..services.semantic_service import calc_sim,MODEL
+from ..services.ai_match_service import explain
 
 router = APIRouter()
 
@@ -53,11 +54,14 @@ def match_job(
     j_text=' '.join([job.title or '',job.skills or '',job.description or ''])
     sim = calc_sim(r_text,j_text)
     sem = SemMatch(sim=round(sim,3),model=MODEL,note='语义相似度,仅作参考')
-
+    total=skill_match.score + keyword_match.score + exp_match.score +role.score + pref.score
+    reasons=skill_match.matched_skills+[hit.resume_evidence for hit in exp_match.matches]
+    gaps=skill_match.missing_skills+required_skill_match.missing_skills
+    ai_note=explain(total,sem.sim,reasons,gaps)
     return JobMatchResponse(
         resume_id=request.resume_id,
         job_id=request.job_id,
-        current_score=skill_match.score + keyword_match.score + exp_match.score + role.score + pref.score,
+        current_score=total,
         current_max_score=100,
         skill_match=skill_match,
         keyword_match=keyword_match,
@@ -65,7 +69,8 @@ def match_job(
         experience_match=exp_match,
         role_match=role,
         pref_match=pref,
-        sem_match=sem
+        sem_match=sem,
+        ai_explain=ai_note
     )
 
 @router.post('/jobs/{job_id}/analysis',

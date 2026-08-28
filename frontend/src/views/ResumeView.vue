@@ -210,8 +210,12 @@ async function analyzeResumeWithAI(resumeId) {
     const response = await request.post(
       `/resumes/${resumeId}/analyze?use_ai=true`
     ) 
-    aiAnalysisResult.value=response.data
-    successMessage.value='AI分析完成'
+    const data=response.data
+    if(data.ai_ok){
+      aiAnalysisResult.value=data
+      successMessage.value='AI分析完成'
+    }else{
+      errorMessage.value=data.summary}  
   }catch(error){
     errorMessage.value=error.response?.data?.detail ?? 'AI分析失败'
   }finally{

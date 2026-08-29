@@ -1,11 +1,12 @@
 import logging
 # logging【语言固定，Python自带标准库】，负责记录程序运行信息
 
-from ..schemas import MatchExplain,TokenUse
+from ..schemas import MatchExplain
 from ..config import settings
 from .ai_resume_service import get_llm_client
 # settings里面保存Mock开关、模型名称等。
 # get_llm_client，中文“取得大模型客户端”，负责创建OpenAI连接。
+from .llm_cost import read_use,calc_fee
 
 log=logging.getLogger(__name__)
 
@@ -44,30 +45,6 @@ def make_mock(reasons:list[str],gaps:list[str])->MatchExplain:
         # actions=[...]：【语言固定的列表推导式】，根据每个缺口生成一条行动建议。
         # gap：【自己命名】，表示当前正在处理的一条能力缺口。
     )
-
-
-# 读取大模型返回的Token
-# 把OpenAI返回的复杂用量对象，整理成项目统一的 TokenUse。
-# 官方返回的三个字段就是这里使用的名称。OpenAI Responses API
-def read_use(res)->TokenUse:
-    if res.usage is None:
-    # 必须处理 usage=None，避免外部接口数据不完整导致系统崩溃。
-    # usage：【第三方库字段】，表示模型用量，不能随便改名
-        return TokenUse()
-    return TokenUse(
-        input_tokens=res.usage.input_tokens,
-        output_tokens=res.usage.output_tokens,
-        total_tokens=res.usage.total_tokens
-    )
-
-
-def calc_fee(use:TokenUse)->float:
-    # TokenUse：【项目约定】，规定输入的数据结构。
-    in_fee=use.input_tokens/1_000_000*settings.llm_in_price
-    out_fee=use.output_tokens/1_000_000*settings.llm_out_price
-    return round(in_fee+out_fee,6)
-# round(...,6)：【语言固定的内置函数】，保留6位小数。
-
 
 
 # 【整段代码作用】：取得环境配置和现有LLM客户端。

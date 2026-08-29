@@ -3,6 +3,8 @@ import logging
 from openai import OpenAI
 from ..config import settings
 from ..schemas import ResumeAIAnalysis
+from .llm_cost import read_use,calc_fee
+
 
 log=logging.getLogger(__name__)
 # getLogger：【标准库提供】取得当前文件的日志记录器。
@@ -99,6 +101,14 @@ def analyze_resume_with_ai(
     except Exception:
         log.exception('LLM简历分析请求失败，已使用降级结果')
         return make_fail(resume_id)
+    use=read_use(response)
+    fee=calc_fee(use)
+    log.info(
+        # info：【语言标准库提供】，记录正常业务信息。
+        'LLM简历分析Token用量 model=%s input=%s output=%s total=%s fee=%.6f',
+        settings.llm_model,
+        use.input_tokens,use.output_tokens,use.total_tokens,fee
+    )
     result = response.output_parsed
     if result is None:
         log.error('LLM简历分析返回空结果，已使用降级结果')

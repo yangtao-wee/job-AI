@@ -118,6 +118,16 @@ class SemMatch(BaseModel):
      # note：给用户看的中文说明。
 
 
+# 这段代码像“AI电表”，负责记录一次AI调用用了多少资源。
+class TokenUse(BaseModel):
+     input_tokens:int=0
+     # 输入Token数量，例如提示词和简历内容。
+     output_tokens:int=0
+     # AI生成回答消耗的Token数量。
+     total_tokens:int=0
+     # 本次调用的总Token数量。
+
+
 # 【整段代码作用】：规定大模型的岗位推荐解释必须返回哪些内容。
 # 【在项目中的用途】：以后Vue可以稳定展示推荐理由、能力缺口和简历优化建议
 class MatchExplain(BaseModel):

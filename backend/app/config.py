@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     # 30.0：一次请求最多等待30秒。
     llm_max_retries:int=2
     # 2：首次请求失败后，最多再重试2次。
+    llm_in_price:float=0.0
+    # 输入每100万 Token 的价格，可以改名，但引用处必须同步修改。
+    llm_out_price:float=0.0
+    # 输出每100万 Token 的价格。
     model_config = SettingsConfigDict(
         env_file=BACKEND_DIR / '.env',
         env_file_encoding='utf-8'

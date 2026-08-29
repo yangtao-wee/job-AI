@@ -1,4 +1,7 @@
-from app.services.ai_match_service import make_mock,make_prompt
+from types import SimpleNamespace as N
+# SimpleNamespace：【标准库提供】，快速制造一个假的响应对象。
+from app.schemas import TokenUse
+from app.services.ai_match_service import make_mock,make_prompt,read_use,calc_fee
 from app.services import ai_match_service as ai_match
 
 # 【整段代码作用】：检查模拟解释最多返回3条内容，并检查提示词包含安全要求和真实分数。
@@ -28,3 +31,26 @@ def test_fallback(monkeypatch):
     note=ai_match.explain(81,0.737,['Python'],['Docker'])
     assert note.summary=='AI解释暂时不可用，当前展示规则结果'
     assert note.gaps==['Docker']
+
+
+# Token自动化测试 自动化测试可以防止以后修改代码时破坏Token统计。
+def test_token_use():
+    res=N(usage=N(input_tokens=100,output_tokens=20,total_tokens=120))
+    # 外层 N 制造响应，内层 N 制造 usage。
+    use=read_use(res)
+    assert use.total_tokens==120
+
+def test_token_empty():
+    use=read_use(N(usage=None))
+    assert use.total_tokens==0
+
+
+def test_fee(monkeypatch):
+    # monkeypatch：【框架提供】，临时修改配置，测试结束自动恢复。
+    monkeypatch.setattr(ai_match.settings,'llm_in_price',1)
+    monkeypatch.setattr(ai_match.settings,'llm_out_price',2)
+    use=TokenUse(input_tokens=1_000_000,output_tokens=1_000_000)
+    assert calc_fee(use)==3.0
+
+def test_fee_empty():
+    assert calc_fee(TokenUse())==0.0

@@ -5,6 +5,7 @@ from ..dependencies import get_current_user
 from ..models import User
 from ..schemas import RagAsk,RagAnswer
 from ..services.rag_service import answer_question
+from ..services.kb_service import load_parts
 
 router=APIRouter()
 
@@ -13,4 +14,4 @@ router=APIRouter()
 def ask(data:RagAsk,_user:User=Depends(get_current_user)):
 # _user前面的下划线表示：
 # 这个用户对象当前只用于证明已经登录，函数内部暂时不读取它。
-    return answer_question(data.question,data.parts)
+    return answer_question(data.question,load_parts())

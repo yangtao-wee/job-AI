@@ -28,7 +28,7 @@ async function ask() {
     res.value=null
     err.value=''
     try{
-        const response=await askRag(q.value,['使用Docker部署服务'])
+        const response=await askRag(q.value)
         res.value=response.data
     }catch(error){
         err.value=error.response?.data?.detail ?? '回答失败'

@@ -1,9 +1,8 @@
 import request from './request.js'
 
-export function askRag(question,parts){
+export function askRag(question){
     return request.post('/rag/ask',{
-        question:question,
-        parts:parts
+        question:question
     },{
         timeout:30000
     })

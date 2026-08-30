@@ -144,9 +144,10 @@ class MatchExplain(BaseModel):
 class RagAsk(BaseModel):
 #   Field Pydantic提供的字段配置工具，用于设置数据验证规则，名称不能改。
      question:str=Field(min_length=1,max_length=500)
-     parts:list[str]=Field(min_length=1,max_length=50)
-     model_config=ConfigDict(str_strip_whitespace=True)
+     model_config=ConfigDict(str_strip_whitespace=True,extra='forbid')
 #     str_strip_whitespace 所有字符串自动去掉开头和结尾多余的空格
+# extra额外字段。【第三方库配置】固定名称。forbid：禁止。【第三方库规定值】不能随意改写。
+# extra='forbid'拒绝接口未声明字段。
 
 
 # 给RAG回答准备一个固定“快递箱”，

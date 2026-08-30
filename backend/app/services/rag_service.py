@@ -58,12 +58,13 @@ def search(q:str,parts:list[str],top_k:int=3)->list[tuple[float,str]]:
 
 
 # 把搜索到的多段文字合并成一段上下文。
-def make_ctx(q:str,parts:list[str],top_k:int=3)->str:
+def make_ctx(q:str,parts:list[str],top_k:int=3,min_score:float=0.5)->str:
     rows=search(q,parts,top_k)
     texts=[]
-    for _,part in rows:
+    for score,part in rows:
     #   _表示分数暂时不用，part表示文字片段
-        texts.append(part)
+        if score >= min_score:
+            texts.append(part)
     return '\n'.join(texts)
 # 用换行符连接所有文字并返回
 

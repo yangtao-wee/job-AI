@@ -153,3 +153,10 @@ def test_answer_ok(monkeypatch):
     monkeypatch.setattr(rag,'get_llm_client',GoodClient)
     res=rag.answer_question('如何部署应用',['测试资料'])
     assert res==GoodResponse.output_parsed
+
+def low_search(q,parts,top_k):
+    return [(0.4,'无关资料')]
+
+def test_ctx_low(monkeypatch):
+    monkeypatch.setattr(rag,'search',low_search)
+    assert rag.make_ctx('as',['测试资料'])==''

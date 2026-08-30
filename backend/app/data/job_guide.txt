@@ -1,0 +1,5 @@
+FastAPI适合开发Python后端接口，可以使用Pydantic验证请求数据，并通过Depends实现依赖注入和身份认证。
+
+Docker可以把应用代码、运行环境和依赖打包成容器，使开发、测试和生产环境保持一致。
+
+Vue用于构建前端页面，Axios负责发送HTTP请求，Vue Router负责管理页面路由。

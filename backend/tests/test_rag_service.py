@@ -54,12 +54,12 @@ def test_answer_question():
     assert res.enough is False
     assert res.sources==[]
 
-def fake_ctx(q,parts):
-    return '使用Docker部署服务'
+def good_rows(q,parts):
+    return [(0.9,'使用Docker部署服务')]
 
 def test_answer_mock(monkeypatch):
     monkeypatch.setattr(rag.settings,'llm_mock_mode',True)
-    monkeypatch.setattr(rag,'make_ctx',fake_ctx)
+    monkeypatch.setattr(rag,'pick_rows',good_rows)
     res=rag.answer_question('如何部署应用',['测试资料'])
     assert res.enough is True
     assert res.answer=='模拟回答:如何部署应用'
@@ -78,7 +78,7 @@ def test_answer_client_fail(monkeypatch):
     monkeypatch.setattr(rag.settings,'llm_model','test_model')
     # llm_model：【项目配置】要调用的大模型名称。
     # test-model：【测试数据】测试模型，不会真的调用。
-    monkeypatch.setattr(rag,'make_ctx',fake_ctx)
+    monkeypatch.setattr(rag,'pick_rows',good_rows)
     monkeypatch.setattr(rag,'get_llm_client',fail_client)
     # 这就是测试的关键：不需要真的断网，也能稳定复现连接故障。
     res=rag.answer_question('如何部署应用',['测试资料'])
@@ -106,14 +106,13 @@ def test_answer_request_fail(monkeypatch):
     # 关闭Mock，避免提前返回模拟答案。
     monkeypatch.setattr(rag.settings,'llm_model','test-model')
     # 提供非空的测试模型名称，避免程序提前报告“未配置模型”。
-    monkeypatch.setattr(rag,'make_ctx',fake_ctx)
+    monkeypatch.setattr(rag,'pick_rows',good_rows)
     # 固定返回有效上下文，只测试LLM请求分支。
     monkeypatch.setattr(rag,'get_llm_client',make_fail_client)
     # 让业务代码取得我们准备的假客户端。
     res=rag.answer_question('如何部署应用',['测试资料'])
     assert res.enough is False
     assert res.sources==[]
-
 
 class EmptyResponse:
     output_parsed=None
@@ -128,16 +127,15 @@ class EmptyClient:
 def test_answer_empty(monkeypatch,caplog):
     monkeypatch.setattr(rag.settings,'llm_mock_mode',False)
     monkeypatch.setattr(rag.settings,'llm_model','test-model')
-    monkeypatch.setattr(rag,'make_ctx',fake_ctx)
+    monkeypatch.setattr(rag,'pick_rows',good_rows)
     monkeypatch.setattr(rag,'get_llm_client',EmptyClient)
     res=rag.answer_question('如何部署应用',['测试资料'])
     assert 'RAG问题返回空结果' in caplog.text
     assert res.enough is False
     assert res.sources==[]
 
-
 class GoodResponse:
-    output_parsed=RagAnswer(answer='根据资料回答',sources=['使用Docker部署服务'],enough=True)
+    output_parsed=RagAnswer(answer='根据资料回答',sources=['模型编造的来源'],enough=True)
 
 class GoodResponses:
     def parse(self,**kwargs):
@@ -149,10 +147,11 @@ class GoodClient:
 def test_answer_ok(monkeypatch):
     monkeypatch.setattr(rag.settings,'llm_mock_mode',False)
     monkeypatch.setattr(rag.settings,'llm_model','test-model')
-    monkeypatch.setattr(rag,'make_ctx',fake_ctx)
+    monkeypatch.setattr(rag,'pick_rows',good_rows)
     monkeypatch.setattr(rag,'get_llm_client',GoodClient)
     res=rag.answer_question('如何部署应用',['测试资料'])
-    assert res==GoodResponse.output_parsed
+    assert res.answer=='根据资料回答'
+    assert res.sources==['使用Docker部署服务']
 
 def low_search(q,parts,top_k):
     return [(0.4,'无关资料')]
@@ -160,3 +159,11 @@ def low_search(q,parts,top_k):
 def test_ctx_low(monkeypatch):
     monkeypatch.setattr(rag,'search',low_search)
     assert rag.make_ctx('as',['测试资料'])==''
+
+def fake_rows(q,parts,top_k):
+    return[(0.8,'Docker'),(0.4,'vue')]
+
+def test_pick_rows(monkeypatch):
+    monkeypatch.setattr(rag,'search',fake_rows)
+    assert rag.pick_rows('部署',['a','b'])==[(0.8,'Docker')]
+    # 0.8的Docker被保留，0.4的Vue低于0.5，被过滤。

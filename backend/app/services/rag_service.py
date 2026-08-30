@@ -56,16 +56,24 @@ def search(q:str,parts:list[str],top_k:int=3)->list[tuple[float,str]]:
     # 把 rows 从大到小排序。
     return rows[:top_k]    
 
+# 负责排序结果→ 阈值过滤→ 保留分数和资料
+def pick_rows(q:str,parts:list[str],top_k:int=3,min_score:float=0.5)->list[tuple[float,str]]:
+    # tuple：【语言固定类型】元组，这里保存“分数和资料”。
+    rows=search(q,parts,top_k)
+    return [(score,part) for score,part in rows if score >= min_score]
 
+# join_rows：【自己命名】拼接检索结果，名称较短，可以修改。
+def join_rows(rows:list[tuple[float,str]])->str:
+    return '\n'.join(part for _,part in rows)
+
+#make_ctx 负责过滤后的资料→ 拼成Prompt需要的字符串
 # 把搜索到的多段文字合并成一段上下文。
 def make_ctx(q:str,parts:list[str],top_k:int=3,min_score:float=0.5)->str:
-    rows=search(q,parts,top_k)
-    texts=[]
-    for score,part in rows:
-    #   _表示分数暂时不用，part表示文字片段
-        if score >= min_score:
-            texts.append(part)
-    return '\n'.join(texts)
+    return join_rows(pick_rows(q,parts,top_k,min_score))
+
+
+# join：【语言固定方法】把多段文字连接成一个字符串。
+# _：【项目常用写法】表示这个位置的分数暂时不用。
 # 用换行符连接所有文字并返回
 
 
@@ -96,12 +104,15 @@ def make_fail()->RagAnswer:
 # 这一步实现的是 answer_question
 #  的"资料不足就提前拒答"这一段，验证它在资料为空时能安全返回，不会往下走去瞎编。
 def answer_question(q:str,parts:list[str])->RagAnswer:
-    ctx=make_ctx(q,parts)
-    if not ctx:
+    rows=pick_rows(q,parts)
+    sources=[part for _,part in rows]
+    ctx=join_rows(rows)
+    if not sources:
         return make_fail()
     if settings.llm_mock_mode:
+        
 # llm_mock_mode：【自己项目里定义的配置项】，一个布尔值（True/False），控制"要不要真的花钱调用大模型"。
-        return RagAnswer(answer=f'模拟回答:{q}',sources=[ctx],enough=True)
+        return RagAnswer(answer=f'模拟回答:{q}',sources=sources,enough=True)
     if not settings.llm_model:
         raise RuntimeError('未配置 LLM_MODEL')
     try:
@@ -116,6 +127,8 @@ def answer_question(q:str,parts:list[str])->RagAnswer:
             model=settings.llm_model,
             input=prompt,
             text_format=RagAnswer
+            
+        
         )
     except Exception:
         log.exception('RAG问答请求LLM失败，已使用降级结果')
@@ -131,5 +144,6 @@ def answer_question(q:str,parts:list[str])->RagAnswer:
     if result is None:
         log.error('RAG问题返回空结果，已使用降级结果')
         return make_fail()
+    result.sources=sources
     return result
     

@@ -162,3 +162,16 @@
 - 项目证据：形成覆盖正常、异常和边界情况的RAG Service测试集，并具备Token用量和费用日志。
 - 🟡 正在学习：RAG完整数据路线、测试替身、分支证明、结构化输出验证。
 - 下一步：为RAG问答增加FastAPI接口，接通HTTP请求与Service。
+
+## 2026-08-30 RAG问答API第一版
+
+- 完成功能：新增`RagAsk`请求Schema、`POST /rag/ask`路由、JWT认证、输入限制和`RagAnswer`响应验证。
+- 用户亲手完成：请求Schema、RAG Router、主应用路由注册，以及200、401、422三类API测试。
+- 数据路线：JSON请求 → Pydantic验证 → JWT认证 → Router → RAG Service → `RagAnswer` → JSON响应。
+- 验收结果：RAG API测试3项通过；后端完整回归测试41项全部通过。
+- Bug：最初使用`app.routes`逐项读取`path`，遇到FastAPI内部`_IncludedRouter`后产生`AttributeError`。
+- 修复：改用`app.openapi()['paths']`检查最终接口路径，确认`POST /rag/ask`注册成功。
+- 安全设计：匿名请求返回401；空问题和空资料返回422；无效请求不会进入Embedding和LLM流程。
+- 项目证据：具备RAG接口的正常、认证失败和输入边界自动化测试。
+- 🟡 正在学习：Router与Service分层、依赖覆盖、HTTP接口安全边界。
+- 下一步：由Vue调用RAG接口，完成前后端问答闭环。

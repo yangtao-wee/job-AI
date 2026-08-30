@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from .schemas import JobSchema
 from .database import engine
-from .routers import jobs,users,resumes
+from .routers import jobs,users,resumes,rag
 # engine
 # 知道：
 # 数据库在哪里。
@@ -42,6 +42,12 @@ app.include_router(
     resumes.router,
     prefix='/resumes',
     tags=['resumes']
+)
+
+app.include_router(
+    rag.router,
+    prefix='/rag',
+    tags=['rag']
 )
 
 app.add_middleware(

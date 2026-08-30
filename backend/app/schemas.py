@@ -1,4 +1,4 @@
-from pydantic import BaseModel,ConfigDict
+from pydantic import BaseModel,ConfigDict,Field
 from datetime import datetime
 # 数据验证数据格式转换
 
@@ -139,6 +139,15 @@ class MatchExplain(BaseModel):
      # 能力缺口
      actions:list[str]
      # 行动建议
+
+# HTTP接口必须验证输入，避免空问题、过多资料和不稳定的数据格式。
+class RagAsk(BaseModel):
+#   Field Pydantic提供的字段配置工具，用于设置数据验证规则，名称不能改。
+     question:str=Field(min_length=1,max_length=500)
+     parts:list[str]=Field(min_length=1,max_length=50)
+     model_config=ConfigDict(str_strip_whitespace=True)
+#     str_strip_whitespace 所有字符串自动去掉开头和结尾多余的空格
+
 
 # 给RAG回答准备一个固定“快递箱”，
 # 箱子里必须包含回答、资料来源、资料是否足够。

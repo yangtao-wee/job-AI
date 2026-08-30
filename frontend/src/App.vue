@@ -5,6 +5,8 @@
     <router-link to="/jobs">岗位列表</router-link>
     |
     <router-link to="/resumes">我的简历</router-link>
+    |
+    <router-link to="/rag">知识问答</router-link>
   </nav>
 
   <BackendStatus />

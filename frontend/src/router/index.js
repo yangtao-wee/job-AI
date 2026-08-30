@@ -4,6 +4,7 @@ import JobList from '../views/JobList.vue'
 import LoginView from '../views/LoginView.vue' 
 import RegisterView from '../views/RegisterView.vue'
 import ResumeView from '../views/Resumeview.vue'
+import RagView  from '../views/RagView.vue'
 const router=createRouter({
 history:createWebHistory(),
     routes:[
@@ -33,6 +34,12 @@ history:createWebHistory(),
             requiresAuth:true
         }
 
+    },
+    {
+        path:'/rag',
+        name:'rag',
+        component:RagView,
+        meta:{requiresAuth:true}
     },
     {
         path:'/login',

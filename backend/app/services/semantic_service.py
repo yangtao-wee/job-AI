@@ -19,6 +19,6 @@ def calc_sim(a:str,b:str)->float:
     # calc_sim【自己命名】，计算相似度。
     vec=get_model().encode([a,b],normalize_embeddings=True)
     # encode：【第三方库】，把文字转换成数字向量。
-    # normalize_embeddings=True：把向量统一长度，方便比较。
+    # normalize_embeddings=True：把向量统一长度，方便比较。把每个向量归一化，让它的模长变成 1。这样后面就可以方便地用点积计算余弦相似度。
     return float(vec[0] @ vec[1])
 # float()：【语言固定】，把结果转换成普通小数。

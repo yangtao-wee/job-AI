@@ -140,6 +140,16 @@ class MatchExplain(BaseModel):
      actions:list[str]
      # 行动建议
 
+# 给RAG回答准备一个固定“快递箱”，
+# 箱子里必须包含回答、资料来源、资料是否足够。
+class RagAnswer(BaseModel):
+     # RagAnswer：【自己命名】，意思是“RAG回答”
+     answer:str
+     # answer：【自己命名】，回答内容。
+     sources:list[str]
+     # sources：【自己命名】，中文是“资料来源”
+     enough:bool
+     # enough：【自己命名】，中文是“资料是否足够”。
 
 # 岗位匹配接口
 class JobMatchResponse(BaseModel):

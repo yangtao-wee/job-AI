@@ -149,6 +149,13 @@ class RagAsk(BaseModel):
 # extra额外字段。【第三方库配置】固定名称。forbid：禁止。【第三方库规定值】不能随意改写。
 # extra='forbid'拒绝接口未声明字段。
 
+# 一条资料来源以后不再只是字符串：
+class RagSrc(BaseModel):
+     text:str
+     score:float=Field(ge=-1,le=1)
+     # Field：【第三方库】设置字段验证规则。
+     # ge：【第三方库固定参数】greater than or equal，大于或等于。
+     # le：【第三方库固定参数】less than or equal，小于或等于。
 
 # 给RAG回答准备一个固定“快递箱”，
 # 箱子里必须包含回答、资料来源、资料是否足够。
@@ -156,7 +163,7 @@ class RagAnswer(BaseModel):
      # RagAnswer：【自己命名】，意思是“RAG回答”
      answer:str
      # answer：【自己命名】，回答内容。
-     sources:list[str]
+     sources:list[RagSrc]
      # sources：【自己命名】，中文是“资料来源”
      enough:bool
      # enough：【自己命名】，中文是“资料是否足够”。

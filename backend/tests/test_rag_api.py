@@ -19,7 +19,8 @@ def fake_user():
     return object()
 
 def fake_answer(q,parts):
-    return{'answer':'测试回答','sources':parts,'enough':True}
+    sources=[{'text':part,'score':0.8} for part in parts]
+    return{'answer':'测试回答','sources':sources,'enough':True}
 
 def test_rag_ok(monkeypatch):
     app.dependency_overrides[get_current_user]=fake_user
@@ -42,7 +43,8 @@ def test_rag_ok(monkeypatch):
     # 如果不清除，后面的测试可能继续使用假用户，导致本应返回401的测试错误通过。
     assert(res.status_code,res.json()['enough'])==(200,True)
 # .json() = 把返回的 JSON 数据转成 Python 字典/列表，方便我们用 [] 取数据。
-    assert res.json()['sources'][1].startswith('Docker')
+    assert res.json()['sources'][1]['text'].startswith('Docker')
+    assert res.json()['sources'][1]['score']==0.8
 # startswith：【语言固定】Python字符串方法，检查是否以指定文字开头。
 
 def test_rag_bad():

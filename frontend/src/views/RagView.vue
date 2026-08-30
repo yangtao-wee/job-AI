@@ -10,7 +10,8 @@
             <p>{{ res.answer }}</p>
             <p>资料足够：{{ res.enough?'是':'否' }}</p>
             <ul>
-                <li v-for="source in res.sources" :key="source">{{ source }}</li>
+                <li v-for="source in res.sources" :key="source.text">{{ source.text }}(相似度：{{ source.score.toFixed(2) }})</li>
+                <!-- toFixed(2)：【语言固定】JavaScript数字方法，保留两位小数。 -->
             </ul>
         </div>
     </section>

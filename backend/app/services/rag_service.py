@@ -2,7 +2,7 @@ import logging
 
 from .ai_resume_service import get_llm_client
 from .semantic_service import get_model
-from ..schemas import RagAnswer
+from ..schemas import RagAnswer,RagSrc
 from ..config import settings
 from .llm_cost import read_use,calc_fee
 # settings 是项目统一的配置表，从 .env 文件读进来的所有开关和参数都在这里。
@@ -105,7 +105,7 @@ def make_fail()->RagAnswer:
 #  的"资料不足就提前拒答"这一段，验证它在资料为空时能安全返回，不会往下走去瞎编。
 def answer_question(q:str,parts:list[str])->RagAnswer:
     rows=pick_rows(q,parts)
-    sources=[part for _,part in rows]
+    sources=[RagSrc(text=part,score=score) for score,part in rows]
     ctx=join_rows(rows)
     if not sources:
         return make_fail()

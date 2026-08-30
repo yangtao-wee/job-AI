@@ -1,6 +1,6 @@
 import pytest
 # pytest：【第三方库】，自动测试工具。
-from app.schemas import RagAnswer
+from app.schemas import RagAnswer,RagSrc
 from app.services.rag_service import split_text,make_vecs,search,make_prompt,make_fail,answer_question
 from app.services import rag_service as rag
 
@@ -63,7 +63,8 @@ def test_answer_mock(monkeypatch):
     res=rag.answer_question('如何部署应用',['测试资料'])
     assert res.enough is True
     assert res.answer=='模拟回答:如何部署应用'
-    assert res.sources==['使用Docker部署服务']
+    assert res.sources[0].text=='使用Docker部署服务'
+    assert res.sources[0].score==0.9
 
 
 # 有资料，但连接真实大模型失败时，系统不能崩溃。
@@ -135,7 +136,7 @@ def test_answer_empty(monkeypatch,caplog):
     assert res.sources==[]
 
 class GoodResponse:
-    output_parsed=RagAnswer(answer='根据资料回答',sources=['模型编造的来源'],enough=True)
+    output_parsed=RagAnswer(answer='根据资料回答',sources=[RagSrc(text='模型编造的来源',score=0.1)],enough=True)
 
 class GoodResponses:
     def parse(self,**kwargs):
@@ -151,7 +152,8 @@ def test_answer_ok(monkeypatch):
     monkeypatch.setattr(rag,'get_llm_client',GoodClient)
     res=rag.answer_question('如何部署应用',['测试资料'])
     assert res.answer=='根据资料回答'
-    assert res.sources==['使用Docker部署服务']
+    assert res.sources[0].text=='使用Docker部署服务'
+    assert res.sources[0].score==0.9
 
 def low_search(q,parts,top_k):
     return [(0.4,'无关资料')]

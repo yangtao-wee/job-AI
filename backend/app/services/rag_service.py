@@ -8,6 +8,7 @@ from .llm_cost import read_use,calc_fee
 # settings 是项目统一的配置表，从 .env 文件读进来的所有开关和参数都在这里。
 
 log=logging.getLogger(__name__)
+MIN_SCORE=0.6
 
 def split_text(text:str,size:int=300,overlap:int=50)->list[str]:
     # 文本、片段大小、重叠长度
@@ -57,7 +58,7 @@ def search(q:str,parts:list[str],top_k:int=3)->list[tuple[float,str]]:
     return rows[:top_k]    
 
 # 负责排序结果→ 阈值过滤→ 保留分数和资料
-def pick_rows(q:str,parts:list[str],top_k:int=3,min_score:float=0.5)->list[tuple[float,str]]:
+def pick_rows(q:str,parts:list[str],top_k:int=3,min_score:float=MIN_SCORE)->list[tuple[float,str]]:
     # tuple：【语言固定类型】元组，这里保存“分数和资料”。
     rows=search(q,parts,top_k)
     return [(score,part) for score,part in rows if score >= min_score]
@@ -68,7 +69,7 @@ def join_rows(rows:list[tuple[float,str]])->str:
 
 #make_ctx 负责过滤后的资料→ 拼成Prompt需要的字符串
 # 把搜索到的多段文字合并成一段上下文。
-def make_ctx(q:str,parts:list[str],top_k:int=3,min_score:float=0.5)->str:
+def make_ctx(q:str,parts:list[str],top_k:int=3,min_score:float=MIN_SCORE)->str:
     return join_rows(pick_rows(q,parts,top_k,min_score))
 
 

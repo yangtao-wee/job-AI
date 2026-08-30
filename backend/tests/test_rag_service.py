@@ -163,9 +163,9 @@ def test_ctx_low(monkeypatch):
     assert rag.make_ctx('as',['测试资料'])==''
 
 def fake_rows(q,parts,top_k):
-    return[(0.8,'Docker'),(0.4,'vue')]
+    return[(0.8,'Docker'),(0.6,'FastAPI'),(0.59,'Vue')]
 
 def test_pick_rows(monkeypatch):
     monkeypatch.setattr(rag,'search',fake_rows)
-    assert rag.pick_rows('部署',['a','b'])==[(0.8,'Docker')]
-    # 0.8的Docker被保留，0.4的Vue低于0.5，被过滤。
+    assert rag.pick_rows('部署',['a','b'])==[(0.8,'Docker'),(0.6,'FastAPI')]
+   # 0.6达到最低分会保留，0.59低于最低分会被过滤。

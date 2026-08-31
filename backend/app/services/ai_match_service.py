@@ -3,7 +3,7 @@ import logging
 
 from ..schemas import MatchExplain
 from ..config import settings
-from .ai_resume_service import get_llm_client
+from .llm_service import get_llm_client
 # settings里面保存Mock开关、模型名称等。
 # get_llm_client，中文“取得大模型客户端”，负责创建OpenAI连接。
 from .llm_cost import read_use,calc_fee

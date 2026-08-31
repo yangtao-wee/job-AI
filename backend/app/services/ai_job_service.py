@@ -2,7 +2,7 @@ from ..config import settings
 from ..schemas import JobRequirementResult
 # 【自己命名】，刚才创建的岗位结果格式。
 
-from .ai_resume_service import get_llm_client                          
+from .llm_service import get_llm_client
 # 复用现有的大模型客户端创建函数。
 
 def build_job_analysis_prompt(job_description:str)->str:

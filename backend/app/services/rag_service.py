@@ -1,6 +1,6 @@
 import logging
 
-from .ai_resume_service import get_llm_client
+from .llm_service import get_llm_client
 from .semantic_service import get_model
 from ..schemas import RagAnswer,RagSrc
 from ..config import settings

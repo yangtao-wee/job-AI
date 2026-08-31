@@ -1,6 +1,6 @@
 import logging
 
-from openai import OpenAI
+from .llm_service import get_llm_client
 from ..config import settings
 from ..schemas import ResumeAIAnalysis
 from .llm_cost import read_use,calc_fee
@@ -60,17 +60,6 @@ def make_fail(resume_id:int)->ResumeAIAnalysis:
         improvement_suggestions=[],
         recommended_positions=[],
         ai_ok=False
-    )
-
-
-def get_llm_client()->OpenAI:
-    if not settings.llm_api_key:
-        raise RuntimeError('未配置 LLM_API_KEY')
-    return OpenAI(
-        api_key=settings.llm_api_key,
-        base_url=settings.llm_base_url or None,
-        timeout=settings.llm_timeout,
-        max_retries=settings.llm_max_retries
     )
 
 def analyze_resume_with_ai(

@@ -5,7 +5,7 @@ from .kb_service import load_parts
 from .rag_service import pick_rows
 from ..schemas import RagSrc
 from ..config import settings
-from .ai_resume_service import get_llm_client
+from .llm_service import get_llm_client
 
 log=logging.getLogger(__name__)
 

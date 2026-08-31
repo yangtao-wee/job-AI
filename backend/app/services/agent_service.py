@@ -1,3 +1,4 @@
+import logging
 import json
 from .kb_service import load_parts
 from .rag_service import pick_rows
@@ -5,18 +6,21 @@ from ..schemas import RagSrc
 from ..config import settings
 from .ai_resume_service import get_llm_client
 
+log=logging.getLogger(__name__)
+
 # KB_TOOL → 工具说明书
 KB_TOOL={
     'type':'function',
-    'name':'find_kb',
-    'description':'从求职知识库检索相关资料',
-    'parameters':{
-        'type':'object',
-        'properties':{'q':{'type':'string'}},
-        'required':['q'],
-        'additionalProperties':False
-    },
-    'strict':True
+    'function':{
+        'name':'find_kb',
+        'description':'从求职知识库检索相关资料',
+        'parameters':{
+            'type':'object',
+            'properties':{'q':{'type':'string'}},
+            'required':['q'],
+            'additionalProperties':False
+        }
+    }
 }
 # type、name、description、parameters、strict：【第三方SDK接口字段】名称不能随意改。
 # properties、required、additionalProperties：【JSON Schema固定字段】不能随意改。
@@ -45,47 +49,44 @@ def run_tool(name:str,args:dict)->str:
 # ensure_ascii=False：【标准库固定参数】让中文保持中文，而不是变成Unicode转义。
 
 def run_call(call)->dict:
-    args=json.loads(call.arguments)
-    # call.arguments通常返回str
-# call.arguments、call.name、call.call_id：【第三方SDK响应字段】不能随意改。
-    output=run_tool(call.name,args)
-    # call.name模型想调用哪个工具。
-    return{'type':'function_call_output','call_id':call.call_id,"output":output}
-# function_call_output：【第三方SDK固定值】表示这是工具执行结果。
+    name=call.function.name
+    log.info(
+        'Agent执行工具 name=%s call_id=%s',name,call.id)
+    args=json.loads(call.function.arguments)
+    # function.arguments：【第三方SDK响应字段】JSON字符串形式的工具参数。
+    output=run_tool(name,args)
+    return{'role':'tool','tool_call_id':call.id,"content":output}
+# role、tool_call_id、content：【第三方接口固定字段】组成工具结果消息。
 
-def ask_model(client,goal:str):
-    return client.responses.create(
-    # client.responses.create：【第三方SDK提供】发送Responses API请求。
+def ask_model(client,messages):
+    return client.chat.completions.create(
+    # chat.completions.create：【第三方SDK提供】发送对话补全请求。
         model=settings.llm_model,
-        instructions='你是AI求职助手，需要资料时调用find_kb。',
-        input=goal,
+        messages=messages,
         tools=[KB_TOOL],
         tool_choice='auto'
 # 【第三方SDK固定参数】
 # model       → 使用哪个模型
-# instructions → Agent角色和工具使用规则
-# input       → 用户目标
+# messages    → 完整对话消息
 # tools       → 模型可以选择的工具
 # tool_choice → 是否由模型自己选择
     )
 
 def run_agent(client,goal:str)->str:
-    first=ask_model(client,goal)
-    calls=[item for item in first.output if item.type=='function_call']
-# 第1项：普通输出
-# 第2项：工具调用function_call
-# 第3项：其他输出
+    msgs=[
+        {'role':'system','content':'你是AI求职助手，需要资料时调用find_kb。'},
+        {'role':'user','content':goal}
+    ]
+    first=ask_model(client,msgs)
+    msg=first.choices[0].message
+    calls=msg.tool_calls or []
+    log.info('Agent首轮完成 tool_calls=%d',len(calls))
     if not calls:
-        return first.output_text
-    outputs=[run_call(call) for call in calls]
-    second=client.responses.create(
-        model=settings.llm_model,
-        instructions='根据工具结果回答用户，不要编造资料',
-        previous_response_id=first.id,
-        input=outputs,
-        tools=[KB_TOOL]
-    )
-    return second.output_text
+        return msg.content or ''
+    msgs.append(msg.model_dump(exclude_none=True))
+    msgs.extend(run_call(call) for call in calls)
+    second=ask_model(client,msgs)
+    return second.choices[0].message.content or ''
 
 def ask_agent(goal:str)->str:
     if settings.llm_mock_mode:

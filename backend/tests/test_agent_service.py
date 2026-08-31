@@ -1,3 +1,4 @@
+from types import SimpleNamespace as NS
 import json
 import pytest
 from app.schemas import RagSrc
@@ -29,12 +30,14 @@ def test_run_bad():
         # 我期待下面这段代码必须抛出 ValueError。
         agent.run_tool('delete_db',{})
 
-class FakeCall:
-    type='function_call'
-    # function_call：【第三方SDK固定值】表示这是工具调用，不能随便改。
+class Func:
     name='find_kb'
     arguments='{"q":"部署"}'
-    call_id='call_1'
+
+
+class FakeCall:
+    id='call_1'
+    function=Func()
 
 def fake_run(name,args):
     return '测试结果'
@@ -42,81 +45,60 @@ def fake_run(name,args):
 def test_run_call(monkeypatch):
     monkeypatch.setattr(agent,'run_tool',fake_run)
     item=agent.run_call(FakeCall())
-    assert item['call_id']=='call_1'
-    assert item['output']=='测试结果'
+    assert item['tool_call_id']=='call_1'
+    assert item['content']=='测试结果'
 
-class FakeRes:
+class FakeComp:
     def create(self,**kwargs):
 # **kwargs：【语言固定】接收所有“参数名=值”形式的参数。
         return kwargs
 
+class FakeChat:
+    completions=FakeComp()
+
 class FakeClient:
-    responses=FakeRes()
-    # responses：【第三方SDK接口结构】这里模拟真实客户端的属性名称。
+    chat=FakeChat()
 
 def test_ask_model():
-    data=agent.ask_model(FakeClient(),'查Docker')
-    assert data['input']=='查Docker'
-    assert data['tools'][0]['name']=='find_kb'
+    msgs=[{'role':'user','content':'查Docker'}]
+    data=agent.ask_model(FakeClient(),msgs)
+    assert data['messages']==msgs
+    assert data['tools'][0]['function']['name']=='find_kb'
     assert data['tool_choice']=='auto'
 
 
 # 用假模型验证完整的一轮 Agent。
-class First:
-    id='r1'
-    output=[FakeCall()]
-    output_text=''
-
-class Last:
-    output_text='最终回答'
-
-class AgentRes:
-    def __init__(self):
-        self.count=0
-
-    def create(self,**kwargs):
-        self.count+=1
-        if self.count==1:
-            return First()
-        assert kwargs['previous_response_id']=='r1'
-        assert kwargs['input'][0]['output']=='测试结果'
-        return Last()
-
-class AgentClient:
-    def __init__(self):
-        self.responses=AgentRes()
-
 def test_run_agent(monkeypatch):
+    first=NS(
+        content='',tool_calls=[FakeCall()],
+        model_dump=lambda exclude_none:{'role':'assistant'}
+    )
+    last=NS(content='最终回答',tool_calls=None)
+    replies=[
+        NS(choices=[NS(message=first)]),
+        NS(choices=[NS(message=last)])
+    ]
+    sent=[]
+    def fake_ask(client,msgs):
+        sent.append(list(msgs))
+        return replies.pop(0)
+    monkeypatch.setattr(agent,'ask_model',fake_ask)
     monkeypatch.setattr(agent,'run_tool',fake_run)
-    result=agent.run_agent(AgentClient(),'查Docker')
-    assert result=='最终回答'
+    assert agent.run_agent(None,'查Docker')=='最终回答'
+    assert [m['role'] for m in sent[1]]==['system','user','assistant','tool']
 
 
 # 避免不必要的第二次模型请求，降低延迟和费用。
-class Msg:
-    type='message'
-
-class Direct:
-    output=[Msg()]
-    output_text='直接回答'
-
-class DirectRes:
-    def __init__(self):
-        self.count=0
-
-    def create(self,**kwargs):
-        self.count+=1
-        return Direct()
-
-class DirectClient:
-    def __init__(self):
-        self.responses=DirectRes()
-
-def test_agent_direct():
-    client=DirectClient()
-    assert agent.run_agent(client,'你好')=='直接回答'
-    assert client.responses.count==1
-
+def test_agent_direct(monkeypatch):
+    msg=NS(content='直接回答',tool_calls=None)
+    reply=NS(choices=[NS(message=msg)])
+    calls=[]
+    def fake_ask(client,msgs):
+        calls.append(msgs)
+        return reply
+    monkeypatch.setattr(agent,'ask_model',fake_ask)
+    assert agent.run_agent(None,'你好')=='直接回答'
+    assert len(calls)==1
 
 def fake_client():
     return 'client'

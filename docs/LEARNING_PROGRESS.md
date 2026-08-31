@@ -238,3 +238,13 @@
 - 成本控制：单元测试全部使用假客户端；模型直接回答时不会发送第二次请求。
 - 🟡 正在学习：Agent编排、Tool Calling、调用关联、工具安全边界。
 - 下一步：为Agent增加受JWT保护的FastAPI接口。
+
+## 2026-08-31 Agent API与认证
+
+- 完成功能：新增`POST /agent/ask`，通过JWT认证后调用Agent Service。
+- 数据路线：HTTP请求 → JWT认证 → AgentAsk → ask_agent → AgentAnswer → JSON响应。
+- 安全边界：匿名请求返回401，空目标和额外字段返回422，不进入收费模型。
+- 测试覆盖：未登录、正常回答、空白目标和额外字段。
+- 验收结果：Agent API专项测试4项、后端完整回归58项通过。
+- 🟡 正在学习：Agent API分层、模型成本保护、接口隔离测试。
+- 下一步：新增Vue Agent页面并调用`/agent/ask`。

@@ -64,7 +64,7 @@ def test_ask_model():
 # 用假模型验证完整的一轮 Agent。
 class First:
     id='r1'
-    output=[FackCall()]
+    output=[FakeCall()]
     output_text=''
 
 class Last:

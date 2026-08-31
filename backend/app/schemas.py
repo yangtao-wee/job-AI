@@ -168,6 +168,18 @@ class RagAnswer(BaseModel):
      enough:bool
      # enough：【自己命名】，中文是“资料是否足够”。
 
+# 模型输出接口
+class AgentAsk(BaseModel):
+     goal:str=Field(min_length=1,max_length=500)
+     # Field限制字段
+     model_config=ConfigDict(str_strip_whitespace=True,extra='forbid')
+     # ConfigDict规定整个类要遵守规则str_strip_whitespace=true自动去空格
+     # extra='forbid'不允许出现模型没有定义的额外字段。
+
+# 模型返回接口
+class AgentAnswer(BaseModel):
+     answer:str
+
 # 岗位匹配接口
 class JobMatchResponse(BaseModel):
      resume_id:int

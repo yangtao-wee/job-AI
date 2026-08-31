@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from .schemas import JobSchema
 from .database import engine
-from .routers import jobs,users,resumes,rag
+from .routers import jobs,users,resumes,rag,agent
 # engine
 # 知道：
 # 数据库在哪里。
@@ -48,6 +48,13 @@ app.include_router(
     rag.router,
     prefix='/rag',
     tags=['rag']
+)
+
+app.include_router(
+    agent.router,
+    prefix='/agent',
+    tags=['agent']
+    # tags：【框架提供】在 Swagger 接口文档中把接口归入 agent 分类。
 )
 
 app.add_middleware(

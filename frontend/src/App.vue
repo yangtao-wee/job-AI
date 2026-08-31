@@ -7,6 +7,8 @@
     <router-link to="/resumes">我的简历</router-link>
     |
     <router-link to="/rag">知识问答</router-link>
+    |
+    <router-link to="/agent">AI助手</router-link>
   </nav>
 
   <BackendStatus />

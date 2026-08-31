@@ -5,6 +5,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import ResumeView from '../views/Resumeview.vue'
 import RagView  from '../views/RagView.vue'
+import AgentView from '../views/AgentView.vue'
 const router=createRouter({
 history:createWebHistory(),
     routes:[
@@ -39,6 +40,12 @@ history:createWebHistory(),
         path:'/rag',
         name:'rag',
         component:RagView,
+        meta:{requiresAuth:true}
+    },
+    {
+        path:'/agent',
+        name:'agent',
+        component:AgentView,
         meta:{requiresAuth:true}
     },
     {

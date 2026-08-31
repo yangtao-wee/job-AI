@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     llm_api_key:str | None=None
     llm_base_url:str | None=None
     llm_model:str | None=None
+    llm_backup_model:str | None=None
     llm_mock_mode:bool=False
     llm_timeout:float=30.0
     # 30.0：一次请求最多等待30秒。

@@ -1,5 +1,6 @@
 import logging
 import json
+from openai import RateLimitError
 from .kb_service import load_parts
 from .rag_service import pick_rows
 from ..schemas import RagSrc
@@ -58,19 +59,20 @@ def run_call(call)->dict:
     return{'role':'tool','tool_call_id':call.id,"content":output}
 # role、tool_call_id、content：【第三方接口固定字段】组成工具结果消息。
 
-def ask_model(client,messages):
+def call_model(client,messages,model):
     return client.chat.completions.create(
-    # chat.completions.create：【第三方SDK提供】发送对话补全请求。
-        model=settings.llm_model,
-        messages=messages,
-        tools=[KB_TOOL],
-        tool_choice='auto'
-# 【第三方SDK固定参数】
-# model       → 使用哪个模型
-# messages    → 完整对话消息
-# tools       → 模型可以选择的工具
-# tool_choice → 是否由模型自己选择
+        model=model,messages=messages,
+        tools=[KB_TOOL],tool_choice='auto'
     )
+
+def ask_model(client,messages):
+    try:
+        return call_model(client,messages,settings.llm_model)
+    except RateLimitError as error:
+        if str(error.code)!='1305' or not settings.llm_backup_model:
+            raise
+        log.warning('主模型繁忙，切换备用模型 model=%s',settings.llm_backup_model)
+        return call_model(client,messages,settings.llm_backup_model)
 
 def run_agent(client,goal:str)->str:
     msgs=[

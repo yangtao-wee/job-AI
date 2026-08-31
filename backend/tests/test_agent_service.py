@@ -66,6 +66,54 @@ def test_ask_model():
     assert data['tools'][0]['function']['name']=='find_kb'
     assert data['tool_choice']=='auto'
 
+class BusyError(Exception):
+    code='1305'
+
+def test_ask_backup(monkeypatch):
+    models=[]
+    def fake_call(client,messages,model):
+        models.append(model)
+        if model=='main':
+            raise BusyError()
+        return '备用成功'
+    monkeypatch.setattr(agent,'RateLimitError',BusyError)
+    monkeypatch.setattr(agent,'call_model',fake_call)
+    monkeypatch.setattr(agent.settings,'llm_model','main')
+    monkeypatch.setattr(agent.settings,'llm_backup_model','backup')
+    result=agent.ask_model(None,[])
+    assert result=='备用成功'
+    assert models==['main','backup']
+
+class OtherRateError(Exception):
+    code='9999'
+
+def test_ask_non_busy_error(monkeypatch):
+    models=[]
+    def fake_call(client,messages,model):
+        models.append(model)
+        raise OtherRateError()
+    monkeypatch.setattr(agent,'RateLimitError',OtherRateError)
+    monkeypatch.setattr(agent,'call_model',fake_call)
+    monkeypatch.setattr(agent.settings,'llm_model','main')
+    monkeypatch.setattr(agent.settings,'llm_backup_model','backup')
+    with pytest.raises(OtherRateError):
+        # 我预期 agent.ask_model() 必须抛出 OtherRateError。
+        agent.ask_model(None,[])
+    assert models==['main']
+
+def test_ask_busy_without_backup(monkeypatch):
+    models=[]
+    def fake_call(client,messages,model):
+        models.append(model)
+        raise BusyError()
+    monkeypatch.setattr(agent,'RateLimitError',BusyError)
+    monkeypatch.setattr(agent,'call_model',fake_call)
+    monkeypatch.setattr(agent.settings,'llm_model','main')
+    monkeypatch.setattr(agent.settings,'llm_backup_model',None)
+    with pytest.raises(BusyError):
+        agent.ask_model(None,[])
+    assert models==['main']
+
 
 # 用假模型验证完整的一轮 Agent。
 def test_run_agent(monkeypatch):

@@ -88,20 +88,6 @@ def test_answer_client_fail(monkeypatch):
 
 
 
-class FailResponses:
-    def parse(self,**kwargs):
-        # self：当前对象自身，是Python实例方法的标准写法。
-# parse：【第三方库接口名称】解析；真实客户端用它发送请求并解析结构化结果。
-        # **kwargs：【语言固定】接收所有“参数名=参数值”形式的参数。
-        raise RuntimeError('模拟请求故障')
-
-class FailClient:
-    responses=FailResponses()
-    # responses为假客户端创建一个responses对象。
-
-def make_fail_client():
-    return FailClient()
-
 def test_answer_request_fail(monkeypatch):
     monkeypatch.setattr(rag.settings,'llm_mock_mode',False)
     # 关闭Mock，避免提前返回模拟答案。
@@ -109,51 +95,49 @@ def test_answer_request_fail(monkeypatch):
     # 提供非空的测试模型名称，避免程序提前报告“未配置模型”。
     monkeypatch.setattr(rag,'pick_rows',good_rows)
     # 固定返回有效上下文，只测试LLM请求分支。
-    monkeypatch.setattr(rag,'get_llm_client',make_fail_client)
+    monkeypatch.setattr(rag,'get_llm_client',lambda:'client')
     # 让业务代码取得我们准备的假客户端。
+    def fail_call(client,prompt,schema,model):
+        raise RuntimeError('模拟请求故障')
+    monkeypatch.setattr(rag,'call_structured',fail_call)
     res=rag.answer_question('如何部署应用',['测试资料'])
     assert res.enough is False
     assert res.sources==[]
 
-class EmptyResponse:
-    output_parsed=None
-# output_parsed：【第三方库字段】已经解析好的结构化输出。
-class EmptyResponses:
-    def parse(self,**kwargs):
-        return EmptyResponse()
-
-class EmptyClient:
-    responses=EmptyResponses()
 
 def test_answer_empty(monkeypatch,caplog):
     monkeypatch.setattr(rag.settings,'llm_mock_mode',False)
     monkeypatch.setattr(rag.settings,'llm_model','test-model')
     monkeypatch.setattr(rag,'pick_rows',good_rows)
-    monkeypatch.setattr(rag,'get_llm_client',EmptyClient)
+    monkeypatch.setattr(rag,'get_llm_client',lambda:'client')
+    def empty_call(client,prompt,schema,model):
+        raise RuntimeError('大模型没有返回内容')
+    monkeypatch.setattr(rag,'call_structured',empty_call)
     res=rag.answer_question('如何部署应用',['测试资料'])
-    assert 'RAG问题返回空结果' in caplog.text
+    assert 'RAG问答请求LLM失败' in caplog.text
     assert res.enough is False
     assert res.sources==[]
 
-class GoodResponse:
-    output_parsed=RagAnswer(answer='根据资料回答',sources=[RagSrc(text='模型编造的来源',score=0.1)],enough=True)
-
-class GoodResponses:
-    def parse(self,**kwargs):
-        return GoodResponse()
-
-class GoodClient:
-    responses=GoodResponses()
 
 def test_answer_ok(monkeypatch):
     monkeypatch.setattr(rag.settings,'llm_mock_mode',False)
     monkeypatch.setattr(rag.settings,'llm_model','test-model')
     monkeypatch.setattr(rag,'pick_rows',good_rows)
-    monkeypatch.setattr(rag,'get_llm_client',GoodClient)
+    monkeypatch.setattr(rag,'get_llm_client',lambda:'client')
+    expected=RagAnswer(
+        answer='根据资料回答',
+        sources=[RagSrc(text='模型编造的来源',score=0.1)],
+        enough=True
+    )
+    def fake_call(client,prompt,schema,model):
+        assert schema is RagAnswer
+        return expected,object()
+    monkeypatch.setattr(rag,'call_structured',fake_call)
     res=rag.answer_question('如何部署应用',['测试资料'])
     assert res.answer=='根据资料回答'
     assert res.sources[0].text=='使用Docker部署服务'
     assert res.sources[0].score==0.9
+
 
 def low_search(q,parts,top_k):
     return [(0.4,'无关资料')]

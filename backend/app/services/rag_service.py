@@ -1,6 +1,6 @@
 import logging
 
-from .llm_service import get_llm_client
+from .llm_service import get_llm_client,call_structured
 from .semantic_service import get_model
 from ..schemas import RagAnswer,RagSrc
 from ..config import settings
@@ -124,12 +124,11 @@ def answer_question(q:str,parts:list[str])->RagAnswer:
 # 连不上大模型，就返回"暂时不可用"的安全结果，而不是让用户看到一个丑陋的报错页面。
     prompt=make_prompt(q,ctx)
     try:
-        response=client.responses.parse(
-            model=settings.llm_model,
-            input=prompt,
-            text_format=RagAnswer
-            
-        
+        result, response=call_structured(
+            client,
+            prompt,
+            RagAnswer,
+            settings.llm_model
         )
     except Exception:
         log.exception('RAG问答请求LLM失败，已使用降级结果')
@@ -141,10 +140,6 @@ def answer_question(q:str,parts:list[str])->RagAnswer:
          settings.llm_model,
     use.input_tokens,use.output_tokens,use.total_tokens,fee
     )
-    result=response.output_parsed
-    if result is None:
-        log.error('RAG问题返回空结果，已使用降级结果')
-        return make_fail()
     result.sources=sources
     return result
     

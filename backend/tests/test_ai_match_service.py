@@ -40,6 +40,14 @@ def test_token_use():
     use=read_use(res)
     assert use.total_tokens==120
 
+def test_chat_completion_token_use():
+    res=N(usage=N(prompt_tokens=100,completion_tokens=20,total_tokens=120))
+    use=read_use(res)
+    assert use.input_tokens==100
+    assert use.output_tokens==20
+    assert use.total_tokens==120
+
+
 def test_token_empty():
     use=read_use(N(usage=None))
     assert use.total_tokens==0

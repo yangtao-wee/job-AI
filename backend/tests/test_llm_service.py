@@ -3,6 +3,7 @@ from pydantic import ValidationError
 from types import SimpleNamespace as NS
 
 from app.schemas import RagAnswer
+from app.services import llm_service as llm
 from app.services.llm_service import build_json_messages, call_structured
 
 
@@ -54,3 +55,64 @@ def test_call_structured_invalid():
     )))
     with pytest.raises(ValidationError, match='enough'):
         call_structured(client, '测试问题', RagAnswer, 'test-model')
+
+
+class BusyError(Exception):
+    code = '1305'
+
+
+class OtherRateError(Exception):
+    code = '9999'
+
+
+def test_call_structured_uses_backup(monkeypatch):
+    models = []
+    response = NS(choices=[NS(message=NS(
+        content='{"answer":"备用回答","sources":[],"enough":true}'
+    ))])
+
+    def fake_call(client, messages, model):
+        models.append(model)
+        if model == 'main-model':
+            raise BusyError()
+        return response
+
+    monkeypatch.setattr(llm, 'RateLimitError', BusyError)
+    monkeypatch.setattr(llm, 'call_json_model', fake_call)
+    monkeypatch.setattr(llm.settings, 'llm_backup_model', 'backup-model')
+    result, raw = llm.call_structured(
+        None, '测试问题', RagAnswer, 'main-model'
+    )
+    assert result.answer == '备用回答'
+    assert raw is response
+    assert models == ['main-model', 'backup-model']
+
+
+def test_call_structured_does_not_hide_other_rate_error(monkeypatch):
+    models = []
+
+    def fake_call(client, messages, model):
+        models.append(model)
+        raise OtherRateError()
+
+    monkeypatch.setattr(llm, 'RateLimitError', OtherRateError)
+    monkeypatch.setattr(llm, 'call_json_model', fake_call)
+    monkeypatch.setattr(llm.settings, 'llm_backup_model', 'backup-model')
+    with pytest.raises(OtherRateError):
+        llm.call_structured(None, '测试问题', RagAnswer, 'main-model')
+    assert models == ['main-model']
+
+
+def test_call_structured_busy_without_backup(monkeypatch):
+    models = []
+
+    def fake_call(client, messages, model):
+        models.append(model)
+        raise BusyError()
+
+    monkeypatch.setattr(llm, 'RateLimitError', BusyError)
+    monkeypatch.setattr(llm, 'call_json_model', fake_call)
+    monkeypatch.setattr(llm.settings, 'llm_backup_model', None)
+    with pytest.raises(BusyError):
+        llm.call_structured(None, '测试问题', RagAnswer, 'main-model')
+    assert models == ['main-model']

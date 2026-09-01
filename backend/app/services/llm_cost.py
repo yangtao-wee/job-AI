@@ -2,14 +2,16 @@ from ..config import settings
 from ..schemas import TokenUse
 
 def read_use(res)->TokenUse:
-    if getattr(res,'usage',None) is None:
-# getattr：【语言固定，Python内置】安全获取对象属性，不需要导入
+    usage=getattr(res,'usage',None)
+    # getattr(对象, '属性名', 默认值)
+    if usage is None:
         return TokenUse()
     return TokenUse(
-        input_tokens=res.usage.input_tokens,
-        output_tokens=res.usage.output_tokens,
-        total_tokens=res.usage.total_tokens
+        input_tokens=getattr(usage,'input_tokens',getattr(usage,'prompt_tokens',0)),
+        output_tokens=getattr(usage,'output_tokens',getattr(usage,'completion_tokens',0)),
+        total_tokens=getattr(usage,'total_tokens',0)
     )
+
 
 def calc_fee(use:TokenUse)->float:
     in_fee=use.input_tokens/1_000_000*settings.llm_in_price

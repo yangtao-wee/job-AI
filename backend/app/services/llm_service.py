@@ -1,10 +1,12 @@
 import json
-
-from openai import OpenAI
+import logging
+from openai import OpenAI, RateLimitError
 # 所以这里的 OpenAI 更像一个“会说兼容接口格式的通用请求工具”。
 from pydantic import BaseModel
 
 from ..config import settings
+
+log = logging.getLogger(__name__)
 
 
 # 一个配置好的大模型客户端
@@ -44,17 +46,35 @@ def build_json_messages(
         # prompt：【自己命名】实际任务提示词。
     ]
 
-
-# 统一发送结构化模型请求并用Pydantic验证结果。
-def call_structured(client, prompt, schema, model):
-    response = client.chat.completions.create(
+def call_json_model(client, messages, model):
+    return client.chat.completions.create(
         # 使用大模型客户端创建一次对话请求，并把完整响应保存到 response。
         model=model,
-        messages=build_json_messages(prompt, schema),
+        messages=messages,
         response_format={'type': 'json_object'}
         # response_format：【第三方接口固定参数】响应格式。
         # 要求模型返回一个合法的数据对象，而不是普通文字或 Markdown 代码块。
     )
+
+
+
+# 统一发送结构化模型请求并用Pydantic验证结果。
+def call_structured(client, prompt, schema, model):
+    messages = build_json_messages(prompt, schema)
+    try:
+        response = call_json_model(client, messages, model)
+    except RateLimitError as error:
+        if str(error.code) != '1305' or not settings.llm_backup_model:
+            raise
+        log.warning(
+            '主模型繁忙，切换备用模型 model=%s',
+            settings.llm_backup_model
+        )
+        response = call_json_model(
+            client,
+            messages,
+            settings.llm_backup_model
+        )
     content = response.choices[0].message.content
     # choices：【第三方接口响应字段】候选回答列表。
     if not content:

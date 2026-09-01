@@ -1,6 +1,6 @@
 from types import SimpleNamespace as N
 # SimpleNamespace：【标准库提供】，快速制造一个假的响应对象。
-from app.schemas import TokenUse
+from app.schemas import TokenUse,MatchExplain
 from app.services.ai_match_service import make_mock,make_prompt,read_use,calc_fee
 from app.services import ai_match_service as ai_match
 
@@ -17,6 +17,24 @@ def test_prompt_safe():
     text=make_prompt(81,0.737,['Python'],['Docker'])
     assert '不得修改分数' in text
     assert '81/100' in text
+    assert '面向求职者本人' in text
+    assert '不得擅自扩大' in text
+
+def test_structured_success(monkeypatch):
+    expected=MatchExplain(
+        summary='匹配成功',reasons=['模型编造理由'],
+        gaps=['模型编造缺口'],actions=['补充Docker项目']
+    )
+    monkeypatch.setattr(ai_match.settings,'llm_mock_mode',False)
+    monkeypatch.setattr(ai_match,'get_llm_client',lambda:'client')
+    def fake_call(client,prompt,schema,model):
+        assert schema is MatchExplain
+        return expected,N(usage=None)
+    monkeypatch.setattr(ai_match,'call_structured',fake_call)
+    result=ai_match.explain(81,0.737,['Python'],['Docker'])
+    assert result is expected
+    assert result.reasons==['Python']
+    assert result.gaps==['Docker']
 
 
 # 【整段代码作用】：假装LLM客户端发生故障，确认explain()能够接住错误并返回降级解释。

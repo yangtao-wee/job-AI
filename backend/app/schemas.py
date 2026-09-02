@@ -56,7 +56,6 @@ class ResumeAIAnalysis(BaseModel):
 class ResumeAnalysisResponse(ResumeAIAnalysis):
      id:int
      created_at:datetime
-
      model_config=ConfigDict(
           from_attributes=True
      )
@@ -67,6 +66,46 @@ class JobMatchRequest(BaseModel):
      job_id:int
      city:str=''
      min_pay:int=0
+
+# 岗位辅助请求。
+class JobAssistRequest(BaseModel):
+     resume_id:int=Field(gt=0)
+     # ge=0 表示允许0。
+     # gt=0 表示必须大于0。
+     jd_text:str=Field(min_length=20,max_length=20000)
+# max_length=20000：限制输入长度，避免异常请求和过高模型费用。
+     job_title:str=Field(min_length=1,max_length=100)
+     company:str=Field(min_length=1,max_length=100)
+     model_config=ConfigDict(
+          str_strip_whitespace=True,extra='forbid'
+# extra='forbid'：【第三方库配置】，拒绝没有声明的额外字段。
+     )
+
+# 当前正在做：阶段2“手动粘贴岗位描述，生成真实、不编造的简历定制建议
+class RewriteAdvice(BaseModel):
+     requirement:str
+     evidence:str
+     rewrite:str
+
+class TailorResult(BaseModel):
+     summary:str
+     suggestions:list[RewriteAdvice]
+     missing_requirements:list[str]
+
+class GreetingResult(BaseModel):
+     greeting:str=Field(min_length=1,max_length=300)
+
+
+class JobAssistResponse(BaseModel):
+     resume_id:int
+     score:int=Field(ge=0,le=100)
+     matched_skills:list[str]
+     missing_skills:list[str]
+     tailoring:TailorResult
+     greeting:str
+     ai_ok:bool=True
+
+
 
 class SkillMatchResult(BaseModel):
      score:int

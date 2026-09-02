@@ -67,8 +67,8 @@ def call_structured(client, prompt, schema, model):
         if str(error.code) != '1305' or not settings.llm_backup_model:
             raise
         log.warning(
-            '主模型繁忙，切换备用模型 model=%s',
-            settings.llm_backup_model
+            '主模型限流(code=%s)，切换备用模型 model=%s',
+             error.code,settings.llm_backup_model
         )
         response = call_json_model(
             client,

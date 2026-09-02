@@ -4,13 +4,13 @@ from sqlalchemy.orm  import Session
 from ..database import SessionLocal
 from ..dependencies import get_current_user,get_db
 from ..models import Job,User
-from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch
+from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch,JobAssistRequest,JobAssistResponse
 from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref
 from ..services.job_service import get_all_jobs
 from ..services.ai_job_service import analyze_job_with_ai
 from ..services.semantic_service import calc_sim,MODEL
 from ..services.ai_match_service import explain
-
+from ..services.job_assist_service import assist_job
 router = APIRouter()
 
 @router.get('/jobs')
@@ -72,6 +72,20 @@ def match_job(
         sem_match=sem,
         ai_explain=ai_note
     )
+
+@router.post('/jobs/assist',response_model=JobAssistResponse)
+def assist_pasted_job(
+     request:JobAssistRequest,
+     current_user:User=Depends(get_current_user),
+     db:Session=Depends(get_db)
+):
+     analysis=get_user_resume_analysis(
+          db,request.resume_id,current_user.id
+     )
+     if not analysis:
+          raise HTTPException(status_code=404,detail='简历分析不存在')
+     return assist_job(request,analysis)
+
 
 @router.post('/jobs/{job_id}/analysis',
              response_model=JobRequirementResult)

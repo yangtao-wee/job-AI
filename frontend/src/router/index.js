@@ -3,9 +3,11 @@ import {createRouter,createWebHistory} from 'vue-router'
 import JobList from '../views/JobList.vue'
 import LoginView from '../views/LoginView.vue' 
 import RegisterView from '../views/RegisterView.vue'
-import ResumeView from '../views/Resumeview.vue'
+import ResumeView from '../views/ResumeView.vue'
 import RagView  from '../views/RagView.vue'
 import AgentView from '../views/AgentView.vue'
+import JobAssistView from '../views/JobAssistView.vue'
+
 const router=createRouter({
 history:createWebHistory(),
     routes:[
@@ -46,6 +48,12 @@ history:createWebHistory(),
         path:'/agent',
         name:'agent',
         component:AgentView,
+        meta:{requiresAuth:true}
+    },
+    {
+        path:'/assist',
+        name:'assist',
+        component:JobAssistView,
         meta:{requiresAuth:true}
     },
     {

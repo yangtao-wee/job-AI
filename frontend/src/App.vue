@@ -9,6 +9,8 @@
     <router-link to="/rag">知识问答</router-link>
     |
     <router-link to="/agent">AI助手</router-link>
+    |
+    <router-link to="/assist">定制建议</router-link>
   </nav>
 
   <BackendStatus />

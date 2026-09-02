@@ -27,6 +27,7 @@
         v-for="resume in resumes"
         :key="resume.id"
       >
+      编号{{ resume.id }} ·
         {{ resume.original_filename }}
         · {{ formatFileSize(resume.file_size) }}
         · {{ formatDate(resume.created_at) }}
@@ -208,7 +209,9 @@ async function analyzeResumeWithAI(resumeId) {
   errorMessage.value=''
   try{
     const response = await request.post(
-      `/resumes/${resumeId}/analyze?use_ai=true`
+      `/resumes/${resumeId}/analyze?use_ai=true`,null,{
+        timeout:60000
+      }
     ) 
     const data=response.data
     if(data.ai_ok){

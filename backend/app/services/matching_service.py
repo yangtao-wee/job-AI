@@ -100,9 +100,9 @@ def calculate_skill_score(
         resume_skill:list[str],
         job_skills:list[str]
 )->SkillMatchResult:
-    resume_set = {skill.strip().lower() for skill in resume_skill}
+    resume_set = {skill_name(skill) for skill in resume_skill}
     job_set = {
-        skill.strip().lower()
+        skill_name(skill)
         for skill in job_skills
         if skill.strip()
     }
@@ -127,6 +127,17 @@ def calculate_skill_score(
 #     len()：【语言固定】，计算数量。
 # round()：【语言固定】，四舍五入。
 # * 35：这是【项目规则】，因为技能维度最高35分，可以根据测试结果调整。
+
+
+def skill_name(text:str)->str:
+    name=text.strip().lower()
+    names={
+        'python编程':'python',
+        'python语言':'python',
+        'vue.js':'vue'
+    }
+    return names.get(name,name)
+# 字典的 get() 用来查找。第一个 name 是要查什么，第二个是查不到时返回什么。
 
 def get_user_resume_analysis(
         db:Session,

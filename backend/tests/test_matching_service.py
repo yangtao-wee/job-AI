@@ -60,3 +60,21 @@ def test_pref_miss():
 def test_pay_equal():
     res=score_pref('深圳','15-20K','深圳',20)
     assert res.pay_ok is True
+
+def test_skill_names():
+    result = calculate_skill_score(
+        ['Python编程','Vue.js'],
+        ['Python语言','Vue','Docker']
+    )
+    assert result.score==23
+    assert result.matched_skills==['python','vue']
+    assert result.missing_skills==['docker']
+
+def test_skill_state():
+    result=calculate_skill_score(
+        ['正在学习Python','不会Docker'],
+        ['Python','Docker']
+    )
+    assert result.score==0
+    assert result.matched_skills==[]
+    assert result.missing_skills==['docker','python']

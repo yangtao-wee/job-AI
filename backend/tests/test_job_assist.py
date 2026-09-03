@@ -4,7 +4,7 @@ from types import SimpleNamespace as NS
 # SimpleNamespace：简单对象容器，【语言固定·标准库】，用来模拟数据库简历对象。
 
 from app.services.job_assist_service import make_tailor_prompt
-from app.schemas import JobAssistRequest,RewriteAdvice,TailorResult,JobAssistResponse,GreetingResult,JobRequirementResult
+from app.schemas import JobAssistRequest,RewriteAdvice,TailorResult,JobAssistResponse,GreetingResult,JobRequirementResult,AdviceDraft,TailorDraft
 from app.services import job_assist_service as assist
 
 def test_job_assist_request_ok():
@@ -82,19 +82,21 @@ def test_tailor_prompt_uses_evidence():
 
 
 def test_tailor_resume_calls_structured(monkeypatch):
-    expected=TailorResult(
-        summary='建议',suggestions=[],missing_requirements=['Docker']
+    draft = TailorDraft(
+        summary='建议', missing=['Docker'],
+        items=[AdviceDraft(need='FastAPI', proof_id=1, rewrite='参与FastAPI项目')]
     )
-    sent={}
-    def fake_call(client,prompt,schema,model):
-        sent['schema']=schema
-        return  expected,None
-    monkeypatch.setattr(assist,'get_llm_client',lambda:'client')
-    monkeypatch.setattr(assist,'call_structured',fake_call)
-    result=assist.tailor_resume('要求Docker','掌握Python',['FastAPI项目'])
-    assert result == expected
-    assert sent['schema'] is TailorResult
-
+    def fake_call(client, prompt, schema, model):
+        assert schema is TailorDraft
+        assert '1:FastAPI项目' in prompt
+        return draft, None
+    monkeypatch.setattr(assist, 'get_llm_client', lambda: 'client')
+    monkeypatch.setattr(assist, 'call_structured', fake_call)
+    result = assist.tailor_resume('要求FastAPI和Docker', '总结', ['运营账号', 'FastAPI项目'])
+    assert isinstance(result, TailorResult)
+    assert len(result.suggestions) == 1
+    assert result.suggestions[0].evidence == 'FastAPI项目'
+    assert result.missing_requirements == ['Docker']
 
 def test_draft_greeting_calls_structured(monkeypatch):
     expected=GreetingResult(greeting='您好，我有Python项目经验')
@@ -192,14 +194,14 @@ def test_assist_job_combines_result(monkeypatch):
     assert result.greeting=='您好'
 
 def test_tailor_resume_rejects_summary_as_evidence(monkeypatch):
-    fake=TailorResult(
+    fake=TailorDraft(
         summary='建议',
-        suggestions=[RewriteAdvice(
-            requirement='Docker',
-            evidence='模拟总结',
+        items=[AdviceDraft(
+            need='Docker',
+            proof_id=0,
             rewrite='掌握Docker'
         )],
-        missing_requirements=[]
+        missing=[]
     )
     monkeypatch.setattr(assist,'get_llm_client',lambda:'client')
     monkeypatch.setattr(

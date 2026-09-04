@@ -1,6 +1,6 @@
 from pydantic import BaseModel,ConfigDict,Field
 from datetime import datetime
-
+from typing import Literal
 # BaseModel：Pydantic提供的数据模型基类，负责检查和转换数据。
 # ConfigDict：Pydantic提供的模型配置工具，负责设置整个类的验证规则。
 # Field：Pydantic提供的字段配置工具，负责设置长度、范围等验证条件。
@@ -93,11 +93,10 @@ class JobAssistRequest(BaseModel):
     )
 
 
-# 模型生成的一条建议草稿：用编号关联本次提供的经历列表。
+# 模型选择的一条候选引用：用编号关联本次提供的经历列表，不要求生成改写。
 class AdviceDraft(BaseModel):
     need:str  # 这条建议对应的岗位要求。
     proof_id:int=Field(ge=0)  # 简历证据编号，必须大于或等于0。
-    rewrite:str  # 模型生成的改写文字，是否忠实于经历仍需核对。
 
 
 # 模型生成的完整定制草稿：尚未经过后端证据编号检查。
@@ -107,17 +106,17 @@ class TailorDraft(BaseModel):
     missing:list[str]  # 模型判断需要补充经历依据的岗位要求，不代表候选人一定不会。
 
 
-# 已补入引用原文的一条改写草稿：引用有效不代表改写事实已经核验。
+# 已取回经历文字的一条候选引用：编号有效不代表经历支持对应岗位要求。
 class RewriteAdvice(BaseModel):
     requirement:str  # 这条建议对应的岗位要求。
     evidence:str  # 后端按编号取回的经历文字；经历列表可能来自AI简历分析。
-    rewrite:str  # 待用户核对的改写文字，不能仅凭引用存在就认为事实正确。
+    rewrite:str  # 兼容原有接口的字段；当前check_draft固定返回空字符串，不传递模型改写。
 
 
-# 简历定制结果：包含总体说明、带引用的改写草稿和待补依据的要求。
+# 简历定制结果：包含待核对的模型总结、候选引用和待补依据的要求。
 class TailorResult(BaseModel):
     summary:str  # 简历定制建议的总体说明。
-    suggestions:list[RewriteAdvice]  # 已检查引用编号并补入经历文字的草稿，未自动核验语义真实性。
+    suggestions:list[RewriteAdvice]  # 已检查编号的候选引用，未自动核验与岗位要求的语义关联。
     missing_requirements:list[str]  # 模型报告或因引用无效而加入的待补依据要求。
 
 
@@ -126,10 +125,18 @@ class GreetingResult(BaseModel):
     greeting:str=Field(min_length=1,max_length=300)  # 求职招呼语，长度为1到300个字符。
 
 
+class Scoreminxi(BaseModel):
+    skill:int=Field(ge=0,le=35)
+    exp:int=Field(ge=0,le=30) #经历
+    role:int=Field(ge=0,le=10) #岗位
+
+
+
 # 岗位定制接口最终返回结构：前端按照这个结构展示结果。
 class JobAssistResponse(BaseModel):
     resume_id:int  # 本次使用的简历编号。
     score:int=Field(ge=0,le=100)  # 岗位匹配分，范围是0到100。
+    parts:Scoreminxi #分项
     matched_skills:list[str]  # 简历已经具备的岗位技能。
     missing_skills:list[str]  # 简历缺少的岗位技能。
     tailoring:TailorResult  # 简历定制建议。
@@ -150,6 +157,59 @@ class KeywordMatchResult(BaseModel):
     matched_keywords:list[str]  # 已匹配关键词列表。
     missing_keywords:list[str]  # 缺少关键词列表。
 
+class NeedDraft(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    text: str = Field(min_length=1)
+    kind: Literal['技能', '职责', '经验', '学历', '加分']
+    start: int = Field(ge=0)
+    end: int = Field(ge=0)
+
+class NeedDrafts(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    items: list[NeedDraft]
+
+
+
+class Need(BaseModel):
+    model_config=ConfigDict(extra='forbid',str_strip_whitespace=True)
+    id:int=Field(ge=0)
+    text:str=Field(min_length=1)
+    kind:Literal['技能', '职责', '经验', '学历', '加分'] 
+    quote:str=Field(min_length=1)
+
+class Needs(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    items:list[Need]
+
+class Check(BaseModel):
+    model_config=ConfigDict(extra='forbid',str_strip_whitespace=True)
+    need_id:int=Field(ge=0)
+    status:Literal['有依据', '部分支持', '未找到依据', '待核对']
+    proof_ids:list[int]
+    note:str=Field(min_length=1)
+
+class Checks(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    items:list[Check]
+
+
+class Report(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    needs:list[Need]
+    checks:list[Check]
+    proofs:list[str]
+
+class ReportBoag(BaseModel):
+    model_config=ConfigDict(from_attributes=True)
+    id:int
+    title:str
+    company:str
+    created_at:datetime
+
+class ReportDeta(ReportBoag):
+    resume_id:int
+    jd:str
+    content:Report
 
 # 岗位要求分析结果：限制模型按五个部分拆解岗位描述。
 class JobRequirementResult(BaseModel):
@@ -258,4 +318,3 @@ class JobMatchResponse(BaseModel):
 
 # `| None`：【语言固定】表示字段既可以有指定类型的数据，也可以为空。
 # `=None`：【语言固定】表示调用方没有提供该字段时，默认使用空值。
-

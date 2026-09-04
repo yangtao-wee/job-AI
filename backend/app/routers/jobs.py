@@ -1,16 +1,22 @@
 from fastapi import APIRouter,Depends,HTTPException,status
+from fastapi import Query
 from sqlalchemy.orm  import Session
-
+from pathlib import Path
+from sqlalchemy.exc import SQLAlchemyError
 from ..database import SessionLocal
 from ..dependencies import get_current_user,get_db
-from ..models import Job,User
-from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch,JobAssistRequest,JobAssistResponse
+from ..models import Job,User,Resume
+from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch,JobAssistRequest,JobAssistResponse,Report,ReportBoag,ReportDeta
 from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref
 from ..services.job_service import get_all_jobs
 from ..services.ai_job_service import analyze_job_with_ai
 from ..services.semantic_service import calc_sim,MODEL
 from ..services.ai_match_service import explain
 from ..services.job_assist_service import assist_job
+from ..services.resume_parser import extract_pdf_text
+from ..services.job_assist_service import make_report
+from ..services.report_service import save_report,list_reports,get_report
+
 router = APIRouter()
 
 @router.get('/jobs')
@@ -86,7 +92,65 @@ def assist_pasted_job(
           raise HTTPException(status_code=404,detail='简历分析不存在')
      return assist_job(request,analysis)
 
+# 新增列表
+@router.get('/jobs/reports',response_model=list[ReportBoag])
+def my_reports(
+     offset:int=Query(0,ge=0),
+    #  Query(0, ge=0)：默认跳过0条，禁止负数
+     current_user:User=Depends(get_current_user),
+     db:Session=Depends(get_db)
+):
+     return list_reports(db,current_user.id,offset)
 
+# 新增详情
+@router.get('/jobs/reports/{report_id}',response_model=ReportDeta)
+def report_data(
+     report_id:int,
+     current_user:User=Depends(get_current_user),
+     db:Session=Depends(get_db)
+):
+     row=get_report(db,current_user.id,report_id)
+     if row is None:
+          raise HTTPException(status_code=404,detail='报告不存在')
+     return row
+
+
+
+
+# 原生成并保存接口
+@router.post('/jobs/report',response_model=Report)
+def job_report(
+     request:JobAssistRequest,
+     current_user: User=Depends(get_current_user),
+     db:Session=Depends(get_db)
+):
+     resume=db.query(Resume).filter(
+          Resume.id==request.resume_id,Resume.user_id==current_user.id 
+     ).first()
+     if not resume:
+          raise HTTPException(status_code=404,detail='简历不存在')
+     if resume.content_type != 'application/pdf':
+          raise HTTPException(status_code=415,detail='当前仅支持PDF简历')
+     path=Path(__file__).resolve().parents[2]/'uploads'/'resumes'/resume.stored_filename
+     try:
+          text=extract_pdf_text(path)
+     except ValueError as error:
+          raise HTTPException(status_code=422,detail=str(error)) from error
+     try:
+          result=make_report(request.jd_text,text.splitlines())
+     except ValueError as error:
+          import traceback
+          print('报告失败，错误类型：',type(error).__name__)
+          traceback.print_tb(error.__traceback__)
+          raise HTTPException(status_code=502,detail='模型结果未通过检查，请稍后重试') from error
+     try:
+        save_report(db,current_user.id,request,result)
+     except SQLAlchemyError as error:
+        raise HTTPException(status_code=500,detail='报告保存失败，请勿连续重复分析') from error
+     return result
+
+
+# 原接口
 @router.post('/jobs/{job_id}/analysis',
              response_model=JobRequirementResult)
 # response_model：【框架提供】，检查返回结果必须符 

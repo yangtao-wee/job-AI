@@ -135,3 +135,18 @@ class ResumeAnalysis(Base):
         nullable=False
     )
 
+
+class SavedReport(Base):
+    __tablename__='saved_reports'
+
+    id = Column(Integer,primary_key=True)
+    user_id = Column(Integer,ForeignKey('users.id'),nullable=False,index=True)
+    # index=True为用户编号建立索引，方便按用户查询历史。
+    resume_id=Column(Integer,ForeignKey('resumes.id'),nullable=False)
+    title = Column(String(200),nullable=False)
+    company = Column(String(200),nullable=False)
+    # nullable=False不允许数据库中的空值 NULL；不等于禁止空字符串。
+    jd = Column(Text,nullable=False)
+    content = Column(JSON,nullable=False)
+    created_at = Column(DateTime,server_default=func.now(),nullable=False)
+

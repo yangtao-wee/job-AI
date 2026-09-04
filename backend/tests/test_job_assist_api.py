@@ -3,7 +3,7 @@ from app.main import app
 from  types import SimpleNamespace as NS
 from app.routers import jobs
 from app.dependencies import get_current_user,get_db
-from app.schemas import JobAssistResponse,TailorResult
+from app.schemas import JobAssistResponse,TailorResult,Scoreminxi
 client=TestClient(app)
 
 def test_job_assist_unauth():
@@ -19,6 +19,7 @@ def test_job_assist_ok(monkeypatch):
     expected=JobAssistResponse(
         resume_id=1,
         score=80,
+        parts=Scoreminxi(skill=35, exp=20, role=5),
         matched_skills=['Python'],
         missing_skills=['docker'],
         tailoring=TailorResult(
@@ -39,6 +40,7 @@ def test_job_assist_ok(monkeypatch):
     })
     app.dependency_overrides.clear()
     assert(response.status_code,response.json()['score'])==(200,80)
+    assert response.json()['parts'] == {'skill': 35, 'exp': 20, 'role': 5}
 
 def test_job_assist_resume_not_found(monkeypatch):
     app.dependency_overrides[get_current_user]=lambda:NS(id=7)

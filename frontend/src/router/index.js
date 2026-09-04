@@ -7,7 +7,7 @@ import ResumeView from '../views/ResumeView.vue'
 import RagView  from '../views/RagView.vue'
 import AgentView from '../views/AgentView.vue'
 import JobAssistView from '../views/JobAssistView.vue'
-
+import ApplyView  from '../views/ApplyView.vue'
 const router=createRouter({
 history:createWebHistory(),
     routes:[
@@ -60,6 +60,12 @@ history:createWebHistory(),
         path:'/login',
         name:'login',
         component:LoginView
+    },
+    {
+        path:'/applications',
+        name:'applications',
+        component:ApplyView,
+        meta:{requiresAuth:true}
     },
     {
         path:'/register',

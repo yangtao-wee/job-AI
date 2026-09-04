@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..database import SessionLocal
 from ..dependencies import get_current_user,get_db
 from ..models import Job,User,Resume
-from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch,JobAssistRequest,JobAssistResponse,Report,ReportBoag,ReportDeta
+from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch,JobAssistRequest,JobAssistResponse,Report,ReportBoag,ReportDeta,ApplyCreate,ApplyUpdate,ApplyOut,ApplyItem
 from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref
 from ..services.job_service import get_all_jobs
 from ..services.ai_job_service import analyze_job_with_ai
@@ -16,8 +16,40 @@ from ..services.job_assist_service import assist_job
 from ..services.resume_parser import extract_pdf_text
 from ..services.job_assist_service import make_report
 from ..services.report_service import save_report,list_reports,get_report
-
+from ..services.apply_service import create_apply,list_apply,update_apply
 router = APIRouter()
+
+@router.post('/applications',response_model=ApplyOut)
+def app_apply(
+     request:ApplyCreate,
+     current_user:User=Depends(get_current_user),
+     db:Session=Depends(get_db)
+):
+     row=create_apply(db,current_user.id,request.report_id)
+     if row is None:
+          raise HTTPException(status_code=404,detail='报告不存在')
+     return row
+
+@router.get('/applications',response_model=list[ApplyItem])
+def get_apply(
+     current_user:User=Depends(get_current_user),
+     db:Session=Depends(get_db)
+):
+     return list_apply(db,current_user.id)
+
+
+@router.patch('/applications/{apply_id}',response_model=ApplyOut)
+def edit_apply(
+     apply_id:int,
+     request:ApplyUpdate,
+     current_user:User=Depends(get_current_user),
+     db:Session=Depends(get_db)
+):
+     row = update_apply(db,current_user.id,apply_id,request)
+     if row is None:
+          raise HTTPException(status_code=404,detail='投递记录不存在')
+     return row
+
 
 @router.get('/jobs')
 def get_jobs():

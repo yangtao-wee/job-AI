@@ -318,3 +318,29 @@ class JobMatchResponse(BaseModel):
 
 # `| None`：【语言固定】表示字段既可以有指定类型的数据，也可以为空。
 # `=None`：【语言固定】表示调用方没有提供该字段时，默认使用空值。
+
+class ApplyCreate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    # extra='forbid'：拒绝未声明字段，例如用户偷偷提交 user_id。
+    report_id: int = Field(gt=0)
+
+
+class ApplyUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    status: Literal['待投递', '已投递', '面试中', '已结束']
+# Literal列出允许的状态，由Pydantic校验；不在列表中的文字会被拒绝。
+    note: str = Field(max_length=2000)
+
+class ApplyOut(BaseModel):
+    model_config=ConfigDict(from_attributes=True)
+    id:int
+    user_id:int
+    report_id:int
+    status:str
+    note:str
+    created_at:datetime
+    updated_at:datetime
+
+class ApplyItem(ApplyOut):
+    title: str
+    company: str

@@ -150,3 +150,14 @@ class SavedReport(Base):
     content = Column(JSON,nullable=False)
     created_at = Column(DateTime,server_default=func.now(),nullable=False)
 
+
+class Application(Base):
+    __tablename__ = 'applications'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    report_id = Column(Integer, ForeignKey('saved_reports.id'), nullable=False, unique=True)
+    status = Column(String(20), nullable=False, default='待投递')
+    note = Column(Text, nullable=False, default='')
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+

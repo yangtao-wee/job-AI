@@ -18,11 +18,15 @@
         {{ historyBusy ? '读取中...' : '刷新历史' }}
     </button>
     <p v-if="historyErr">{{ historyErr }}</p>
+        <p role="status">{{ adding ? '加入中...' : applyMsg }}</p>
     <p v-if="!historyBusy && !historyErr && !history.length">暂无已保存报告。</p>
     <ul>
         <li v-for="item in history" :key="item.id">
             {{ item.title }} · {{ item.company }} · {{ item.created_at }}
             <button :disabled="loading || historyBusy" @click="openReport(item.id)">打开报告</button>
+                        <button :disabled="adding || loading || historyBusy" @click="addApply(item.id)">
+                加入投递管理
+            </button>
         </li>
     </ul>
 </section>
@@ -55,6 +59,7 @@
 import {ref,onMounted} from 'vue'
 import { assistJob,fetchRoprt,fetchRoprts } from '../api/jobAssist';
 import { fetchMyResumes } from '../api/resumes';
+import { createApply } from '../api/apply';
 const resumeId=ref('')
 const resumes=ref([])
 const jobTitle=ref('')
@@ -66,7 +71,21 @@ const err=ref('')
 const history=ref([])
 const historyBusy=ref(false)
 const historyErr=ref('')
-
+const adding = ref(false)
+const applyMsg = ref('')
+async function addApply(id) {
+    if (adding.value) return
+    adding.value = true
+    applyMsg.value = ''
+    try {
+        await createApply(id)
+        applyMsg.value = '已加入投递管理，可点击顶部“投递管理”查看'
+    } catch {
+        applyMsg.value = '加入失败，请重试'
+    } finally {
+        adding.value = false
+    }
+}
 
 async function loadHistory() {
     if(historyBusy.value) return

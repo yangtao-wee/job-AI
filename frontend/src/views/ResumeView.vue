@@ -76,6 +76,10 @@
         {{ skill }}
         </li>
       </ul>
+      <h4>提取的经历</h4>
+      <ul>
+        <li v-for="(item,i) in aiAnalysisResult.work_experience" :key="i">{{ item }}</li>
+      </ul>
       <h4>候选人优势</h4>
       <ul>
         <li

@@ -36,8 +36,9 @@ def find_kb(q:str)->list[RagSrc]:
     # RagSrc：【自己命名】已有的来源结构。
     return [RagSrc(text=part,score=score) for score,part in rows]
 
-# run_tool 是分发器。
+# run_tool 是分发器 也是工具安全边界。
 def run_tool(name:str,args:dict)->str:
+    # 工具名称 + 工具参数
     if name != 'find_kb':
         raise ValueError('不支持的工具')
     rows=find_kb(args['q'])
@@ -56,6 +57,9 @@ def run_call(call)->dict:
     args=json.loads(call.function.arguments)
     # function.arguments：【第三方SDK响应字段】JSON字符串形式的工具参数。
     output=run_tool(name,args)
+    # role：【第三方接口固定字段】消息角色。
+    # tool：【第三方接口固定值】表示这是一条工具结果消息。
+    # tool_call_id：【第三方接口固定字段】工具调用编号。
     return{'role':'tool','tool_call_id':call.id,"content":output}
 # role、tool_call_id、content：【第三方接口固定字段】组成工具结果消息。
 
@@ -76,18 +80,27 @@ def ask_model(client,messages):
 
 def run_agent(client,goal:str)->str:
     msgs=[
+        # system：【第三方接口固定值】系统角色，负责给模型规定身份和规则。
         {'role':'system','content':'你是AI求职助手，需要资料时调用find_kb。'},
+        # 系统告诉模型——你是求职助手，需要资料时可以选择查询知识库。
         {'role':'user','content':goal}
+        # user用户告诉模型——查询 Docker。
     ]
     first=ask_model(client,msgs)
     msg=first.choices[0].message
+    # choices：【第三方接口响应字段】候选回答列表。【0】message取第一个回答
     calls=msg.tool_calls or []
+    # tool_calls：【第三方接口响应字段】模型提出的工具调用请求,不代表工具已经执行。
     log.info('Agent首轮完成 tool_calls=%d',len(calls))
     if not calls:
         return msg.content or ''
+    # model_dump：【第三方库提供】把模型消息对象转换成 Python（蟒蛇语言）字典
     msgs.append(msg.model_dump(exclude_none=True))
+    # exclude_none：【第三方库固定参数】排除值为“空值”的字段。
     msgs.extend(run_call(call) for call in calls)
+    # extend：【语言固定方法】把多个元素加入列表。
     second=ask_model(client,msgs)
+    # 把工具结果再次交给模型，让模型整理成自然语言：
     return second.choices[0].message.content or ''
 
 def ask_agent(goal:str)->str:

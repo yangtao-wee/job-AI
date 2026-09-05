@@ -11,6 +11,8 @@ export function matchJob(resumeId,jobId,city,minPay){
         job_id:jobId,
         city:city,
         min_pay:minPay
+    },{
+        timeout:120000
     })
 }
 

@@ -113,7 +113,7 @@ async function handleMatch(job) {
         job.sem=response.data.sem_match
         job.aiNote=response.data.ai_explain
     }catch(error){
-        matchError.value=error.response?.data?.detail ?? '岗位匹配失败'
+        matchError.value=error.response?.data?.detail ?? error.message ?? 'a岗位匹配失败'
     }finally{
         matchingId.value=null
     }

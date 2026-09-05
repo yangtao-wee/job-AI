@@ -33,7 +33,7 @@ def test_call_structured():
     assert raw is response
     assert sent['model'] == 'test-model'
     assert sent['response_format'] == {'type': 'json_object'}
-
+    assert sent['temperature'] == 0
 
 # 验证空模型结果会被统一适配层明确拒绝。
 def test_call_structured_empty():
@@ -58,11 +58,11 @@ def test_call_structured_invalid():
 
 
 class BusyError(Exception):
-    code = '1305'
+    pass
 
 
-class OtherRateError(Exception):
-    code = '9999'
+class OtherError(Exception):
+    pass
 
 
 def test_call_structured_uses_backup(monkeypatch):
@@ -88,17 +88,15 @@ def test_call_structured_uses_backup(monkeypatch):
     assert models == ['main-model', 'backup-model']
 
 
-def test_call_structured_does_not_hide_other_rate_error(monkeypatch):
+def test_call_structured_does_not_hide_other_error(monkeypatch):
     models = []
 
     def fake_call(client, messages, model):
         models.append(model)
-        raise OtherRateError()
-
-    monkeypatch.setattr(llm, 'RateLimitError', OtherRateError)
+        raise OtherError()
     monkeypatch.setattr(llm, 'call_json_model', fake_call)
     monkeypatch.setattr(llm.settings, 'llm_backup_model', 'backup-model')
-    with pytest.raises(OtherRateError):
+    with pytest.raises(OtherError):
         llm.call_structured(None, '测试问题', RagAnswer, 'main-model')
     assert models == ['main-model']
 

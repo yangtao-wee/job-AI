@@ -51,7 +51,8 @@ def call_json_model(client, messages, model):
         # 使用大模型客户端创建一次对话请求，并把完整响应保存到 response。
         model=model,
         messages=messages,
-        response_format={'type': 'json_object'}
+        response_format={'type': 'json_object'},
+        temperature=0
         # response_format：【第三方接口固定参数】响应格式。
         # 要求模型返回一个合法的数据对象，而不是普通文字或 Markdown 代码块。
     )
@@ -63,12 +64,12 @@ def call_structured(client, prompt, schema, model):
     messages = build_json_messages(prompt, schema)
     try:
         response = call_json_model(client, messages, model)
-    except RateLimitError as error:
-        if str(error.code) != '1305' or not settings.llm_backup_model:
+    except RateLimitError:
+        if not settings.llm_backup_model:
             raise
         log.warning(
-            '主模型限流(code=%s)，切换备用模型 model=%s',
-             error.code,settings.llm_backup_model
+            '主模型限流，切换备用模型 model=%s',
+            settings.llm_backup_model
         )
         response = call_json_model(
             client,

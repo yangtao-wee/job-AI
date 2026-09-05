@@ -138,6 +138,19 @@ def test_answer_ok(monkeypatch):
     assert res.sources[0].text=='使用Docker部署服务'
     assert res.sources[0].score==0.9
 
+def test_answer_keeps_not_enough(monkeypatch):
+    monkeypatch.setattr(rag.settings, 'llm_mock_mode', False)
+    monkeypatch.setattr(rag.settings, 'llm_model', 'test-model')
+    monkeypatch.setattr(rag, 'pick_rows', good_rows)
+    monkeypatch.setattr(rag, 'get_llm_client', lambda: 'client')
+    result = RagAnswer(answer='资料不足', sources=[], enough=False)
+    monkeypatch.setattr(
+        rag, 'call_structured',
+        lambda *args: (result, object())
+    )
+    res = rag.answer_question('数据库备份周期？', ['测试资料'])
+    assert res.enough is False
+
 
 def low_search(q,parts,top_k):
     return [(0.4,'无关资料')]

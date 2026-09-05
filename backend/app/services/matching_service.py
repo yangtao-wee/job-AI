@@ -3,14 +3,14 @@ import re
 # re【Python自带】，正则表达式工具，负责从文字中寻找数字。
 from ..schemas import SkillMatchResult,KeywordMatchResult,ExpMatch,Dutyproof,RoleMatch,PrefMatch
 from ..models import  Resume,ResumeAnalysis
-
 JOB_KEYWORDS = [
     'Python','FastAPI','MySQL','Redis',
     'Docker','RAG','Agent','Vue'
 ]
 
-EXPERIENCE_KEYWORDS = JOB_KEYWORDS + ['AI','接口','数据库','部署','测试','需求','文档']
-ROLE_KEYS=['Python','Vue','AI','后端','前端','产品']
+# 经历匹配只使用已有技术词，宽泛词不能单独作为加分依据。
+EXPERIENCE_KEYWORDS = JOB_KEYWORDS
+ROLE_KEYS=['Python','Vue','全栈','后端','前端','产品']
 def find_resume_evidence(
         responsibility:str,work_experience:list[str]
 )->str | None:
@@ -91,7 +91,7 @@ def merge_job_skills(
     manual_skills = job_skills.split(',')
     all_skills=manual_skills + ai_required_skills
     return sorted({
-        skill.strip().lower()
+        skill_name(skill)
         for skill in all_skills
         if skill.strip()
     })
@@ -175,7 +175,7 @@ def calculate_keyword_score(
 )->KeywordMatchResult:
     job_keywords = set(extract_job_keywords(job_description))
     # set()：【语言固定】，转换成集合并自动去重。
-    resume_keywords = {skill.lower() for skill in resume_skills}
+    resume_keywords = {skill_name(skill) for skill in resume_skills}
     matched_keywords = {
         keyword for keyword in job_keywords
         if keyword.lower() in resume_keywords
@@ -194,8 +194,8 @@ def calculate_required_skill_score(
         resume_skills:list[str],
         required_skills:list[str]
 )->SkillMatchResult:
-    resume_set ={skill.strip().lower() for skill in resume_skills}
-    required_set={skill.strip().lower() for skill in required_skills if skill.strip()}
+    resume_set ={skill_name(skill) for skill in resume_skills}
+    required_set={skill_name(skill) for skill in required_skills if skill.strip()}
     matched_skills = resume_set & required_set
     # &：【语言固定】，计算两个集合的交集。
     if not required_set:

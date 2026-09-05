@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "求职助手",
+  "version": "0.2",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.zhipin.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

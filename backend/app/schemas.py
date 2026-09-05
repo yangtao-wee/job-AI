@@ -206,6 +206,9 @@ class ReportBoag(BaseModel):
     company:str
     created_at:datetime
 
+class ReportSaved(Report):
+    report_id: int
+
 class ReportDeta(ReportBoag):
     resume_id:int
     jd:str
@@ -286,7 +289,7 @@ class RagSrc(BaseModel):
 class RagAnswer(BaseModel):
     answer:str  # 模型根据参考资料生成的回答。
     sources:list[RagSrc]  # 后端检索并确认过的资料来源。
-    enough:bool  # 参考资料是否足够回答问题。
+    enough:bool  # 是否检索到了参考资料（由后端判定，不采用模型自述）。
 
 
 # Agent提问请求：规定前端只能提交一个非空目标。
@@ -305,6 +308,7 @@ class AgentAnswer(BaseModel):
 class JobMatchResponse(BaseModel):
     resume_id:int  # 本次参与匹配的简历编号。
     job_id:int  # 本次参与匹配的岗位编号。
+    job_requirements: JobRequirementResult
     current_score:int  # 当前获得的总分。
     current_max_score:int  # 当前已接入评分维度能够获得的最高分。
     skill_match:SkillMatchResult  # 固定技能匹配结果。
@@ -344,3 +348,17 @@ class ApplyOut(BaseModel):
 class ApplyItem(ApplyOut):
     title: str
     company: str
+
+
+class QuickJob(BaseModel):
+    name:str=Field(min_length=1,max_length=200)
+    tags:list[str]=Field(default_factory=list,max_length=30)
+
+class QuickScoreRequest(BaseModel):
+    resume_id:int=Field(gt=0)
+    jobs:list[QuickJob]=Field(max_length=50)
+
+class QuickScoreItem(BaseModel):
+    name:str
+    score:int=Field(ge=0,le=100)
+    matched:list[str]

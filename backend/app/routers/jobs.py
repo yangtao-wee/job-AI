@@ -6,10 +6,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..database import SessionLocal
 from ..dependencies import get_current_user,get_db
 from ..models import Job,User,Resume
-from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch,JobAssistRequest,JobAssistResponse,Report,ReportBoag,ReportDeta,ApplyCreate,ApplyUpdate,ApplyOut,ApplyItem
-from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref
+from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch,JobAssistRequest,JobAssistResponse,Report,ReportBoag,ReportDeta,ApplyCreate,ApplyUpdate,ApplyOut,ApplyItem,QuickScoreRequest,QuickScoreItem,ReportSaved
+from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref,build_job_requirements,quick_score
 from ..services.job_service import get_all_jobs
-from ..services.ai_job_service import analyze_job_with_ai
 from ..services.semantic_service import calc_sim,MODEL
 from ..services.ai_match_service import explain
 from ..services.job_assist_service import assist_job
@@ -72,7 +71,15 @@ def match_job(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='简历分析或岗位不存在'
         )
-    job_requirements = analyze_job_with_ai(job.description)
+    if not(job.description or '').strip():
+         raise HTTPException(
+              status_code=422,
+              detail='岗位描述缺失，无法进行完整匹配'
+         )
+    job_requirements = build_job_requirements(
+         job.skills,
+         job.description
+    )
     merged_job_skills = merge_job_skills(
          job.skills,job_requirements.required_skills
     )
@@ -99,6 +106,7 @@ def match_job(
     return JobMatchResponse(
         resume_id=request.resume_id,
         job_id=request.job_id,
+        job_requirements=job_requirements,
         current_score=total,
         current_max_score=100,
         skill_match=skill_match,
@@ -150,7 +158,7 @@ def report_data(
 
 
 # 原生成并保存接口
-@router.post('/jobs/report',response_model=Report)
+@router.post('/jobs/report',response_model=ReportSaved)
 def job_report(
      request:JobAssistRequest,
      current_user: User=Depends(get_current_user),
@@ -176,10 +184,10 @@ def job_report(
           traceback.print_tb(error.__traceback__)
           raise HTTPException(status_code=502,detail='模型结果未通过检查，请稍后重试') from error
      try:
-        save_report(db,current_user.id,request,result)
+        row=save_report(db,current_user.id,request,result)
      except SQLAlchemyError as error:
         raise HTTPException(status_code=500,detail='报告保存失败，请勿连续重复分析') from error
-     return result
+     return ReportSaved(**result.model_dump(),report_id=row.id)
 
 
 # 原接口
@@ -194,5 +202,22 @@ def analyze_job(
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
             raise HTTPException(status_code=404,detail='岗位不存在')
-    return analyze_job_with_ai(job.description)
+    if not(job.description or '').strip():
+         raise  HTTPException(
+              status_code=422,
+              detail='岗位描述缺失，无法分析'
+         )
+    return build_job_requirements(job.skills,job.description)
 
+@router.post('/jobs/quick-score',response_model=list[QuickScoreItem])
+def quick_score_jobs(
+     request:QuickScoreRequest,
+     current_user:User=Depends(get_current_user),
+     db:Session=Depends(get_db)
+):
+     analysis=get_user_resume_analysis(
+          db,request.resume_id,current_user.id
+     )
+     if not analysis:
+          raise HTTPException(status_code=404,detail='简历分析不存在')
+     return quick_score(analysis,request.jobs)

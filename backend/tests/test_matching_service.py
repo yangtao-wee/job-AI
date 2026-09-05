@@ -1,7 +1,8 @@
 import pytest
+from types import SimpleNamespace
+from app.schemas import QuickJob
+from app.services.matching_service import calculate_required_skill_score,calculate_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref,build_job_requirements,calculate_keyword_score,quick_score
 
-from app.services.matching_service import calculate_required_skill_score,calculate_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref
-from app.services.matching_service import calculate_keyword_score
 
 def test_partial_match():
     result = calculate_required_skill_score(
@@ -72,6 +73,16 @@ def test_skill_names():
     assert result.score==23
     assert result.matched_skills==['python','vue']
     assert result.missing_skills==['docker']
+
+def test_split_skills():
+    result = calculate_skill_score(
+        ['HTML/CSS/JavaScript'],
+        ['Vue', 'JavaScript', 'CSS']
+    )
+    assert result.score == 23
+    assert result.matched_skills == ['css', 'javascript']
+    assert result.missing_skills == ['vue']
+
 
 def test_skill_state():
     result=calculate_skill_score(
@@ -154,6 +165,16 @@ def test_exp_tech(work, need):
     assert result.matches[0].resume_evidence == work
     assert result.missing_responsibilities == []
 
+def test_exp_learning_is_not_work():
+    work = '目前正在自学Python和RPA，目标是用自动化脚本处理数据报表'
+    need = '负责使用Python和FastAPI开发AI求职Agent，接入RAG检索能力'
+
+    result = calculate_experience_score([work], [need])
+
+    assert result.score == 0
+    assert result.matches == []
+    assert result.missing_responsibilities == [need]
+
 
 @pytest.mark.parametrize('work', [[], ['   ']])
 def test_exp_no_work(work):
@@ -178,3 +199,30 @@ def test_role_keys(title, roles, score, note):
     assert result.score == score
     assert result.hit is (score > 0)
     assert result.note == note
+
+
+def test_build_job_requirements():
+    result = build_job_requirements(
+        'Python,FastAPI',
+        '负责Python接口开发；负责FastAPI服务部署。'
+    )
+
+    assert result.required_skills == ['fastapi', 'python']
+    assert result.responsibilities == [
+        '负责Python接口开发',
+        '负责FastAPI服务部署'
+    ]
+
+def test_quick_score(monkeypatch):
+    monkeypatch.setattr(
+        'app.services.matching_service.calc_sim',
+        lambda *_: 0.8
+    )
+    analysis = SimpleNamespace(
+        skills=['Python'],
+        recommended_positions=['AI开发工程师']
+    )
+    jobs = [QuickJob(name='AI开发工程师', tags=['Python', '本科', '3-5年'])]
+    result = quick_score(analysis, jobs)
+    assert result[0].score == 96
+    assert result[0].matched == ['python']

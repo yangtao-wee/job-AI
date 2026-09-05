@@ -1,21 +1,44 @@
 from sqlalchemy.orm import Session
 import re
 # re【Python自带】，正则表达式工具，负责从文字中寻找数字。
-from ..schemas import SkillMatchResult,KeywordMatchResult,ExpMatch,Dutyproof,RoleMatch,PrefMatch
+from ..schemas import SkillMatchResult,KeywordMatchResult,ExpMatch,Dutyproof,RoleMatch,PrefMatch,JobRequirementResult,QuickJob,QuickScoreItem
 from ..models import  Resume,ResumeAnalysis
+from .semantic_service import calc_sim
+SKIP_TAG=re.compile(r'年|大专|本科|硕士|博士|学历|经验不限|应届|不接受')
 JOB_KEYWORDS = [
-    'Python','FastAPI','MySQL','Redis',
-    'Docker','RAG','Agent','Vue'
+    'Python', 'FastAPI', 'MySQL', 'Redis', 'Docker',
+    'RAG', 'Agent', 'Vue', 'JavaScript', 'CSS',
+    'AI', '大模型', '产品设计'
 ]
 
 # 经历匹配只使用已有技术词，宽泛词不能单独作为加分依据。
-EXPERIENCE_KEYWORDS = JOB_KEYWORDS
+EXPERIENCE_KEYWORDS = [
+    'Python', 'FastAPI', 'MySQL', 'Redis', 'Docker',
+    'RAG', 'Agent', 'Vue', 'JavaScript', 'CSS',
+    '大模型', '产品设计'
+]
+LEARNING_WORDS = (
+    '正在学习',
+    '正在自学',
+    '计划学习',
+    '目标是',
+)
 ROLE_KEYS=['Python','Vue','全栈','后端','前端','产品']
+
+def is_learning_text(text: str) -> bool:
+    return any(
+        word in text
+        for word in LEARNING_WORDS
+    )
+
 def find_resume_evidence(
         responsibility:str,work_experience:list[str]
 )->str | None:
     responsibility_lower = responsibility.lower()
     for evidence in work_experience:
+        if is_learning_text(evidence):
+            continue
+
         evidence_lower=evidence.lower()
         has_shared_keyword = any(
             # any检查双方是否至少拥有一个相同关键词。
@@ -88,24 +111,15 @@ def merge_job_skills(
         job_skills:str,
         ai_required_skills:list[str]
 )->list[str]:
-    manual_skills = job_skills.split(',')
-    all_skills=manual_skills + ai_required_skills
-    return sorted({
-        skill_name(skill)
-        for skill in all_skills
-        if skill.strip()
-    })
+    all_skills=[job_skills,*ai_required_skills]
+    return sorted(skill_names(all_skills))
 
 def calculate_skill_score(
         resume_skill:list[str],
         job_skills:list[str]
 )->SkillMatchResult:
-    resume_set = {skill_name(skill) for skill in resume_skill}
-    job_set = {
-        skill_name(skill)
-        for skill in job_skills
-        if skill.strip()
-    }
+    resume_set = skill_names(resume_skill)
+    job_set = skill_names(job_skills)
     matched_skills = resume_set & job_set
     if not job_set:
         return SkillMatchResult(
@@ -138,6 +152,32 @@ def skill_name(text:str)->str:
     }
     return names.get(name,name)
 # 字典的 get() 用来查找。第一个 name 是要查什么，第二个是查不到时返回什么。
+def skill_names(items: list[str]) -> set[str]:
+    return {
+        skill_name(part)
+        for text in items
+        for part in re.split(r'[/,，、]+', text)
+        if part.strip()
+    }
+
+def build_job_requirements(
+        job_skills: str,
+        description: str
+) -> JobRequirementResult:
+    duties = [
+        text.strip()
+        for text in re.split(r'[；;。\n]+', description)
+        if text.strip()
+    ]
+    return JobRequirementResult(
+        responsibilities=duties,
+        required_skills=sorted(skill_names([job_skills])),
+        experience=[],
+        education=[],
+        bonus_points=[]
+    )
+
+
 
 def get_user_resume_analysis(
         db:Session,
@@ -175,7 +215,7 @@ def calculate_keyword_score(
 )->KeywordMatchResult:
     job_keywords = set(extract_job_keywords(job_description))
     # set()：【语言固定】，转换成集合并自动去重。
-    resume_keywords = {skill_name(skill) for skill in resume_skills}
+    resume_keywords = skill_names(resume_skills)
     matched_keywords = {
         keyword for keyword in job_keywords
         if keyword.lower() in resume_keywords
@@ -194,8 +234,8 @@ def calculate_required_skill_score(
         resume_skills:list[str],
         required_skills:list[str]
 )->SkillMatchResult:
-    resume_set ={skill_name(skill) for skill in resume_skills}
-    required_set={skill_name(skill) for skill in required_skills if skill.strip()}
+    resume_set = skill_names(resume_skills)
+    required_set=skill_names(required_skills)
     matched_skills = resume_set & required_set
     # &：【语言固定】，计算两个集合的交集。
     if not required_set:
@@ -204,3 +244,16 @@ def calculate_required_skill_score(
         matched_skills=sorted(matched_skills),
         missing_skills=sorted(required_set-resume_set)
         )
+
+
+def quick_score(analysis,jobs:list[QuickJob])->list[QuickScoreItem]:
+    items=[]
+    for job in jobs:
+        sim=max((calc_sim(job.name,p) for p in analysis.recommended_positions),default=0.0)
+        role=round(sim*10) if sim>=0.5 else 0
+        real_tags=[t for t in job.tags if not SKIP_TAG.search(t)]
+        skill=calculate_skill_score(analysis.skills,real_tags)
+        full=10+(35 if real_tags else 0)
+        total=round((role+skill.score)/full*100)
+        items.append(QuickScoreItem(name=job.name,score=total,matched=skill.matched_skills))
+    return items

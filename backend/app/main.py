@@ -63,7 +63,8 @@ app.add_middleware(
     allow_origins=[
         # 允许哪些前端地址。
         'http://localhost:5174',
-        'http://localhost:5173'
+        'http://localhost:5173',
+        'https://www.zhipin.com'
     ],
     allow_methods=['*'],
     # 允许所有HTTP方法：比如：GET POST PUT DELETE

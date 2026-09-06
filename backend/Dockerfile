@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY --chown=appuser:appuser app ./app
+RUN mkdir -p /app/uploads && chown appuser:appuser /app/uploads
 
 USER appuser
 EXPOSE 8000

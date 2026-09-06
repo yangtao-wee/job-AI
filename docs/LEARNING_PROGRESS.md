@@ -635,3 +635,15 @@
 - 边界：当前只验收健康检查、登录与岗位列表链路；简历上传、Embedding、RAG、Agent及报告生成尚未完成容器内专项验收。当前仍为HTTP，没有HTTPS、访问日志规划、监控和生产级端口收敛。
 - 掌握状态：🟡正在学习。已能跟随说明完成Vue/Nginx/Compose链路并根据网络证据排错，尚未脱离指导独立重写前端生产容器配置。
 - 唯一下一步：精确提交前端容器化和代理相关文件及两份项目记录，不混入已有的大范围界面改版文件。
+
+## 2026-09-06 Docker上传文件持久化与权限验收
+
+- 完成：Compose为后端挂载`upload_data:/app/uploads`命名卷，并在顶层声明该卷；后端镜像预先创建上传目录并把所有权交给非root用户`appuser`。
+- 用户亲手完成：添加卷挂载与声明、Dockerfile目录初始化，执行容器重建、用户与目录权限检查、测试文件写入和跨容器读取。
+- 数据路线：FastAPI上传接口 → `/app/uploads/resumes` → `upload_data`命名卷 → 后端容器重建后重新挂载并读取。
+- Bug与证据：首次卷由Docker创建为`root root`且权限为`drwxr-xr-x`，运行用户为`uid=1000(appuser)`，写入返回`Permission denied`；后续`No such file`只是写入失败的连锁结果。
+- 修复：保留`USER appuser`安全边界；对当前卷执行一次限定目录的`chown`，并在Dockerfile的`USER appuser`之前创建和授权`/app/uploads`，覆盖未来新镜像和新卷场景。
+- 验证：`appuser`成功写入`volume-test.txt`；重新构建后端镜像并重建容器后仍读取到`volume-ok`，证明目录可写且文件跨容器保留。
+- 边界：本轮是卷级持久化验证，尚未使用无敏感信息的真实PDF完整验收上传、下载和删除接口；命名卷仍需要备份策略，删除卷会永久删除其中的简历文件。
+- 掌握状态：🟡正在学习。能够根据`id`、`ls -ld`和错误链确认权限根因，尚未独立设计生产文件备份与恢复。
+- 唯一下一步：删除无隐私测试标记，精确提交`compose.yaml`、`backend/Dockerfile`和两份项目记录。

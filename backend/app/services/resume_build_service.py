@@ -1,11 +1,7 @@
-import logging
-
 from ..config import settings
 from ..schemas import ResumeProfile
 from .llm_service import call_structured,get_llm_client
-from .llm_cost import read_use,calc_fee
 
-log=logging.getLogger(__name__)
 
 
 def build_profile_prompt(raw:str,target:str)->str:
@@ -44,17 +40,10 @@ def build_profile(raw:str,target:str='')->ResumeProfile:
             target=target,
             summary='用于离线测试的模拟档案'
         )
-    result,response=call_structured(
+    result,_=call_structured(
         get_llm_client(),
         build_profile_prompt(raw,target),
         ResumeProfile,
         settings.llm_model
-    )
-    use=read_use(response)
-    fee=calc_fee(use)
-    log.info(
-        'LLM简历生成Token用量 model=%s input=%s output=%s total=%s fee=%.6f',
-        settings.llm_model,
-        use.input_tokens,use.output_tokens,use.total_tokens,fee
     )
     return result

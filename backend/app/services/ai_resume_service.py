@@ -3,8 +3,6 @@ import logging
 from .llm_service import call_structured, get_llm_client
 from ..config import settings
 from ..schemas import ResumeAIAnalysis
-from .llm_cost import calc_fee, read_use
-
 
 log = logging.getLogger(__name__)
 # getLogger：【标准库提供】取得当前文件的日志记录器。
@@ -91,7 +89,7 @@ def analyze_resume_with_ai(
     prompt = build_resume_analysis_prompt(resume_text)
 
     try:
-        result, response = call_structured(
+        result, _ = call_structured(
             client,
             f'简历编号：{resume_id}\n\n{prompt}',
             ResumeAIAnalysis,
@@ -100,13 +98,5 @@ def analyze_resume_with_ai(
     except Exception:
         log.exception('LLM简历分析请求失败，已使用降级结果')
         return make_fail(resume_id)
-    use = read_use(response)
-    fee = calc_fee(use)
-    log.info(
-        # info：【语言标准库提供】，记录正常业务信息。
-        'LLM简历分析Token用量 model=%s input=%s output=%s total=%s fee=%.6f',
-        settings.llm_model,
-        use.input_tokens, use.output_tokens, use.total_tokens, fee
-    )
     result.resume_id = resume_id
     return result

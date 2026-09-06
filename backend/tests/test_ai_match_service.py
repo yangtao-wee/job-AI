@@ -1,7 +1,8 @@
 from types import SimpleNamespace as N
 # SimpleNamespace：【标准库提供】，快速制造一个假的响应对象。
 from app.schemas import TokenUse,MatchExplain
-from app.services.ai_match_service import make_mock,make_prompt,read_use,calc_fee
+from app.services.ai_match_service import make_mock,make_prompt
+from app.services.llm_cost import read_use,calc_fee
 from app.services import ai_match_service as ai_match
 
 # 【整段代码作用】：检查模拟解释最多返回3条内容，并检查提示词包含安全要求和真实分数。

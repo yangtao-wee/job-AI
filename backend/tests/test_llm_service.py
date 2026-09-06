@@ -1,4 +1,5 @@
 import pytest
+import logging
 from pydantic import ValidationError
 from types import SimpleNamespace as NS
 
@@ -35,6 +36,17 @@ def test_call_structured():
     assert sent['response_format'] == {'type': 'json_object'}
     assert sent['temperature'] == 0
 
+def test_call_structured_logs_usage(monkeypatch, caplog):
+    response = NS(
+        choices=[NS(message=NS(content='{"answer":"ok","sources":[],"enough":true}'))],
+        usage=NS(prompt_tokens=100, completion_tokens=20, total_tokens=120)
+    )
+    monkeypatch.setattr(llm, 'call_json_model', lambda client, messages, model: response)
+    with caplog.at_level(logging.INFO, logger=llm.__name__):
+        llm.call_structured(None, '测试问题', RagAnswer, 'test-model')
+    assert 'model=test-model' in caplog.text
+    assert 'total=120' in caplog.text
+
 # 验证空模型结果会被统一适配层明确拒绝。
 def test_call_structured_empty():
     response = NS(choices=[NS(message=NS(content=''))])
@@ -65,7 +77,7 @@ class OtherError(Exception):
     pass
 
 
-def test_call_structured_uses_backup(monkeypatch):
+def test_call_structured_uses_backup(monkeypatch,caplog):
     models = []
     response = NS(choices=[NS(message=NS(
         content='{"answer":"备用回答","sources":[],"enough":true}'
@@ -80,12 +92,15 @@ def test_call_structured_uses_backup(monkeypatch):
     monkeypatch.setattr(llm, 'RateLimitError', BusyError)
     monkeypatch.setattr(llm, 'call_json_model', fake_call)
     monkeypatch.setattr(llm.settings, 'llm_backup_model', 'backup-model')
-    result, raw = llm.call_structured(
-        None, '测试问题', RagAnswer, 'main-model'
-    )
+    with caplog.at_level(logging.INFO, logger=llm.__name__):
+        result, raw = llm.call_structured(
+            None, '测试问题', RagAnswer, 'main-model'
+        )
     assert result.answer == '备用回答'
     assert raw is response
     assert models == ['main-model', 'backup-model']
+    assert 'LLM调用Token用量 model=backup-model' in caplog.text
+    assert 'LLM调用Token用量 model=main-model' not in caplog.text
 
 
 def test_call_structured_does_not_hide_other_error(monkeypatch):

@@ -6,7 +6,6 @@ from ..config import settings
 from .llm_service import get_llm_client,call_structured
 # settings里面保存Mock开关、模型名称等。
 # get_llm_client，中文“取得大模型客户端”，负责创建OpenAI连接。
-from .llm_cost import read_use,calc_fee
 
 log=logging.getLogger(__name__)
 
@@ -56,7 +55,7 @@ def explain(score:int,sem:float,reasons:list[str],gaps:list[str])->MatchExplain:
         return make_mock(reasons,gaps)
 
     try:
-        result,res=call_structured(
+        result,_=call_structured(
             get_llm_client(),
             make_prompt(score,sem,reasons,gaps),
             MatchExplain,
@@ -64,19 +63,6 @@ def explain(score:int,sem:float,reasons:list[str],gaps:list[str])->MatchExplain:
         )
         result.reasons=reasons[:3]
         result.gaps=gaps[:3]
-        use=read_use(res)
-        fee=calc_fee(use)
-        log.info(
-            # log.info【标准库提供】记录正常运行信息，像公司流水账。
-            # info：【标准库提供】，记录正常业务信息
-            # INFO：普通运行信息，不代表程序报错。
-            'LLM岗位解释Token用量  model=%s input=%s output=%s total=%s fee=%.6f',
-            # %.6f：【标准库日志写法】，给费用预留位置并保留6位小数。
-            # model=%s：【项目约定】给模型名称预留位置。
-            # %s：【标准库日志写法】，表示这里稍后填入一个值。
-            settings.llm_model,
-            use.input_tokens,use.output_tokens,use.total_tokens,fee
-        )
         return result
     except Exception:
         log.exception('LLM岗位解释失败，已使用降级结果')

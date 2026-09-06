@@ -4,7 +4,6 @@ from .llm_service import get_llm_client,call_structured
 from .semantic_service import get_model
 from ..schemas import RagAnswer,RagSrc
 from ..config import settings
-from .llm_cost import read_use,calc_fee
 # settings 是项目统一的配置表，从 .env 文件读进来的所有开关和参数都在这里。
 
 log=logging.getLogger(__name__)
@@ -124,7 +123,7 @@ def answer_question(q:str,parts:list[str])->RagAnswer:
 # 连不上大模型，就返回"暂时不可用"的安全结果，而不是让用户看到一个丑陋的报错页面。
     prompt=make_prompt(q,ctx)
     try:
-        result, response=call_structured(
+        result, _=call_structured(
             client,
             prompt,
             RagAnswer,
@@ -133,13 +132,6 @@ def answer_question(q:str,parts:list[str])->RagAnswer:
     except Exception:
         log.exception('RAG问答请求LLM失败，已使用降级结果')
         return make_fail()
-    use=read_use(response)
-    fee=calc_fee(use)
-    log.info(
-        'RAG回答Token用量 model=%s input=%s output=%s total=%s fee=%.6f',
-         settings.llm_model,
-    use.input_tokens,use.output_tokens,use.total_tokens,fee
-    )
     result.sources=sources
     return result
     

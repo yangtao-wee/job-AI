@@ -5,7 +5,7 @@ from .kb_service import load_parts
 from .rag_service import pick_rows
 from ..schemas import RagSrc
 from ..config import settings
-from .llm_service import get_llm_client
+from .llm_service import get_llm_client, log_use
 
 log=logging.getLogger(__name__)
 
@@ -70,13 +70,17 @@ def call_model(client,messages,model):
     )
 
 def ask_model(client,messages):
+    used_model = settings.llm_model
     try:
-        return call_model(client,messages,settings.llm_model)
+        response = call_model(client, messages, used_model)
     except RateLimitError as error:
         if str(error.code)!='1305' or not settings.llm_backup_model:
             raise
-        log.warning('主模型繁忙，切换备用模型 model=%s',settings.llm_backup_model)
-        return call_model(client,messages,settings.llm_backup_model)
+        used_model = settings.llm_backup_model
+        log.warning('主模型繁忙，切换备用模型 model=%s', used_model)
+        response = call_model(client, messages, used_model)
+    log_use(response, used_model)
+    return response
 
 def run_agent(client,goal:str)->str:
     msgs=[

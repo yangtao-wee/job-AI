@@ -5,8 +5,15 @@ from openai import OpenAI, RateLimitError
 from pydantic import BaseModel
 
 from ..config import settings
-
+from .llm_cost import read_use
 log = logging.getLogger(__name__)
+
+def log_use(response, model):
+    use = read_use(response)
+    log.info(
+        'LLM调用Token用量 model=%s input=%s output=%s total=%s',
+        model, use.input_tokens, use.output_tokens, use.total_tokens
+    )
 
 
 # 一个配置好的大模型客户端
@@ -62,6 +69,7 @@ def call_json_model(client, messages, model):
 # 统一发送结构化模型请求并用Pydantic验证结果。
 def call_structured(client, prompt, schema, model):
     messages = build_json_messages(prompt, schema)
+    used_model = model
     try:
         response = call_json_model(client, messages, model)
     except RateLimitError:
@@ -71,11 +79,13 @@ def call_structured(client, prompt, schema, model):
             '主模型限流，切换备用模型 model=%s',
             settings.llm_backup_model
         )
+        used_model = settings.llm_backup_model
         response = call_json_model(
             client,
             messages,
-            settings.llm_backup_model
+            used_model
         )
+    log_use(response, used_model)
     content = response.choices[0].message.content
     # choices：【第三方接口响应字段】候选回答列表。
     if not content:

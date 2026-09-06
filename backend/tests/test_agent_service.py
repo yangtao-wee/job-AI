@@ -1,4 +1,5 @@
 from types import SimpleNamespace as NS
+import logging
 import json
 import pytest
 from app.schemas import RagSrc
@@ -66,10 +67,23 @@ def test_ask_model():
     assert data['tools'][0]['function']['name']=='find_kb'
     assert data['tool_choice']=='auto'
 
+def test_ask_model_logs_usage(monkeypatch, caplog):
+    response = NS(usage=NS(
+        prompt_tokens=50, completion_tokens=10, total_tokens=60
+    ))
+    monkeypatch.setattr(agent, 'call_model', lambda client, messages, model: response)
+    monkeypatch.setattr(agent.settings, 'llm_model', 'main-model')
+    with caplog.at_level(logging.INFO):
+        result = agent.ask_model(None, [])
+    assert result is response
+    assert 'LLM调用Token用量 model=main-model' in caplog.text
+    assert 'total=60' in caplog.text
+
+
 class BusyError(Exception):
     code='1305'
 
-def test_ask_backup(monkeypatch):
+def test_ask_backup(monkeypatch,caplog):
     models=[]
     def fake_call(client,messages,model):
         models.append(model)
@@ -80,9 +94,12 @@ def test_ask_backup(monkeypatch):
     monkeypatch.setattr(agent,'call_model',fake_call)
     monkeypatch.setattr(agent.settings,'llm_model','main')
     monkeypatch.setattr(agent.settings,'llm_backup_model','backup')
-    result=agent.ask_model(None,[])
+    with caplog.at_level(logging.INFO):
+        result=agent.ask_model(None,[])
     assert result=='备用成功'
     assert models==['main','backup']
+    assert 'LLM调用Token用量 model=backup' in caplog.text
+    assert 'LLM调用Token用量 model=main' not in caplog.text
 
 class OtherRateError(Exception):
     code='9999'

@@ -610,3 +610,16 @@
 - 边界：当前只缓存公共的岗位要求分析，不缓存包含简历资料的完整个性化报告；尚未统计真实命中率、节省Token和延迟。Redis是辅助层，失败时仍会调用模型，不能消除LLM本身的失败风险。
 - 掌握状态：🟡正在学习。已能跟随数据路线完成读写、TTL、哈希键、命中/未命中和降级测试；尚未脱离指导独立重写缓存模块，不能标为已掌握。
 - 唯一下一步：只提交本次Redis配置、服务、岗位分析、测试和文档文件，排除现有前端改动。
+
+## 2026-09-06 Docker Compose本地编排验收
+
+- 完成：安装并验证Docker Desktop的WSL 2后端；后端使用Python slim镜像、非root用户和`.dockerignore`构建；Compose统一编排FastAPI、MySQL和Redis。
+- 用户亲手完成：Dockerfile、Compose配置、环境变量文件、镜像构建、容器启停以及MySQL、Redis、后端连接验证。
+- AI辅助：解释容器网络和服务名、设计健康检查与启动依赖、提供固定配置、按错误证据缩小排查范围，并整理安全模板和学习记录。
+- 数据路线：`docker compose up` → MySQL与Redis健康检查 → 后端启动 → 通过服务名连接`mysql:3306`和`redis:6379` → 主机`127.0.0.1:8000`访问FastAPI。
+- 验证：`hello-world`成功；后端镜像构建和单容器`/health`成功；Compose内后端查询到数据库`ai_job_agent`且`cache_ready()`为`True`；完整停止后冷启动，backend、mysql、redis最终全部显示`healthy`。
+- Bug：VS Code旧终端没有刷新Docker PATH，外部PowerShell可以正常执行；首次拉取Python镜像遇到Docker Hub认证网络超时，单独拉取后恢复；MySQL命令曾因手工密码和PowerShell嵌套引号分别出现1045、1064，改用容器内交互式客户端验证账号和数据库。
+- 安全：真实`.env`由根目录`.gitignore`排除；仓库只保存`.env.example`占位模板，文档和Git不记录真实密码或密钥。
+- 边界：Compose MySQL使用新的命名卷，与Windows宿主机中已经迁移45条数据的MySQL不是同一个实例，当前不能声称容器库已包含这45条数据；Redis作为缓存暂不持久化；上传目录、前端/Nginx和本地Embedding模型资源还未纳入容器方案。
+- 掌握状态：🟡正在学习。已经跟随完成构建、服务编排、健康检查和多容器连接验证，但尚未脱离指导独立重写Compose配置。
+- 唯一下一步：精确提交Compose、环境变量模板、忽略规则和两份项目记录，不包含现有前端修改。

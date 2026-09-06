@@ -644,6 +644,7 @@
 - Bug与证据：首次卷由Docker创建为`root root`且权限为`drwxr-xr-x`，运行用户为`uid=1000(appuser)`，写入返回`Permission denied`；后续`No such file`只是写入失败的连锁结果。
 - 修复：保留`USER appuser`安全边界；对当前卷执行一次限定目录的`chown`，并在Dockerfile的`USER appuser`之前创建和授权`/app/uploads`，覆盖未来新镜像和新卷场景。
 - 验证：`appuser`成功写入`volume-test.txt`；重新构建后端镜像并重建容器后仍读取到`volume-ok`，证明目录可写且文件跨容器保留。
-- 边界：本轮是卷级持久化验证，尚未使用无敏感信息的真实PDF完整验收上传、下载和删除接口；命名卷仍需要备份策略，删除卷会永久删除其中的简历文件。
+- 真实业务验收：上传无敏感信息的`test_resume.pdf`后，重建backend和frontend容器，简历记录仍存在；下载文件可正常打开；删除后页面记录消失，`find /app/uploads/resumes -maxdepth 1 -type f -print`无输出，未留下孤儿文件。
+- 边界：PDF上传、跨容器持久化、下载和删除已验收；尚未专项验证DOCX、超大文件、错误类型及越权访问。命名卷仍不等于备份，删除卷会永久删除其中的简历文件。
 - 掌握状态：🟡正在学习。能够根据`id`、`ls -ld`和错误链确认权限根因，尚未独立设计生产文件备份与恢复。
-- 唯一下一步：删除无隐私测试标记，精确提交`compose.yaml`、`backend/Dockerfile`和两份项目记录。
+- 唯一下一步：提交本次真实PDF端到端验收记录，不混入现有前端改版文件。

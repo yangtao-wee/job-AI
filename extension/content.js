@@ -1,9 +1,8 @@
-let TOKEN = ''
-chrome.storage.local.get('token').then(data => {
-  TOKEN = data.token || ''
-  scan()
-})
 const tip = document.createElement('div')
+tip.textContent = '[求职助手] 启动中…'
+tip.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;background:#0B7A4B;color:#fff;padding:6px 12px;font-size:14px'
+document.body.appendChild(tip)
+
 const RESUME_ID = 3
 const PASS = 60
 const DRY_RUN = true
@@ -11,9 +10,11 @@ const DAILY_MAX = 1
 const APPLY_MIN = 3
 const MAX_DEEP = 3
 let lastFirst = ''
-tip.textContent = '[求职助手] 等待岗位加载…'
-tip.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;background:#0B7A4B;color:#fff;padding:6px 12px;font-size:14px'
-document.body.appendChild(tip)
+let TOKEN = ''
+
+chrome.storage.local.get('token')
+  .then(data => { TOKEN = data.token || ''; scan() })
+  .catch(e => { tip.textContent = `[求职助手] 读取Token失败：${e.message}` })
 
 function scan() {
   if (!TOKEN){

@@ -5,14 +5,18 @@ from openai import OpenAI, RateLimitError
 from pydantic import BaseModel
 
 from ..config import settings
-from .llm_cost import read_use
+from .llm_cost import read_use, estimate_fee
 log = logging.getLogger(__name__)
 
 def log_use(response, model):
     use = read_use(response)
+    fee = estimate_fee(use, model)
+    fee_text = 'unknown' if fee is None else f'{fee:.6f}'
     log.info(
-        'LLM调用Token用量 model=%s input=%s output=%s total=%s',
-        model, use.input_tokens, use.output_tokens, use.total_tokens
+        'LLM调用Token用量 model=%s input=%s output=%s '
+        'total=%s estimated_fee=%s',
+        model, use.input_tokens, use.output_tokens,
+        use.total_tokens, fee_text
     )
 
 

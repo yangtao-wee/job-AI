@@ -36,16 +36,28 @@ def test_call_structured():
     assert sent['response_format'] == {'type': 'json_object'}
     assert sent['temperature'] == 0
 
+def test_unknown_fee_log(caplog):
+    response = NS(
+        usage=NS(prompt_tokens=10, completion_tokens=2, total_tokens=12)
+    )
+    with caplog.at_level(logging.INFO, logger=llm.__name__):
+        llm.log_use(response, 'unknown-model')
+    assert 'model=unknown-model' in caplog.text
+    assert 'estimated_fee=unknown' in caplog.text
+
+
 def test_call_structured_logs_usage(monkeypatch, caplog):
     response = NS(
         choices=[NS(message=NS(content='{"answer":"ok","sources":[],"enough":true}'))],
         usage=NS(prompt_tokens=100, completion_tokens=20, total_tokens=120)
     )
+    model = 'deepseek-ai/DeepSeek-V3.2'
     monkeypatch.setattr(llm, 'call_json_model', lambda client, messages, model: response)
     with caplog.at_level(logging.INFO, logger=llm.__name__):
-        llm.call_structured(None, '测试问题', RagAnswer, 'test-model')
-    assert 'model=test-model' in caplog.text
+        llm.call_structured(None, '测试问题', RagAnswer, model)
+    assert f'model={model}' in caplog.text
     assert 'total=120' in caplog.text
+    assert 'estimated_fee=0.000520' in caplog.text
 
 # 验证空模型结果会被统一适配层明确拒绝。
 def test_call_structured_empty():

@@ -15,6 +15,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY --chown=appuser:appuser app ./app
 RUN mkdir -p /app/uploads && chown appuser:appuser /app/uploads
 
+ENV HF_HOME=/app/.cache/huggingface
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-small-zh-v1.5')" \
+    && chown -R appuser:appuser /app/.cache
+
 USER appuser
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

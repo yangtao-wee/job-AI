@@ -1,0 +1,10 @@
+.env
+venv/
+uploads/
+tests/
+migrations/
+*.db
+.pytest_cache/
+.pytest_tmp/
+**/__pycache__/
+*.py[cod]

@@ -16,11 +16,7 @@ from .services.cache_service import cache_ready
 
 # 拿模型集合。
 # 因为：
-# Base里面知道：
 # 有哪些表。
-from .models import Base
-
-Base.metadata.create_all(bind=engine)
 # FastAPI启动时：根据我定义好的模型，去数据库创建对应的表
 # 检查数据库。
 # 如果没有表：

@@ -65,5 +65,4 @@ def seed_jobs():
 
 
 if __name__ == '__main__':
-    Base.metadata.create_all(bind=engine)
     seed_jobs()

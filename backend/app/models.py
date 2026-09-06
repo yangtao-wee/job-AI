@@ -51,25 +51,11 @@ class Job(Base):
 # 先简单理解：
 # 提高查询速度。
 
-    title = Column(
-        String
-    )
-
-    company = Column(
-        String
-    )
-
-    salary = Column(
-        String
-    )
-
-    location = Column(
-        String
-    )
-
-    skills= Column(
-        String
-    )   
+    title = Column(String(200))
+    company = Column(String(200))
+    salary = Column(String(50))
+    location = Column(String(100))
+    skills = Column(String(500))
 
     description = Column(Text , nullable=False,default='')
 # nullable=False：【项目规则】，不允许数据库存入空值NULL。
@@ -84,19 +70,19 @@ class User(Base):
 
 
     username = Column(
-        String,
+        String(50),
         unique=True
     )
 # unique是否必须唯一
 
     email = Column(
-        String,
+        String(255),
         unique=True
     )
 
 
     password = Column(
-        String
+        String(255)
     )
 
 class Resume(Base):
@@ -105,9 +91,9 @@ class Resume(Base):
     id = Column(Integer,primary_key=True,index=True)
     user_id  = Column(Integer,ForeignKey('users.id'),
 nullable=False,index=True)
-    original_filename = Column(String,nullable=False)
-    stored_filename = Column(String,unique=True,nullable=False)
-    content_type = Column(String,nullable=False)
+    original_filename = Column(String(255),nullable=False)
+    stored_filename = Column(String(255),unique=True,nullable=False)
+    content_type = Column(String(100),nullable=False)
     file_size = Column(Integer,nullable=False)
     created_at = Column(DateTime,server_default=func.now(),nullable=False)
 

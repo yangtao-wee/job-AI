@@ -1,18 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,declarative_base
-from pathlib import Path
+from .config import settings
 
+
+args = {'check_same_thread':False} if settings.database_url.startswith('sqlite') else {}
+engine = create_engine(settings.database_url,connect_args=args)
 # 创建一个数据库：
-BACKEND_DIR = Path(__file__).resolve().parent.parent
-DATABASE_FILE = BACKEND_DIR / 'jobs.db'
-DATABASE_URL = f'sqlite:///{DATABASE_FILE.as_posix()}'
-# Python连接数据库的发动机
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={
-        'check_same_thread':False
-    }
-)
+
 
 # SessionLocal数据库操作窗口。
 SessionLocal = sessionmaker(

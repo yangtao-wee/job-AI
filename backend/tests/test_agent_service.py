@@ -79,9 +79,8 @@ def test_ask_model_logs_usage(monkeypatch, caplog):
     assert 'LLM调用Token用量 model=main-model' in caplog.text
     assert 'total=60' in caplog.text
 
-
 class BusyError(Exception):
-    code='1305'
+    pass
 
 def test_ask_backup(monkeypatch,caplog):
     models=[]
@@ -101,20 +100,15 @@ def test_ask_backup(monkeypatch,caplog):
     assert 'LLM调用Token用量 model=backup' in caplog.text
     assert 'LLM调用Token用量 model=main' not in caplog.text
 
-class OtherRateError(Exception):
-    code='9999'
-
-def test_ask_non_busy_error(monkeypatch):
+def test_ask_other_exception_not_switched(monkeypatch):
     models=[]
     def fake_call(client,messages,model):
         models.append(model)
-        raise OtherRateError()
-    monkeypatch.setattr(agent,'RateLimitError',OtherRateError)
+        raise ValueError('网络错误')
     monkeypatch.setattr(agent,'call_model',fake_call)
     monkeypatch.setattr(agent.settings,'llm_model','main')
     monkeypatch.setattr(agent.settings,'llm_backup_model','backup')
-    with pytest.raises(OtherRateError):
-        # 我预期 agent.ask_model() 必须抛出 OtherRateError。
+    with pytest.raises(ValueError):
         agent.ask_model(None,[])
     assert models==['main']
 

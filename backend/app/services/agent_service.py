@@ -73,8 +73,8 @@ def ask_model(client,messages):
     used_model = settings.llm_model
     try:
         response = call_model(client, messages, used_model)
-    except RateLimitError as error:
-        if str(error.code)!='1305' or not settings.llm_backup_model:
+    except RateLimitError:
+        if not settings.llm_backup_model:
             raise
         used_model = settings.llm_backup_model
         log.warning('主模型繁忙，切换备用模型 model=%s', used_model)

@@ -10,7 +10,8 @@ JOB_ASSIST_MAX_SCORE=75
 
 from ..models import ResumeAnalysis
 from .ai_job_service import analyze_job_with_ai,get_needs
-
+from pydantic import ValidationError
+from .cache_service import make_key,read_cache,write_cache
 
 def to_percent(score:int,max_score:int=85)->int:
     if max_score<=0:
@@ -214,8 +215,19 @@ proof_ids只能引用输入中的简历编号，无相关资料时返回[]，不
 
 
 def make_report(jd:str,proofs:list[str])->Report:
-    proofs=list(dict.fromkeys(text.strip() for text in proofs if text.strip())) #if text.strip()是在过滤空字符串。
-    # dict.fromkeys去重，同时保持原顺序
+    proofs=list(dict.fromkeys(text.strip() for text in proofs if text.strip()))
+    key=make_key(
+        'job:report:v1',
+        f'{settings.llm_model}\n{jd}\n{chr(10).join(proofs)}'
+    )
+    saved=read_cache(key)
+    if saved is not None:
+        try:
+            return Report.model_validate(saved)
+        except ValidationError:
+            pass
     needs=get_needs(jd)
     checks=get_checks(needs,proofs)
-    return Report(needs=needs.items,checks=checks.items,proofs=proofs)
+    result=Report(needs=needs.items,checks=checks.items,proofs=proofs)
+    write_cache(key,result.model_dump(),ttl=86400)
+    return result

@@ -1,10 +1,12 @@
 import json
+from pydantic import ValidationError
 from ..config import settings
 from ..schemas import JobRequirementResult,Needs,NeedDrafts,Need
 # 【自己命名】，刚才创建的岗位结果格式。
 
 from .llm_service import call_structured, get_llm_client
 # 复用现有的大模型客户端创建函数。
+from .cache_service import make_key,read_cache,write_cache
 
 
 def build_job_analysis_prompt(job_description: str) -> str:
@@ -46,7 +48,19 @@ def analyze_job_with_ai(job_description: str) -> JobRequirementResult:
             education=['大专及以上'],
             bonus_points=['有RAG项目经验']
         )
-    return call_job_analysis_model(job_description)
+    key = make_key(
+        'job:analysis:v1',
+        f'{settings.llm_model}\n{job_description}'
+    )
+    saved=read_cache(key)
+    if saved is not None:
+        try:
+            return JobRequirementResult.model_validate(saved)
+        except ValidationError:
+            pass
+    result = call_job_analysis_model(job_description)
+    write_cache(key,result.model_dump())
+    return result
 
 
 

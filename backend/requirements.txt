@@ -2,6 +2,7 @@ fastapi==0.141.1
 uvicorn==0.52.4
 SQLAlchemy==2.0.52
 PyMySQL[rsa]==1.2.0
+redis==8.1.0
 pydantic==2.13.4
 pydantic-settings==2.15.0
 python-jose==3.5.0
@@ -32,3 +33,4 @@ torch==2.13.0
 # ==用于锁定版本，提高项目可复现性。
 # venv是当前电脑的环境，requirements.txt是可以带走的安装清单。
 # 运行依赖和测试依赖可以分开管理。
+# redis：让Python后端连接并操作Redis服务器。

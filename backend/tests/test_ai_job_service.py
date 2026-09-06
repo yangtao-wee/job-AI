@@ -3,6 +3,54 @@ from app.schemas import JobRequirementResult,NeedDraft,NeedDrafts
 from app.services import ai_job_service as ai_job
 
 
+def test_analyze_job_uses_cache(monkeypatch):
+    data = {
+        'responsibilities': ['开发后端'],
+        'required_skills': ['Python'],
+        'experience': [],
+        'education': [],
+        'bonus_points': []
+    }
+    monkeypatch.setattr(ai_job.settings, 'llm_mock_mode', False)
+    monkeypatch.setattr(ai_job, 'read_cache', lambda key: data)
+    def fail_model(jd):
+        pytest.fail('缓存命中时不应该调用模型')
+    monkeypatch.setattr(ai_job, 'call_job_analysis_model', fail_model)
+    result = ai_job.analyze_job_with_ai('Python后端岗位')
+    assert result.required_skills == ['Python']
+
+
+def test_analyze_job_writes_cache_on_miss(monkeypatch):
+    expected = JobRequirementResult(
+        responsibilities=['开发后端'], required_skills=['Python'],
+        experience=[], education=[], bonus_points=[]
+    )
+    written = []
+    monkeypatch.setattr(ai_job.settings, 'llm_mock_mode', False)
+    monkeypatch.setattr(ai_job, 'read_cache', lambda key: None)
+    monkeypatch.setattr(ai_job, 'call_job_analysis_model', lambda jd: expected)
+    monkeypatch.setattr(
+        ai_job, 'write_cache', lambda key, data: written.append((key, data))
+    )
+    result = ai_job.analyze_job_with_ai('Python后端岗位')
+    assert result is expected
+    assert written[0][0].startswith('job:analysis:v1:')
+    assert written[0][1] == expected.model_dump()
+
+def test_analyze_job_ignores_invalid_cache(monkeypatch):
+    expected = JobRequirementResult(
+        responsibilities=['开发后端'], required_skills=['Python'],
+        experience=[], education=[], bonus_points=[]
+    )
+    monkeypatch.setattr(ai_job.settings, 'llm_mock_mode', False)
+    monkeypatch.setattr(ai_job, 'read_cache', lambda key: {'bad': 'data'})
+    monkeypatch.setattr(
+        ai_job, 'call_job_analysis_model', lambda jd: expected
+    )
+    monkeypatch.setattr(ai_job, 'write_cache', lambda key, data: True)
+    result = ai_job.analyze_job_with_ai('Python后端岗位')
+    assert result is expected
+
 # 岗位Service有没有把正确Prompt、Schema、模型传给适配层
 def test_call_job_analysis_model(monkeypatch):
     expected = object()

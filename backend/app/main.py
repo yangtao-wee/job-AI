@@ -1,12 +1,15 @@
 # 从 fastapi 这个第三方库中导入 FastAPI 类。
 # 你可以先把“类”理解成创建某类对象的模板。
 # 下面我们会使用这个模板，创建整个后端应用。
-from fastapi import FastAPI
+from fastapi import FastAPI,Response,status
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from .schemas import JobSchema
 from .database import engine
 from .routers import jobs,users,resumes,rag,agent
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from .services.cache_service import cache_ready
 # engine
 # 知道：
 # 数据库在哪里。
@@ -73,6 +76,14 @@ app.add_middleware(
     # 允许请求头。
 )
 
+
+def check_db()->bool:
+    try:
+        with engine.connect() as conn:
+            conn.execute(text('SELECT 1'))
+        return True
+    except SQLAlchemyError:
+        return False
 # @app.get('/health') 叫作“装饰器”。
 # 它的作用是告诉 FastAPI：
 # 当客户端使用 GET 请求访问 /health 地址时，执行下面的 health 函数。
@@ -80,13 +91,15 @@ app.add_middleware(
 # GET 是一种 HTTP 请求方法，通常用来读取数据，而不是修改数据。
 # /health 是接口路径，这个接口常用来检查后端服务是否正常运行。
 @app.get('/health')
-def health():
-    # return 表示把结果返回给请求这个接口的客户端。
-    # 这里返回的是一个 Python 字典，包含一组“键和值”。
-    # FastAPI 会自动把这个字典转换成 JSON 响应。
+def health(response:Response):
+    db_ok=check_db()
+    cache_ok=cache_ready()
+    if not db_ok:
+        response.status_code=status.HTTP_503_SERVICE_UNAVAILABLE
     return {
-        # status 是字段名，ok 表示服务目前运行正常。
-        'status': 'ok'
+        'status':'ok' if db_ok and cache_ok else 'degraded',
+        'database':'up' if db_ok else 'down',
+        'cache':'up' if cache_ok else 'down'
     }
 
 # response_model告诉FastAPI：这个接口返回的数据格式是什么。

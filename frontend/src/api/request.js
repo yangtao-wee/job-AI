@@ -1,7 +1,7 @@
 import axios from "axios"
 const request = axios.create({
     //基础地址
-    baseURL:'http://127.0.0.1:8000',
+    baseURL:'/api',
     //运行时间
     timeout:5000
 })

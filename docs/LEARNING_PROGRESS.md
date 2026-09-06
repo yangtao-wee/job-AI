@@ -623,3 +623,15 @@
 - 边界：Compose MySQL使用新的命名卷，与Windows宿主机中已经迁移45条数据的MySQL不是同一个实例，当前不能声称容器库已包含这45条数据；Redis作为缓存暂不持久化；上传目录、前端/Nginx和本地Embedding模型资源还未纳入容器方案。
 - 掌握状态：🟡正在学习。已经跟随完成构建、服务编排、健康检查和多容器连接验证，但尚未脱离指导独立重写Compose配置。
 - 唯一下一步：精确提交Compose、环境变量模板、忽略规则和两份项目记录，不包含现有前端修改。
+
+## 2026-09-06 Vue生产构建与Nginx前端容器验收
+
+- 完成：前端Axios统一使用`/api`相对地址；Vite开发服务器把`/api`代理到宿主机FastAPI并删除前缀；Nginx生产配置提供Vue静态文件、History路由回退和到`backend:8000`的API代理。
+- 完成：使用Node构建、Nginx运行的多阶段`frontend/Dockerfile`；通过`frontend/.dockerignore`排除本机依赖和旧构建结果；Compose新增`frontend`服务并映射主机8080端口。
+- 用户亲手完成：修改请求地址和Vite代理、编写Nginx配置、前端Dockerfile、`.dockerignore`与Compose前端服务，并运行构建、接口和浏览器验收。
+- AI辅助：解释开发代理与生产代理的区别、多阶段构建、容器服务名、浏览器来源隔离；根据`failed to fetch anonymous token`证据把失败定位到Docker Hub网络，并通过单独拉取Node和Nginx镜像恢复构建。
+- 数据路线：浏览器`127.0.0.1:8080` → Nginx → Vue静态文件；`/api/*`请求 → Nginx删除`/api`前缀 → `backend:8000` → FastAPI → MySQL或Redis → Vue。
+- 验证：`docker compose config --quiet`通过；Node执行Vite生产构建并生成`dist`；frontend、backend、mysql、redis全部启动且依赖服务健康；`8080/api/health`返回`ok`；直接访问`8080/jobs`没有Nginx 404，登录后显示Compose数据库中的3个测试岗位且系统状态为已连接。
+- 边界：当前只验收健康检查、登录与岗位列表链路；简历上传、Embedding、RAG、Agent及报告生成尚未完成容器内专项验收。当前仍为HTTP，没有HTTPS、访问日志规划、监控和生产级端口收敛。
+- 掌握状态：🟡正在学习。已能跟随说明完成Vue/Nginx/Compose链路并根据网络证据排错，尚未脱离指导独立重写前端生产容器配置。
+- 唯一下一步：精确提交前端容器化和代理相关文件及两份项目记录，不混入已有的大范围界面改版文件。

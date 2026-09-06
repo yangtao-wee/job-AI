@@ -1,3 +1,4 @@
+import ResumePrintView from '../views/ResumePrintView.vue'
 import {createRouter,createWebHistory} from 'vue-router'
 // createRouter创建路由管理器。createWebHistory负责管理浏览器地址。
 import JobList from '../views/JobList.vue'
@@ -37,6 +38,12 @@ history:createWebHistory(),
             requiresAuth:true
         }
 
+    },
+        {
+        path:'/resume-print',
+        name:'resume-print',
+        component:ResumePrintView,
+        meta:{requiresAuth:true}
     },
     {
         path:'/rag',

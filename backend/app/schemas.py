@@ -362,3 +362,48 @@ class QuickScoreItem(BaseModel):
     name:str
     score:int=Field(ge=0,le=100)
     matched:list[str]
+
+
+class ProfileWork(BaseModel):
+    company:str=''
+    title:str=''
+    period:str=''
+    items:list[str]=Field(default_factory=list,max_length=8)
+
+
+class ProfileProject(BaseModel):
+    name:str
+    role:str=''
+    period:str=''
+    stack:str=''
+    items:list[str]=Field(default_factory=list,max_length=10)
+
+
+class ProfileEdu(BaseModel):
+    school:str=''
+    major:str=''
+    degree:str=''
+    period:str=''
+
+class ProfileSkill(BaseModel):
+    group:str
+    text:str
+
+
+class ResumeProfile(BaseModel):
+    name:str=''
+    target:str=''
+    city:str=''
+    phone:str=''
+    email:str=''
+    link:str=''
+    summary:str=''
+    skills:list[ProfileSkill]=Field(default_factory=list,max_length=6)
+    projects:list[ProfileProject]=Field(default_factory=list,max_length=4)
+    works:list[ProfileWork]=Field(default_factory=list,max_length=5)
+    education:list[ProfileEdu]=Field(default_factory=list,max_length=3)
+
+
+class ProfileBuildRequest(BaseModel):
+    raw:str=Field(min_length=10,max_length=8000)
+    target:str=Field(default='',max_length=50)

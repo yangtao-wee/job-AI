@@ -26,6 +26,13 @@
           </svg>
           我的简历
         </router-link>
+                <router-link to="/resume-print">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 9V3h12v6M6 18H4v-6h16v6h-2" />
+            <rect x="8" y="14" width="8" height="7" />
+          </svg>
+          简历生成
+        </router-link>
 
         <router-link to="/rag">
           <svg viewBox="0 0 24 24">

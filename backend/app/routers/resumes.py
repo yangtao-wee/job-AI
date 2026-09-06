@@ -1,5 +1,6 @@
 from pathlib import Path
 from uuid import uuid4
+import logging
 import aiofiles
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
@@ -7,10 +8,13 @@ from fastapi.responses import FileResponse
 
 from ..dependencies import get_current_user, get_db
 from ..models import Resume, User
-from ..schemas import ResumeResponse
+from ..schemas import ResumeResponse,ResumeProfile,ProfileBuildRequest
 from ..services.resume_parser import extract_pdf_text
 from ..services.ai_resume_service import analyze_resume_with_ai
 from ..services.resume_analysis_service import save_resume_analysis
+from ..services.resume_build_service import build_profile
+
+log=logging.getLogger(__name__)
 router = APIRouter()
 ALLOWED_CONTENT_TYPES = {
     'application/pdf',
@@ -197,3 +201,18 @@ def analyze_resume(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(error)
         )from error
+
+
+@router.post('/profile/build',response_model=ResumeProfile)
+def build_resume_profile(
+    request:ProfileBuildRequest,
+    _current_user:User=Depends(get_current_user)
+):
+    try:
+        return build_profile(request.raw,request.target)
+    except Exception as error:
+        log.exception('简历整理失败')
+        raise HTTPException(
+            status_code=502,
+            detail='简历整理失败，请稍后重试'
+        ) from error

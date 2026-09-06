@@ -15,11 +15,3 @@ export function matchJob(resumeId,jobId,city,minPay){
         timeout:120000
     })
 }
-
-export function analyzeJob(jobId){
-    if(!jobId){
-        throw new Error('缺少岗位ID')
-    // throw、new、Error：【语言固定】。主动停止并报告清楚的前端错误。
-    }
-    return request.post(`/jobs/${jobId}/analysis`)
-}

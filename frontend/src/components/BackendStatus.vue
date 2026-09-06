@@ -1,23 +1,29 @@
 <template>
-    <div class='staus'>
+  <div class="backend-status">
+    <span
+      class="status-dot"
+      :class="{ offline: connected === false }"
+    ></span>
 
-    
-    <p>{{ message }}</p>
-    </div >
+    <span>{{ message }}</span>
+  </div>
 </template>
 
 <script setup>
 import { ref,onMounted } from 'vue'
 import request from '../api/request'
 const message = ref('检测服务器中...')
+const connected = ref(null)
 async function checkBackend(){
     try{
         const response = await request.get('/health')
         if(response.data.status==='ok'){
-            message.value='🟢后端接收成功'
+            message.value = '系统已连接'
+            connected.value = true
         }
     }catch(error){
-        message.value="🔴后端连接失败"
+        message.value = '系统连接失败'
+        connected.value = false
     }
 }
 
@@ -26,9 +32,5 @@ onMounted(()=>{
 })
 </script>
 
-<style>
-.status{
-    margin-top: 20px;
-    font-size: 20px;
-}
-</style>
+
+

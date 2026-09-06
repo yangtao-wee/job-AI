@@ -7,7 +7,7 @@ export function assistJob(resumeId,jobTitle,company,jdText){
         company:company,
         jd_text:jdText
     },{
-        timeout:60000
+        timeout:180000
     })
 }
 

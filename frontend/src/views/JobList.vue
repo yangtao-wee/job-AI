@@ -1,5 +1,19 @@
 <template>
+    <section class="jobs-page">
+    <header class="page-head">
+  <div>
+    <p class="page-kicker">求职工作台</p>
     <h2>岗位列表</h2>
+  </div>
+
+  <span class="job-count">
+    共 {{ jobs.length }} 个岗位
+  </span>
+</header>
+
+    <div class="jobs-layout">
+    <aside class="filter-panel">
+        <h3>筛选条件</h3>
     <div>
     <label for="resume-select">选择简历：</label> 
     <select id="resume-select" v-model.number="selectedResumeId"
@@ -21,11 +35,20 @@
         <input v-model.number="minPay" type="number" min="0">
     </div>
     <p v-if="matchError">{{ matchError }}</p>
-    <JobCard 
-    v-for="job in jobs"
+        </aside>
+
+    <section class="job-area">
+        <h3>为你推荐</h3>
+        <div class="job-grid">
+<JobCard 
+    v-for="(job, index) in jobs"
     :key="job.id"
+    :featured="index === 0"
     :title="job.title"
+    :company="job.company"
+    :location="job.location"
     :salary="job.salary"
+    :description="job.description"
     :current-score="job.currentScore"
     :current-max-score="job.currentMaxScore"
     :score="job.score"
@@ -36,7 +59,6 @@
     :missing-keywords=job.missingKeywords
     :matching="matchingId === job.id"
     :requirements="job.requirements"
-    :analyzing="analyzingId===job.id"
     :required-skill-score="job.requiredSkillScore"
     :matched-required-skills="job.matchedRequiredSkills"
     :missing-required-skills="job.missingRequiredSkills"
@@ -49,14 +71,17 @@
     :pref-notes="job.prefNotes"
     :sem="job.sem"
     :ai-note="job.aiNote"
-    @analyze="handleAnalyze(job)"
     @match="handleMatch(job)"
     />
+            </div>
+    </section>
+    </div>
+</section>
 </template>
 
 <script setup>
 import { ref,onMounted } from 'vue'
-import {fetchJobs,matchJob,analyzeJob} from '../api/jobs.js'
+import {fetchJobs,matchJob} from '../api/jobs.js'
 import JobCard from '../components/JobCard.vue'
 import { fetchMyResumes } from '../api/resumes.js'
 
@@ -66,7 +91,6 @@ const selectedResumeId = ref(null)
 const city = ref('深圳')
 const minPay = ref(15)
 const matchingId = ref(null)
-const analyzingId = ref(null)
 const matchError = ref('')
 
 async function getJobs(){
@@ -86,6 +110,7 @@ async function handleMatch(job) {
     matchError.value=''
     try{
         const response = await matchJob(selectedResumeId.value,job.id,city.value,minPay.value)
+        job.requirements = response.data.job_requirements
         const skillMatch = response.data.skill_match
         job.score=skillMatch.score
         job.matchedSkills = skillMatch.matched_skills
@@ -113,25 +138,14 @@ async function handleMatch(job) {
         job.sem=response.data.sem_match
         job.aiNote=response.data.ai_explain
     }catch(error){
-        matchError.value=error.response?.data?.detail ?? error.message ?? 'a岗位匹配失败'
+        matchError.value=error.response?.data?.detail ?? error.message ?? '岗位匹配失败'
     }finally{
         matchingId.value=null
     }
     
 }
 
-async function handleAnalyze(job) {
-    analyzingId.value=job.id
-    matchError.value=''
-    try{
-        const response = await analyzeJob(job.id)
-        job.requirements = response.data
-    }catch(error){
-        matchError.value=error.response?.data?.detail ?? error.message ?? '岗位分析失败'
-    }finally{
-        analyzingId.value=null
-    }
-}
+
 onMounted(()=>{
     getJobs()
     getMyResumes()
@@ -139,3 +153,4 @@ onMounted(()=>{
     
     
 </script>
+

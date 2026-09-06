@@ -215,7 +215,11 @@ def test_build_job_requirements():
 
 def test_quick_score(monkeypatch):
     monkeypatch.setattr(
-        'app.services.matching_service.calc_sim',
+        'app.services.matching_service.embed_many',
+        lambda texts: {t: [1.0] for t in texts}
+    )
+    monkeypatch.setattr(
+        'app.services.matching_service.dot',
         lambda *_: 0.8
     )
     analysis = SimpleNamespace(

@@ -3,7 +3,7 @@ import re
 # re【Python自带】，正则表达式工具，负责从文字中寻找数字。
 from ..schemas import SkillMatchResult,KeywordMatchResult,ExpMatch,Dutyproof,RoleMatch,PrefMatch,JobRequirementResult,QuickJob,QuickScoreItem
 from ..models import  Resume,ResumeAnalysis
-from .semantic_service import calc_sim
+from .semantic_service import embed_many,dot
 SKIP_TAG=re.compile(r'年|大专|本科|硕士|博士|学历|经验不限|应届|不接受')
 JOB_KEYWORDS = [
     'Python', 'FastAPI', 'MySQL', 'Redis', 'Docker',
@@ -247,9 +247,14 @@ def calculate_required_skill_score(
 
 
 def quick_score(analysis,jobs:list[QuickJob])->list[QuickScoreItem]:
+    names=[job.name for job in jobs]
+    positions=list(analysis.recommended_positions)
+    vecs=embed_many(names+positions)
     items=[]
     for job in jobs:
-        sim=max((calc_sim(job.name,p) for p in analysis.recommended_positions),default=0.0)
+        jv=vecs.get(job.name)
+        sims=[dot(jv,vecs[p]) for p in positions if jv and p in vecs]
+        sim=max(sims,default=0.0)
         role=round(sim*10) if sim>=0.5 else 0
         real_tags=[t for t in job.tags if not SKIP_TAG.search(t)]
         skill=calculate_skill_score(analysis.skills,real_tags)

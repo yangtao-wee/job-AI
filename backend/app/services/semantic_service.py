@@ -22,3 +22,14 @@ def calc_sim(a:str,b:str)->float:
     # normalize_embeddings=True：把向量统一长度，方便比较。把每个向量归一化，让它的模长变成 1。这样后面就可以方便地用点积计算余弦相似度。
     return float(vec[0] @ vec[1])
 # float()：【语言固定】，把结果转换成普通小数。
+
+def embed_many(texts:list[str])->dict[str,list[float]]:
+    uniq=list(dict.fromkeys(t for t in texts if t and t.strip()))
+    if not uniq:
+        return {}
+    vecs=get_model().encode(uniq,normalize_embeddings=True)
+    return dict(zip(uniq,vecs.tolist()))
+
+
+def dot(a:list[float],b:list[float])->float:
+    return float(sum(x*y for x,y in zip(a,b)))

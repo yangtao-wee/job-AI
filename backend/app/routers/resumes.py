@@ -111,9 +111,13 @@ def delete_resume(
             detail='简历不存在'
         )
     file_path = UPLOAD_DIR / resume_record.stored_filename
+    try:
+        db.delete(resume_record)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     file_path.unlink(missing_ok=True)
-    db.delete(resume_record)
-    db.commit()
 
 @router.get('/{resume_id}/download')
 def download_resume(

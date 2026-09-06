@@ -216,6 +216,8 @@ proof_ids只能引用输入中的简历编号，无相关资料时返回[]，不
 
 def make_report(jd:str,proofs:list[str])->Report:
     proofs=list(dict.fromkeys(text.strip() for text in proofs if text.strip()))
+    if settings.llm_mock_mode:
+        return Report(needs=[],checks=[],proofs=proofs)
     key=make_key(
         'job:report:v1',
         f'{settings.llm_model}\n{jd}\n{chr(10).join(proofs)}'

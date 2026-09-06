@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
 
 from ..dependencies import get_current_user, get_db
-from ..models import Resume, User
+from ..models import Application,Resume,ResumeAnalysis,SavedReport,User
 from ..schemas import ResumeResponse,ResumeProfile,ProfileBuildRequest
 from ..services.resume_parser import extract_pdf_text
 from ..services.ai_resume_service import analyze_resume_with_ai
@@ -112,6 +112,20 @@ def delete_resume(
         )
     file_path = UPLOAD_DIR / resume_record.stored_filename
     try:
+        report_ids=[
+            row.id for row in db.query(SavedReport.id)
+            .filter(SavedReport.resume_id==resume_id)
+            .all()
+        ]
+        db.query(Application).filter(
+            Application.report_id.in_(report_ids)
+        ).delete(synchronize_session=False)
+        db.query(SavedReport).filter(
+            SavedReport.resume_id==resume_id
+        ).delete(synchronize_session=False)
+        db.query(ResumeAnalysis).filter(
+            ResumeAnalysis.resume_id==resume_id
+        ).delete(synchronize_session=False)
         db.delete(resume_record)
         db.commit()
     except Exception:

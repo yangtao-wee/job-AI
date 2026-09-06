@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 import pytest
 from app.routers import resumes
+from app.models import Application,ResumeAnalysis,SavedReport
 
 def test_delete_keeps_file_when_db_fails(tmp_path,monkeypatch):
     file_path=tmp_path/'a.pdf'
@@ -27,3 +28,8 @@ def test_delete_removes_file_after_commit(tmp_path,monkeypatch):
     assert not file_path.exists()
     db.delete.assert_called_once_with(record)
     db.commit.assert_called_once()
+    queried=[item.args[0] for item in db.query.call_args_list]
+    assert any(item is Application for item in queried)
+    assert any(item is SavedReport for item in queried)
+    assert any(item is ResumeAnalysis for item in queried)
+    assert db.query.return_value.filter.return_value.delete.call_count==3

@@ -264,3 +264,14 @@ def test_parts_endpoints():
     assert Scoreminxi(skill=35, exp=30, role=10).model_dump() == {
         'skill': 35, 'exp': 30, 'role': 10
     }
+
+
+def test_make_report_mock_skips_llm(monkeypatch):
+    monkeypatch.setattr(assist.settings,'llm_mock_mode',True)
+    monkeypatch.setattr(assist,'read_cache',lambda key:None)
+    monkeypatch.setattr(
+        assist,'get_needs',
+        lambda jd:pytest.fail('Mock模式不应该调用真实模型')
+    )
+    result=assist.make_report('负责Python开发，要求掌握FastAPI。',['Python项目'])
+    assert result.proofs==['Python项目']

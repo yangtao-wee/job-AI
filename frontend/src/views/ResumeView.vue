@@ -298,7 +298,9 @@ async function getMyResumes() {
 }
 
 async function deleteResume(resumeId) {
-  const confirmed = window.confirm('确认删除这份简历吗')
+  const confirmed = window.confirm(
+  '确认删除这份简历吗？关联的分析、报告和投递记录也会一起删除。'
+)
   if(!confirmed)return
   deletingId.value = resumeId
   successMessage.value=''

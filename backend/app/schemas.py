@@ -407,3 +407,31 @@ class ResumeProfile(BaseModel):
 class ProfileBuildRequest(BaseModel):
     raw:str=Field(min_length=10,max_length=8000)
     target:str=Field(default='',max_length=50)
+
+class LeadIn(BaseModel):
+    title:str=Field(min_length=1,max_length=200)
+    company:str=Field(default='',max_length=200)
+    url:str=Field(min_length=1,max_length=500)
+    tags:list[str]=Field(default_factory=list,max_length=30)
+    quick_score:int=Field(default=0,ge=0,le=100)
+
+
+class LeadBatch(BaseModel):
+    leads:list[LeadIn]=Field(min_length=1,max_length=50)
+
+
+class LeadOut(BaseModel):
+    model_config=ConfigDict(from_attributes=True)
+    id:int
+    title:str
+    company:str
+    url:str
+    tags:list[str]
+    quick_score:int
+    status:str
+    created_at:datetime
+
+class LeadSaveResult(BaseModel):
+    added:int
+    updated:int
+    total:int

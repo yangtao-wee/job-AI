@@ -55,7 +55,13 @@
           </svg>
           定制建议
         </router-link>
-
+                <router-link to="/leads">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 6h16M4 12h16M4 18h10" />
+            <circle cx="19" cy="18" r="2.5" />
+          </svg>
+          岗位池
+        </router-link>
         <router-link to="/applications">
           <svg viewBox="0 0 24 24">
             <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z" />

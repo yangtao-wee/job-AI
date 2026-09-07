@@ -5,7 +5,7 @@ document.body.appendChild(tip)
 
 const RESUME_ID = 3
 const PASS = 60
-const DRY_RUN = true
+const DRY_RUN = false
 const DAILY_MAX = 1
 const APPLY_MIN = 3
 const MAX_DEEP = 3
@@ -33,6 +33,7 @@ function scan() {
   const list = [...cards].map(c => ({
     el: c,
     name: c.querySelector('.job-name')?.innerText,
+    url: c.querySelector('.job-name')?.href || '',
     company:c.querySelector('.boss-name')?.innerText || '未知',
     tags: [...c.querySelectorAll('.tag-list li')].map(li => li.innerText)
   }))
@@ -50,9 +51,15 @@ function scan() {
     })
   })
     .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
-    .then(scores => {
+    .then(async scores => {
       scores.forEach((s, i) => mark(list[i].el, s))
       tip.textContent = `[求职助手] 已打分 ${scores.length} 个岗位`
+      try {
+        const n = await uploadLeads(list, scores)
+        tip.textContent += ` · 入库 ${n} 个新岗位`
+      } catch (e) {
+        tip.textContent += ` · 入库失败：${e.message}`
+      }
       deepCheck(list,scores)
     })
     .catch(e => { tip.textContent = `[求职助手] 打分失败：${e}` })
@@ -72,6 +79,27 @@ function mark(el, s) {
     : `${s.score}分 · 仅按职位名`
   b.style.cssText = 'font-size:12px;color:#0B7A4B;padding:2px 10px;font-weight:600'
   el.appendChild(b)
+}
+
+async function uploadLeads(list, scores) {
+  const leads = list
+    .map((j, i) => ({
+      title: j.name || '',
+      company: j.company === '未知' ? '' : j.company,
+      url: j.url,
+      tags: j.tags,
+      quick_score: scores[i].score
+    }))
+    .filter(l => l.title && l.url)
+  if (!leads.length) return 0
+  const r = await fetch('http://127.0.0.1:8000/leads/batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+    body: JSON.stringify({ leads })
+  })
+  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  const d = await r.json()
+  return d.added
 }
 
 

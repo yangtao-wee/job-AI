@@ -9,6 +9,7 @@ import RagView  from '../views/RagView.vue'
 import AgentView from '../views/AgentView.vue'
 import JobAssistView from '../views/JobAssistView.vue'
 import ApplyView  from '../views/ApplyView.vue'
+import LeadView from '../views/LeadView.vue'
 const router=createRouter({
 history:createWebHistory(),
     routes:[
@@ -55,6 +56,12 @@ history:createWebHistory(),
         path:'/agent',
         name:'agent',
         component:AgentView,
+        meta:{requiresAuth:true}
+    },
+        {
+        path:'/leads',
+        name:'leads',
+        component:LeadView,
         meta:{requiresAuth:true}
     },
     {

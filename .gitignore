@@ -10,3 +10,4 @@
 .vscode/
 tmp/
 backend/.pytest_tmp/
+/output/

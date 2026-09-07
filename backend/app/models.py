@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, func,Text,JSON
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, func,Text,JSON,UniqueConstraint
 # 我们需要告诉数据库：字段是什么类型。
 
 from .database import Base
@@ -147,3 +147,18 @@ class Application(Base):
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
+class JobLead(Base):
+    __tablename__ = 'job_leads'
+    __table_args__ = (
+        UniqueConstraint('user_id', 'url', name='uq_lead_user_url'),
+    )
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    title = Column(String(200), nullable=False)
+    company = Column(String(200), nullable=False, default='')
+    url = Column(String(500), nullable=False)
+    tags = Column(JSON, nullable=False, default=list)
+    quick_score = Column(Integer, nullable=False, default=0)
+    status = Column(String(20), nullable=False, default='新抓取')
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)

@@ -10,6 +10,33 @@ from app.routers import leads
 client=TestClient(app)
 
 
+def test_list_leads_returns_page(monkeypatch):
+    db=object()
+    app.dependency_overrides[get_current_user]=lambda:NS(id=7)
+    app.dependency_overrides[get_db]=lambda:db
+    run=MagicMock(return_value=([],3))
+    monkeypatch.setattr(leads,'list_leads',run)
+
+    response=client.get('/leads?status=待投递&offset=1&limit=2')
+    app.dependency_overrides.clear()
+
+    assert response.status_code==200
+    assert response.json()=={'items':[],'total':3,'offset':1,'limit':2}
+    run.assert_called_once_with(db,7,'待投递',1,2)
+
+def test_list_leads_rejects_large_limit(monkeypatch):
+    app.dependency_overrides[get_current_user]=lambda:NS(id=7)
+    app.dependency_overrides[get_db]=lambda:object()
+    run=MagicMock()
+    monkeypatch.setattr(leads,'list_leads',run)
+
+    response=client.get('/leads?limit=201')
+    app.dependency_overrides.clear()
+
+    assert response.status_code==422
+    run.assert_not_called()
+
+
 def test_analyze_busy_skips_model(monkeypatch,caplog):
     app.dependency_overrides[get_current_user]=lambda:NS(id=7)
     app.dependency_overrides[get_db]=lambda:object()

@@ -37,14 +37,17 @@ def save_leads(db:Session,user_id:int,leads:list[LeadIn])->dict:
     return {'added':added,'updated':updated,'total':len(uniq)}
 
 
-def list_leads(db:Session,user_id:int,status:str|None=None,offset:int=0)->list[JobLead]:
+def list_leads(db:Session,user_id:int,status:str|None=None,
+               offset:int=0,limit:int=50)->tuple[list[JobLead],int]:
     q=db.query(JobLead).filter(JobLead.user_id==user_id)
     if status:
         q=q.filter(JobLead.status==status)
-    return (
+    total=q.count()
+    rows=(
         q.order_by(JobLead.quick_score.desc(),JobLead.id.desc())
-        .offset(offset).limit(200).all()
+        .offset(offset).limit(limit).all()
     )
+    return rows,total
 
 def save_jd(db:Session,user_id:int,items:list[LeadJdIn])->dict:
     uniq={item.url:item for item in items}

@@ -436,6 +436,12 @@ class LeadOut(BaseModel):
     status:str
     created_at:datetime
 
+class LeadPage(BaseModel):
+    items:list[LeadOut]
+    total:int
+    offset:int
+    limit:int
+
 class LeadSaveResult(BaseModel):
     added:int
     updated:int

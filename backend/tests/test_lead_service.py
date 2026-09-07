@@ -66,6 +66,20 @@ def make_db():
     Base.metadata.create_all(engine)
     return Session(engine)
 
+def test_list_leads_filters_and_pages():
+    with make_db() as db:
+        db.add_all([
+            JobLead(user_id=1,title='高分',url='u1',quick_score=90,status='待投递'),
+            JobLead(user_id=1,title='中分',url='u2',quick_score=60,status='待投递'),
+            JobLead(user_id=1,title='其他状态',url='u3',quick_score=100),
+            JobLead(user_id=2,title='其他用户',url='u4',quick_score=95,status='待投递'),
+        ])
+        db.commit()
+
+        rows,total=service.list_leads(db,1,'待投递',1,1)
+        assert total==2
+        assert [row.title for row in rows]==['中分']
+
 
 def test_mark_above_includes_skipped():
     with make_db() as db:

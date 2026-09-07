@@ -3,6 +3,9 @@ import { ref, computed, onMounted } from 'vue'
 import request from '../api/request'
 
 const leads = ref([])
+const total = ref(0)
+const offset = ref(0)
+const pageSize = 50
 const resumes = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -31,8 +34,14 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const res = await request.get('/leads')
-    leads.value = res.data
+    const params = {
+      offset: offset.value,
+      limit: pageSize,
+      status: filter.value || undefined,
+    }
+    const res = await request.get('/leads', { params })
+    leads.value = res.data.items
+    total.value = res.data.total
   } catch (e) {
     error.value = e.response?.data?.detail || e.message || '加载失败'
   } finally {
@@ -54,6 +63,8 @@ onMounted(() => { load(); loadResumes() })
 
 function pick(value) {
   filter.value = value
+  offset.value = 0
+  load()
 }
 
 // 单条改状态。改完只更新本地这一行，不重新拉整个列表。
@@ -147,22 +158,6 @@ const shown = computed(() =>
     (!filter.value || l.status === filter.value)
   )
 )
-
-const counts = computed(() => {
-  const c = {}
-  for (const l of leads.value) c[l.status] = (c[l.status] || 0) + 1
-  return c
-})
-
-const willMark = computed(() =>
-  leads.value.filter(l =>
-    ['新抓取', '已跳过'].includes(l.status) && l.quick_score >= minScore.value
-  ).length
-)
-
-const willUnmark = computed(() =>
-  leads.value.filter(l => l.status === '待投递').length
-)
 </script>
 
 <template>
@@ -198,12 +193,12 @@ const willUnmark = computed(() =>
       <button v-if="!running" class="btn" @click="runAnalyze">开始精判</button>
       <button v-else class="btn stop" @click="stopped = true">停止</button>
 
-      <button class="btn go" :disabled="running || !willMark" @click="markAbove">
-        ↑ 标记 {{ minScore }} 分以上（{{ willMark }}）
+      <button class="btn go" :disabled="running" @click="markAbove">
+        ↑ 标记 {{ minScore }} 分以上
       </button>
 
-      <button class="btn ghost" :disabled="running || !willUnmark" @click="unmarkAll">
-        ↩ 全部撤销待投（{{ willUnmark }}）
+      <button class="btn ghost" :disabled="running" @click="unmarkAll">
+        ↩ 全部撤销待投
       </button>
       <div v-if="running || lastTitle" class="progress">
         <span v-if="running" class="dot"></span>
@@ -222,13 +217,23 @@ const willUnmark = computed(() =>
         @click="pick(f.value)"
       >
         {{ f.label }}
-        <span v-if="f.value && counts[f.value]" class="n">{{ counts[f.value] }}</span>
+        <span v-if="f.value && filter === f.value" class="n">{{ total }}</span>
       </button>
       <label class="minshow">
         分数 ≥
         <input v-model.number="minShow" type="number" min="0" max="100">
       </label>
-        <span class="total">显示 {{ shown.length }} / 共 {{ leads.length }} 条</span>
+      <button class="chip" :disabled="offset === 0 || loading"
+        @click="offset = Math.max(0, offset - pageSize); load()">
+        上一页
+      </button>
+      <button class="chip" :disabled="offset + pageSize >= total || loading"
+        @click="offset += pageSize; load()">
+        下一页
+      </button>
+      <span class="total">
+        显示 {{ shown.length }} / 本页 {{ leads.length }} / 共 {{ total }} 条
+      </span>
     </div>
 
     <p v-if="error" class="err">{{ error }}</p>

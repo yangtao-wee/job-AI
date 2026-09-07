@@ -302,7 +302,11 @@ async function startApply() {
     headers: { 'Authorization': `Bearer ${TOKEN}` }
   })
   if (!r.ok) throw new Error(`HTTP ${r.status}`)
-  const list = await r.json()
+  const data = await r.json()
+  const list = data.items
+  if (!Array.isArray(list)) {
+    throw new Error('岗位接口返回格式错误')
+  }
   if (!list.length) {
     tip.textContent = '[求职助手] 没有「待投递」的岗位，先去岗位池标记'
     return

@@ -1,9 +1,10 @@
 from fastapi import APIRouter,Depends,Query,HTTPException
 from sqlalchemy.orm import Session
 import logging
+from ..config import settings
 from ..dependencies import get_current_user,get_db,check_limit
 from ..models import User
-from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult,LeadUnmarkResult
+from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult,LeadUnmarkResult,LeadPage
 from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below,mark_above,unmark_all
 from ..services.cache_service import take_lock, free_lock
 
@@ -20,14 +21,17 @@ def upload_leads(
     return save_leads(db,current_user.id,request.leads)
 
 
-@router.get('',response_model=list[LeadOut])
+@router.get('',response_model=LeadPage)
 def my_leads(
     status:str|None=Query(None),
     offset:int=Query(0,ge=0),
+    limit:int|None=Query(None,ge=1,le=200),
     current_user:User=Depends(get_current_user),
     db:Session=Depends(get_db)
 ):
-    return list_leads(db,current_user.id,status,offset)
+    size=limit or settings.lead_page_size
+    rows,total=list_leads(db,current_user.id,status,offset,size)
+    return {'items':rows,'total':total,'offset':offset,'limit':size}
 
 @router.post('/jd',response_model=LeadJdResult)
 def upload_jd(

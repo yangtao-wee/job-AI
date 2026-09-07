@@ -1,4 +1,5 @@
 from pathlib import Path
+from pydantic import Field
 from pydantic_settings import BaseSettings,SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
@@ -22,6 +23,7 @@ class Settings(BaseSettings):
     # 输入每100万 Token 的价格，可以改名，但引用处必须同步修改。
     register_code:str|None=None
     cors_origins:str='http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,https://www.zhipin.com'
+    lead_page_size:int=Field(default=50,ge=1,le=200)
     llm_out_price:float=0.0
     # 输出每100万 Token 的价格。
     model_config = SettingsConfigDict(

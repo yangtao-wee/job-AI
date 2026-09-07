@@ -1,7 +1,8 @@
 import json
 import hashlib
 from redis import Redis
-from redis.exceptions import RedisError
+from redis.exceptions import RedisError, LockError
+from redis.lock import Lock
 
 from ..config import settings
 
@@ -34,3 +35,17 @@ def write_cache(key:str,data:dict,ttl:int=3600)->bool:
         return True
     except RedisError:
         return False
+
+def take_lock(key: str, ttl: int = 180) -> Lock | None:
+    lock = cache.lock(key, timeout=ttl)
+    try:
+        return lock if lock.acquire(blocking=False) else None
+    except RedisError:
+        return None
+
+
+def free_lock(lock: Lock) -> None:
+    try:
+        lock.release()
+    except (RedisError, LockError):
+        pass

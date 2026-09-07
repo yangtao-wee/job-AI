@@ -7,11 +7,21 @@
     input, button { box-sizing: border-box; width: 100%; margin-top: 10px; padding: 10px; }
     button { background: #5b7cff; border: 0; border-radius: 8px; cursor: pointer; }
     #status { color: #34d399; }
+    select { box-sizing: border-box; width: 100%; margin-top: 10px; padding: 10px;
+             background: #0f1425; color: #eef2f8; border: 1px solid #2a3348; border-radius: 8px; }
+    label { display: block; margin-top: 14px; font-size: 12px; color: #9aa5bd; }
+    button.ghost { background: transparent; border: 1px solid #2a3348; color: #9aa5bd; }
   </style>
 </head>
 <body>
   <strong>本地API身份配置</strong>
+
   <input id="token" type="password" placeholder="粘贴登录Token">
+
+  <label for="resume">使用哪份简历</label>
+  <select id="resume"><option value="">先填Token再点加载</option></select>
+  <button id="load" class="ghost">加载简历列表</button>
+
   <button id="save">保存</button>
   <p id="status"></p>
   <script src="popup.js"></script>

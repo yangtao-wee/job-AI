@@ -232,6 +232,12 @@ const counts = computed(() => {
 
         <div class="ops">
           <button
+      v-if="l.status !== '已投递'"
+      class="mini"
+      :disabled="running"
+      @click="setStatus(l, '已投递')"
+      >已投</button>
+          <button
             v-if="l.status !== '已跳过'"
             class="mini"
             :disabled="running"

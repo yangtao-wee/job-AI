@@ -1,9 +1,14 @@
 const tip = document.createElement('div')
 tip.textContent = '[求职助手] 启动中…'
-tip.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;background:#0B7A4B;color:#fff;padding:6px 12px;font-size:14px'
+tip.style.cssText = [
+  'position:fixed;bottom:70px;left:20px;z-index:2147483647',
+  'max-width:360px;white-space:normal;overflow-wrap:anywhere',
+  'background:#0B7A4B;color:#fff;padding:8px 12px',
+  'font-size:14px;line-height:1.4;border-radius:8px',
+  'box-shadow:0 4px 14px rgba(0,0,0,.25)'
+].join(';')
 document.body.appendChild(tip)
 
-const RESUME_ID = 3
 const PASS = 60
 const DRY_RUN = false
 const DAILY_MAX = 1
@@ -14,10 +19,12 @@ const QUEUE_KEY = 'jm_apply_queue'
 const APPLY_GAP = 10000
 let lastFirst = ''
 let TOKEN = ''
+let RESUME_ID = null
 
-chrome.storage.local.get('token')
+chrome.storage.local.get(['token', 'resume_id'])
   .then(data => {
     TOKEN = data.token || ''
+    RESUME_ID = data.resume_id || null
     if (isDetailPage()) {
       runQueue().catch(e => { tip.textContent = `[求职助手] 投递失败：${e.message}` })
     } else {
@@ -33,6 +40,10 @@ function scan() {
     if(tip.textContent !== message){
         tip.textContent = message
     }
+    return
+  }
+  if (!RESUME_ID) {
+    tip.textContent = '[求职助手] 请点插件图标选择一份简历'
     return
   }
   const cards = document.querySelectorAll('.job-card-box')
@@ -238,7 +249,10 @@ function addUsed() {
 
 async function closeDialog() {
   for (let i = 0; i < 20; i++) {
-    const c = document.querySelector('.greet-boss-footer .cancel-btn')
+    const c = document.querySelector('.greet-boss-footer .cancel-btn') ||
+      [...document.querySelectorAll('button')].find(
+        b => b.textContent.trim() === '留在此页'
+      )
     if (c) { c.click(); return true }
     await sleep(300)
   }
@@ -260,8 +274,10 @@ async function applyHere(expectTitle) {
   if (titleKey(h1) !== titleKey(expectTitle)) return `⛔标题对不上：${h1}`
   const btn = document.querySelector('.btn-startchat')
   if (!btn) return '⛔没找到沟通按钮'
-  if (!window.confirm(`确认投递「${h1}」？`)) return '✋已取消'
+  if (!DRY_RUN && usedToday() >= DAILY_MAX) return '⛔今日已达上限'
+  if (DRY_RUN) return '🧪演练·本该投出'
   btn.click()
+  addUsed()
   const closed = await closeDialog()
   return closed ? '✅已投递' : '⚠️投了但弹窗没关'
 }
@@ -269,7 +285,12 @@ async function applyHere(expectTitle) {
 function addStartButton() {
   const b = document.createElement('button')
   b.textContent = '开始投递'
-  b.style.cssText = 'position:fixed;top:0;left:260px;z-index:99999;background:#B6791A;color:#fff;border:0;padding:7px 16px;font-size:13px;cursor:pointer'
+  b.style.cssText = [
+  'position:fixed;bottom:20px;left:20px;z-index:2147483647',
+  'background:#B6791A;color:#fff;border:0',
+  'padding:8px 16px;font-size:13px;cursor:pointer',
+  'border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.25)'
+  ].join(';')
   b.addEventListener('click', () => {
     startApply().catch(e => { tip.textContent = `[求职助手] ${e.message}` })
   })
@@ -286,7 +307,13 @@ async function startApply() {
     tip.textContent = '[求职助手] 没有「待投递」的岗位，先去岗位池标记'
     return
   }
-  const queue = list.map(l => ({ id: l.id, url: l.url, title: l.title }))
+  const left = Math.max(DAILY_MAX - usedToday(), 0)
+  if (!DRY_RUN && left === 0) {
+    tip.textContent = '[求职助手] 今日已达投递上限'
+    return
+  }
+  const jobs = DRY_RUN ? list : list.slice(0, left)
+  const queue = jobs.map(l => ({ id: l.id, url: l.url, title: l.title }))
   await chrome.storage.local.set({ [QUEUE_KEY]: queue })
   tip.textContent = `[求职助手] 队列 ${queue.length} 个，开始投递…`
   location.href = queue[0].url
@@ -300,12 +327,20 @@ async function runQueue() {
   if (!location.href.startsWith(cur.url.split('?')[0])) return
   tip.textContent = `[求职助手] 投递中，还剩 ${queue.length} 个`
   const st = await applyHere(cur.title)
+  if (st.startsWith('⛔')) {
+    tip.textContent = `[求职助手] ${st} · 已暂停，岗位仍在队列`
+    return
+  }
   if (st.startsWith('✅') || st.startsWith('⚠️')) {
-    await fetch(`${API}/leads/${cur.id}`, {
+    const saved = await fetch(`${API}/leads/${cur.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
       body: JSON.stringify({ status: '已投递' })
     })
+    if (!saved.ok) {
+      tip.textContent = `[求职助手] 已发送，但状态同步失败：HTTP ${saved.status}`
+      return
+    }
   }
   queue.shift()
   if (!queue.length) {

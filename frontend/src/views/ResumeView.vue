@@ -375,7 +375,7 @@ async function analyzeResumeWithAI(resumeId) {
   try{
     const response = await request.post(
       `/resumes/${resumeId}/analyze?use_ai=true`,null,{
-        timeout:60000
+        timeout:180000
       }
     ) 
     const data=response.data

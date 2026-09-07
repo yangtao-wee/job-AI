@@ -9,6 +9,9 @@ class BrokenCache:
 
     def set(self, *args, **kwargs):
         raise RedisError('redis down')
+    
+    def lock(self, *args, **kwargs):
+        raise RedisError('redis down')
 
 
 def test_cache_failure_falls_back(monkeypatch):
@@ -28,3 +31,8 @@ def test_lock_acquire_and_release(monkeypatch):
     fake_cache.lock.assert_called_once_with('lead:1', timeout=180)
     fake_lock.acquire.assert_called_once_with(blocking=False)
     fake_lock.release.assert_called_once_with()
+
+def test_lock_failure_is_logged(monkeypatch,caplog):
+    monkeypatch.setattr(cache,'cache',BrokenCache())
+    assert cache.take_lock('lead:1') is None
+    assert 'redis_lock_failed' in caplog.text

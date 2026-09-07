@@ -1,11 +1,13 @@
 from fastapi import APIRouter,Depends,Query,HTTPException
 from sqlalchemy.orm import Session
-
+import logging
 from ..dependencies import get_current_user,get_db
 from ..models import User
 from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult
 from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below
 from ..services.cache_service import take_lock, free_lock
+
+log=logging.getLogger(__name__)
 router=APIRouter()
 
 
@@ -47,10 +49,18 @@ def analyze_lead(
         raise HTTPException(status_code=404,detail=str(error)) from error
     lock=take_lock(f'lead:analyze:{current_user.id}')
     if lock is None:
+        log.warning(
+            'lead_analysis_lock_unavailable user_id=%s resume_id=%s',
+            current_user.id,request.resume_id
+        )
         raise HTTPException(status_code=503,detail='精判任务繁忙，请稍后重试')
     try:
         return analyze_next(db,current_user.id,request.resume_id,proofs,request.min_score)
     except Exception as error:
+        log.exception(
+            'lead_analysis_failed user_id=%s resume_id=%s',
+            current_user.id,request.resume_id
+        )
         raise HTTPException(status_code=502,detail='精判失败，请稍后重试') from error
     finally:
         free_lock(lock)

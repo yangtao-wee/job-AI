@@ -8,7 +8,7 @@ from app.routers import leads
 
 client=TestClient(app)
 
-def test_analyze_busy_skips_model(monkeypatch):
+def test_analyze_busy_skips_model(monkeypatch,caplog):
     app.dependency_overrides[get_current_user]=lambda:NS(id=7)
     app.dependency_overrides[get_db]=lambda:object()
     monkeypatch.setattr(leads,'load_proofs',lambda *args:['proof'])
@@ -18,9 +18,11 @@ def test_analyze_busy_skips_model(monkeypatch):
     response=client.post('/leads/analyze',json={'resume_id':1,'min_score':60})
     app.dependency_overrides.clear()
     assert response.status_code==503
+    assert 'lead_analysis_lock_unavailable' in caplog.text
+    assert 'user_id=7' in caplog.text
     run.assert_not_called()
 
-def test_analyze_failure_releases_lock(monkeypatch):
+def test_analyze_failure_releases_lock(monkeypatch,caplog):
     app.dependency_overrides[get_current_user]=lambda:NS(id=7)
     app.dependency_overrides[get_db]=lambda:object()
     monkeypatch.setattr(leads,'load_proofs',lambda *args:['proof'])
@@ -33,4 +35,6 @@ def test_analyze_failure_releases_lock(monkeypatch):
     response=client.post('/leads/analyze',json={'resume_id':1,'min_score':60})
     app.dependency_overrides.clear()
     assert response.status_code==502
+    assert 'lead_analysis_failed' in caplog.text
+    assert 'resume_id=1' in caplog.text
     release.assert_called_once_with(lock)

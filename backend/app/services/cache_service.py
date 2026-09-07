@@ -1,4 +1,5 @@
 import json
+import logging
 import hashlib
 from redis import Redis
 from redis.exceptions import RedisError, LockError
@@ -6,6 +7,7 @@ from redis.lock import Lock
 
 from ..config import settings
 
+log=logging.getLogger(__name__)
 cache = Redis.from_url(settings.redis_url,decode_responses=True)
 # from_url：【第三方库】，根据 settings.redis_url 创建客户端。
 # decode_responses=True：让读取结果直接成为字符串，否则通常得到字节数据。
@@ -37,10 +39,11 @@ def write_cache(key:str,data:dict,ttl:int=3600)->bool:
         return False
 
 def take_lock(key: str, ttl: int = 180) -> Lock | None:
-    lock = cache.lock(key, timeout=ttl)
     try:
+        lock = cache.lock(key, timeout=ttl)
         return lock if lock.acquire(blocking=False) else None
     except RedisError:
+        log.exception('redis_lock_failed key=%s',key)
         return None
 
 
@@ -48,4 +51,4 @@ def free_lock(lock: Lock) -> None:
     try:
         lock.release()
     except (RedisError, LockError):
-        pass
+        log.exception('redis_lock_release_failed')

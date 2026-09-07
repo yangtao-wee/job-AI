@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
 
 from ..dependencies import get_current_user, get_db
-from ..models import Application,Resume,ResumeAnalysis,SavedReport,User
+from ..models import Application,Resume,ResumeAnalysis,SavedReport,User,JobLead
 from ..schemas import ResumeResponse,ResumeProfile,ProfileBuildRequest
 from ..services.resume_parser import extract_pdf_text
 from ..services.ai_resume_service import analyze_resume_with_ai
@@ -117,6 +117,15 @@ def delete_resume(
             .filter(SavedReport.resume_id==resume_id)
             .all()
         ]
+        db.query(JobLead).filter(
+            JobLead.report_id.in_(report_ids)
+        ).update({
+            'report_id':None,
+            'deep_at':None,
+            'deep_ok':0,
+            'deep_part':0,
+            'deep_total':0
+        },synchronize_session=False)
         db.query(Application).filter(
             Application.report_id.in_(report_ids)
         ).delete(synchronize_session=False)

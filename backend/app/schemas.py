@@ -428,6 +428,11 @@ class LeadOut(BaseModel):
     url:str
     tags:list[str]
     quick_score:int
+    deep_ok:int
+    deep_part:int
+    deep_total:int
+    deep_at:datetime|None=None
+    has_jd:bool=False
     status:str
     created_at:datetime
 
@@ -435,3 +440,42 @@ class LeadSaveResult(BaseModel):
     added:int
     updated:int
     total:int
+
+class LeadJdIn(BaseModel):
+    url:str=Field(min_length=1,max_length=500)
+    jd_text:str=Field(min_length=20,max_length=20000)
+
+
+class LeadJdBatch(BaseModel):
+    items:list[LeadJdIn]=Field(min_length=1,max_length=20)
+
+
+class LeadJdResult(BaseModel):
+    updated:int
+    missed:int
+
+
+class LeadAnalyzeRequest(BaseModel):
+    resume_id:int=Field(gt=0)
+    min_score:int=Field(default=60,ge=0,le=100)
+
+
+class LeadAnalyzeResult(BaseModel):
+    analyzed:bool
+    remaining:int
+    lead_id:int|None=None
+    title:str=''
+    deep_ok:int=0
+    deep_part:int=0
+    deep_total:int=0
+
+class LeadStatusUpdate(BaseModel):
+    status:Literal['新抓取','待投递','已投递','已跳过']
+
+
+class LeadSkipRequest(BaseModel):
+    below:int=Field(ge=1,le=100)
+
+
+class LeadSkipResult(BaseModel):
+    skipped:int

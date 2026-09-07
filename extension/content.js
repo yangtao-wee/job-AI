@@ -9,11 +9,22 @@ const DRY_RUN = false
 const DAILY_MAX = 1
 const APPLY_MIN = 3
 const MAX_DEEP = 3
+const API = 'http://127.0.0.1:8000'
+const QUEUE_KEY = 'jm_apply_queue'
+const APPLY_GAP = 10000
 let lastFirst = ''
 let TOKEN = ''
 
 chrome.storage.local.get('token')
-  .then(data => { TOKEN = data.token || ''; scan() })
+  .then(data => {
+    TOKEN = data.token || ''
+    if (isDetailPage()) {
+      runQueue().catch(e => { tip.textContent = `[求职助手] 投递失败：${e.message}` })
+    } else {
+      addStartButton()
+      scan()
+    }
+  })
   .catch(e => { tip.textContent = `[求职助手] 读取Token失败：${e.message}` })
 
 function scan() {
@@ -60,7 +71,12 @@ function scan() {
       } catch (e) {
         tip.textContent += ` · 入库失败：${e.message}`
       }
-      deepCheck(list,scores)
+      try {
+        const n = await collectJds(list)
+        tip.textContent = `[求职助手] 已入库 ${scores.length} 个岗位，补全 ${n} 份JD。去「岗位池」页面开始精判`
+      } catch (e) {
+        tip.textContent += ` · JD补全失败：${e.message}`
+      }
     })
     .catch(e => { tip.textContent = `[求职助手] 打分失败：${e}` })
 }
@@ -115,6 +131,33 @@ async function waitJd(prev) {
   }
   return null
 }
+
+
+async function collectJds(list) {
+  const items = []
+  let prev = document.querySelector('.job-detail-body')?.innerText || ''
+  for (let i = 0; i < list.length && items.length < 20; i++) {
+    const t = list[i]
+    if (!t.url) continue
+    tip.textContent = `[求职助手] 读取JD ${i + 1}/${list.length}`
+    t.el.click()
+    const jd = await waitJd(prev)
+    if (!jd || jd.length < 20) continue
+    prev = jd
+    items.push({ url: t.url, jd_text: jd.slice(0, 20000) })
+  }
+  if (!items.length) return 0
+  const r = await fetch('http://127.0.0.1:8000/leads/jd', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+    body: JSON.stringify({ items })
+  })
+  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  const d = await r.json()
+  return d.updated
+}
+
+
 
 async function deepCheck(list, scores) {
   const targets = list.filter((_, i) => scores[i].score >= PASS).slice(0, MAX_DEEP)
@@ -200,6 +243,80 @@ async function closeDialog() {
     await sleep(300)
   }
   return false
+}
+
+
+function isDetailPage() {
+  return location.pathname.includes('/job_detail/')
+}
+
+function titleKey(s) {
+  return (s || '').replace(/\s/g, '').slice(0, 10)
+}
+
+async function applyHere(expectTitle) {
+  const h1 = document.querySelector('h1')?.innerText.trim()
+  if (!h1) return '⛔页面没加载好'
+  if (titleKey(h1) !== titleKey(expectTitle)) return `⛔标题对不上：${h1}`
+  const btn = document.querySelector('.btn-startchat')
+  if (!btn) return '⛔没找到沟通按钮'
+  if (!window.confirm(`确认投递「${h1}」？`)) return '✋已取消'
+  btn.click()
+  const closed = await closeDialog()
+  return closed ? '✅已投递' : '⚠️投了但弹窗没关'
+}
+
+function addStartButton() {
+  const b = document.createElement('button')
+  b.textContent = '开始投递'
+  b.style.cssText = 'position:fixed;top:0;left:260px;z-index:99999;background:#B6791A;color:#fff;border:0;padding:7px 16px;font-size:13px;cursor:pointer'
+  b.addEventListener('click', () => {
+    startApply().catch(e => { tip.textContent = `[求职助手] ${e.message}` })
+  })
+  document.body.appendChild(b)
+}
+
+async function startApply() {
+  const r = await fetch(`${API}/leads?status=待投递`, {
+    headers: { 'Authorization': `Bearer ${TOKEN}` }
+  })
+  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  const list = await r.json()
+  if (!list.length) {
+    tip.textContent = '[求职助手] 没有「待投递」的岗位，先去岗位池标记'
+    return
+  }
+  const queue = list.map(l => ({ id: l.id, url: l.url, title: l.title }))
+  await chrome.storage.local.set({ [QUEUE_KEY]: queue })
+  tip.textContent = `[求职助手] 队列 ${queue.length} 个，开始投递…`
+  location.href = queue[0].url
+}
+
+async function runQueue() {
+  const data = await chrome.storage.local.get(QUEUE_KEY)
+  const queue = data[QUEUE_KEY] || []
+  if (!queue.length) return
+  const cur = queue[0]
+  if (!location.href.startsWith(cur.url.split('?')[0])) return
+  tip.textContent = `[求职助手] 投递中，还剩 ${queue.length} 个`
+  const st = await applyHere(cur.title)
+  if (st.startsWith('✅') || st.startsWith('⚠️')) {
+    await fetch(`${API}/leads/${cur.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+      body: JSON.stringify({ status: '已投递' })
+    })
+  }
+  queue.shift()
+  if (!queue.length) {
+    await chrome.storage.local.remove(QUEUE_KEY)
+    tip.textContent = `[求职助手] ${st} · 队列全部完成`
+    return
+  }
+  await chrome.storage.local.set({ [QUEUE_KEY]: queue })
+  tip.textContent = `[求职助手] ${st} · ${APPLY_GAP / 1000} 秒后投下一个（还剩 ${queue.length}）`
+  await sleep(APPLY_GAP)
+  location.href = queue[0].url
 }
 
 async function tryApply(t) {

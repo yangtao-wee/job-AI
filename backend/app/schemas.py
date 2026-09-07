@@ -25,7 +25,7 @@ class UserCreate(BaseModel):
     username:str  # 用户名。
     email:str  # 电子邮箱。
     password:str  # 未加密的原始密码，只用于接收请求，不能直接保存到数据库。
-
+    invite_code:str=''
 
 # 用户信息返回结构：只返回可以公开给前端的用户信息，不返回密码。
 class UserResponse(BaseModel):

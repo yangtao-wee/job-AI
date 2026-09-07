@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     # 2：首次请求失败后，最多再重试2次。
     llm_in_price:float=0.0
     # 输入每100万 Token 的价格，可以改名，但引用处必须同步修改。
+    register_code:str|None=None
+    cors_origins:str='http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,https://www.zhipin.com'
     llm_out_price:float=0.0
     # 输出每100万 Token 的价格。
     model_config = SettingsConfigDict(

@@ -10,6 +10,7 @@ from .routers import jobs,users,resumes,rag,agent,leads
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from .services.cache_service import cache_ready
+from .config import settings
 # engine
 # 知道：
 # 数据库在哪里。
@@ -64,13 +65,8 @@ app.include_router(
 app.add_middleware(
     CORSMiddleware,
     # 保安
-    allow_origins=[
-        # 允许哪些前端地址。
-        'http://localhost:5174',
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-        'https://www.zhipin.com'
-    ],
+        # 允许哪些前端地址。默认值在 config.py，生产环境用 CORS_ORIGINS 覆盖。
+    allow_origins=[o.strip() for o in settings.cors_origins.split(',') if o.strip()],
     allow_methods=['*'],
     # 允许所有HTTP方法：比如：GET POST PUT DELETE
     allow_headers=['*'],

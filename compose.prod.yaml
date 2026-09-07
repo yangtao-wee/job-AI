@@ -5,6 +5,8 @@ services:
     ports: !reset []
   backend:
     ports: !reset []
+    environment:
+      LLM_MOCK_MODE: "false"
   frontend:
     ports: !override
       - "80:80"

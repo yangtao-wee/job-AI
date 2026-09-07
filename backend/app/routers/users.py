@@ -6,6 +6,8 @@ from ..utils.security import verify_password,create_access_token
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from ..dependencies import get_db,get_current_user
+from ..config import settings
+from secrets import compare_digest
 router = APIRouter()
 
 @router.post('/register',response_model=UserResponse,
@@ -14,6 +16,13 @@ router = APIRouter()
 # UserCreate代表：接收前端用户提交的数据。
 def registerr(user:UserCreate,
     db:Session=Depends(get_db)):
+    if settings.register_code and not compare_digest(
+        user.invite_code, settings.register_code
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='邀请码不正确'
+        )
     existing_user=db.query(User).filter(
         or_(User.username==user.username,
             User.email==user.email)

@@ -43,7 +43,7 @@ def list_leads(db:Session,user_id:int,status:str|None=None,offset:int=0)->list[J
         q=q.filter(JobLead.status==status)
     return (
         q.order_by(JobLead.quick_score.desc(),JobLead.id.desc())
-        .offset(offset).limit(50).all()
+        .offset(offset).limit(200).all()
     )
 
 def save_jd(db:Session,user_id:int,items:list[LeadJdIn])->dict:

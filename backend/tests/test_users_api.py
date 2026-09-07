@@ -67,3 +67,39 @@ def test_login_no_such_user():
         'username': 'nobody_here_at_all', 'password': 'Test123456'
     })
     assert res.status_code == 401
+
+
+def login(user):
+    client.post('/users/register', json={**user, 'invite_code': CODE})
+    res = client.post('/users/login', json={
+        'username': user['username'], 'password': user['password']
+    })
+    return res.json()['access_token']
+
+
+def test_token_works():
+    token = login(new_user())
+    res = client.get('/users/me', headers={'Authorization': f'Bearer {token}'})
+    assert res.status_code == 200
+
+
+def test_logout_all_invalidates_old_token():
+    token = login(new_user())
+    head = {'Authorization': f'Bearer {token}'}
+
+    assert client.post('/users/logout-all', headers=head).status_code == 204
+    assert client.get('/users/me', headers=head).status_code == 401
+
+
+def test_new_token_works_after_logout_all():
+    user = new_user()
+    old = login(user)
+    client.post('/users/logout-all', headers={'Authorization': f'Bearer {old}'})
+
+    res = client.post('/users/login', json={
+        'username': user['username'], 'password': user['password']
+    })
+    new = res.json()['access_token']
+
+    assert client.get('/users/me', headers={'Authorization': f'Bearer {new}'}).status_code == 200
+    assert client.get('/users/me', headers={'Authorization': f'Bearer {old}'}).status_code == 401

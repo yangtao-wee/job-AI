@@ -59,7 +59,8 @@ def login(login_data:UserLogin,
 
     token = create_access_token(
         {
-            'user_id':db_user.id
+            'user_id':db_user.id,
+            'tv':db_user.token_version
         }
     )
 
@@ -72,3 +73,12 @@ def get_me(
     current_user:User = Depends(get_current_user)
 ):
     return current_user
+
+
+@router.post('/logout-all',status_code=status.HTTP_204_NO_CONTENT)
+def logout_all(
+    current_user:User=Depends(get_current_user),
+    db:Session=Depends(get_db)
+):
+    current_user.token_version += 1
+    db.commit()

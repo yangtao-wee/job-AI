@@ -84,7 +84,7 @@ class User(Base):
     password = Column(
         String(255)
     )
-
+    token_version = Column(Integer, nullable=False, server_default='0')
 class Resume(Base):
     __tablename__ = 'resumes'
 

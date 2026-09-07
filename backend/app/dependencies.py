@@ -34,6 +34,7 @@ def get_current_user(
     try:
         payload = decode_access_token(credentials.credentials)
         user_id = payload.get('user_id')
+        token_version = payload.get('tv')
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -44,6 +45,11 @@ def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='用户不存在'
+        )
+    if token_version != user.token_version:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='TOKEN已失效，请重新登录'
         )
     return user
 

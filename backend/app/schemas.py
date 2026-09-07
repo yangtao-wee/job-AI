@@ -486,3 +486,6 @@ class LeadMarkRequest(BaseModel):
 
 class LeadMarkResult(BaseModel):
     marked:int
+
+class LeadUnmarkResult(BaseModel):
+    unmarked:int

@@ -144,7 +144,7 @@ def skip_below(db:Session,user_id:int,below:int)->int:
     n=db.query(JobLead).filter(
         JobLead.user_id==user_id,
         JobLead.quick_score<below,
-        JobLead.status=='新抓取'
+        JobLead.status.in_(['新抓取','待投递'])
     ).update({'status':'已跳过'},synchronize_session=False)
     try:
         db.commit()
@@ -157,8 +157,20 @@ def mark_above(db:Session,user_id:int,above:int)->int:
     n=db.query(JobLead).filter(
         JobLead.user_id==user_id,
         JobLead.quick_score>=above,
-        JobLead.status=='新抓取'
+        JobLead.status.in_(['新抓取','已跳过'])
     ).update({'status':'待投递'},synchronize_session=False)
+    try:
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise
+    return n
+
+def unmark_all(db:Session,user_id:int)->int:
+    n=db.query(JobLead).filter(
+        JobLead.user_id==user_id,
+        JobLead.status=='待投递'
+    ).update({'status':'新抓取'},synchronize_session=False)
     try:
         db.commit()
     except SQLAlchemyError:

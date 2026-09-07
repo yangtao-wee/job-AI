@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 import logging
 from ..dependencies import get_current_user,get_db,check_limit
 from ..models import User
-from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult
-from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below,mark_above
+from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult,LeadUnmarkResult
+from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below,mark_above,unmark_all
 from ..services.cache_service import take_lock, free_lock
 
 log=logging.getLogger(__name__)
@@ -95,3 +95,11 @@ def mark_high_score(
     db:Session=Depends(get_db)
 ):
     return {'marked':mark_above(db,current_user.id,request.above)}
+
+
+@router.post('/unmark',response_model=LeadUnmarkResult)
+def unmark_all_leads(
+    current_user:User=Depends(get_current_user),
+    db:Session=Depends(get_db)
+):
+    return {'unmarked':unmark_all(db,current_user.id)}

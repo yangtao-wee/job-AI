@@ -31,9 +31,7 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const res = await request.get('/leads', {
-      params: filter.value ? { status: filter.value } : {},
-    })
+    const res = await request.get('/leads')
     leads.value = res.data
   } catch (e) {
     error.value = e.response?.data?.detail || e.message || '加载失败'
@@ -56,7 +54,6 @@ onMounted(() => { load(); loadResumes() })
 
 function pick(value) {
   filter.value = value
-  load()
 }
 
 // 单条改状态。改完只更新本地这一行，不重新拉整个列表。
@@ -69,27 +66,29 @@ async function setStatus(lead, status) {
   }
 }
 
-async function skipBelow() {
-  if (!confirm(`把 ${minScore.value} 分以下、状态还是「新抓取」的岗位全部标为已跳过？`)) return
-  try {
-    const res = await request.post('/leads/skip-below', { below: minScore.value })
-    error.value = ''
-    await load()
-    lastTitle.value = `已跳过 ${res.data.skipped} 个低分岗位`
-  } catch (e) {
-    error.value = e.response?.data?.detail || '批量跳过失败'
-  }
-}
-
 async function markAbove() {
-  if (!confirm(`把 ${minScore.value} 分及以上、状态还是「新抓取」的岗位全部标为待投递？`)) return
+  if (!confirm(`把 ${minScore.value} 分及以上的岗位标为待投递（含之前跳过的，已投递的不动）？`)) return
   try {
     const res = await request.post('/leads/mark-above', { above: minScore.value })
     error.value = ''
     await load()
-    lastTitle.value = `已标记 ${res.data.marked} 个岗位为待投递`
+    lastTitle.value = res.data.marked
+      ? `已标记 ${res.data.marked} 个岗位为待投递`
+      : `没有符合条件的岗位（需要：状态是「新抓取」且分数 ≥ ${minScore.value}）`
   } catch (e) {
     error.value = e.response?.data?.detail || '批量标记失败'
+  }
+}
+
+async function unmarkAll() {
+  if (!confirm('把所有「待投递」的岗位撤回「新抓取」？已投递的不动。')) return
+  try {
+    const res = await request.post('/leads/unmark')
+    error.value = ''
+    await load()
+    lastTitle.value = `已撤销 ${res.data.unmarked} 个待投递标记`
+  } catch (e) {
+    error.value = e.response?.data?.detail || '撤销失败'
   }
 }
 
@@ -143,7 +142,10 @@ function tone(score) {
 }
 
 const shown = computed(() =>
-  leads.value.filter(l => l.quick_score >= minShow.value)
+  leads.value.filter(l =>
+    l.quick_score >= minShow.value &&
+    (!filter.value || l.status === filter.value)
+  )
 )
 
 const counts = computed(() => {
@@ -151,6 +153,16 @@ const counts = computed(() => {
   for (const l of leads.value) c[l.status] = (c[l.status] || 0) + 1
   return c
 })
+
+const willMark = computed(() =>
+  leads.value.filter(l =>
+    ['新抓取', '已跳过'].includes(l.status) && l.quick_score >= minScore.value
+  ).length
+)
+
+const willUnmark = computed(() =>
+  leads.value.filter(l => l.status === '待投递').length
+)
 </script>
 
 <template>
@@ -186,11 +198,12 @@ const counts = computed(() => {
       <button v-if="!running" class="btn" @click="runAnalyze">开始精判</button>
       <button v-else class="btn stop" @click="stopped = true">停止</button>
 
-      <button class="btn ghost" :disabled="running" @click="skipBelow">
-        跳过 {{ minScore }} 分以下
+      <button class="btn go" :disabled="running || !willMark" @click="markAbove">
+        ↑ 标记 {{ minScore }} 分以上（{{ willMark }}）
       </button>
-      <button class="btn go" :disabled="running" @click="markAbove">
-        标记 {{ minScore }} 分以上要投
+
+      <button class="btn ghost" :disabled="running || !willUnmark" @click="unmarkAll">
+        ↩ 全部撤销待投（{{ willUnmark }}）
       </button>
       <div v-if="running || lastTitle" class="progress">
         <span v-if="running" class="dot"></span>
@@ -260,6 +273,7 @@ const counts = computed(() => {
       :disabled="running"
       @click="setStatus(l, '已投递')"
       >已投</button>
+            
           <button
             v-if="l.status !== '已跳过'"
             class="mini"

@@ -479,3 +479,10 @@ class LeadSkipRequest(BaseModel):
 
 class LeadSkipResult(BaseModel):
     skipped:int
+
+class LeadMarkRequest(BaseModel):
+    above:int=Field(ge=1,le=100)
+
+
+class LeadMarkResult(BaseModel):
+    marked:int

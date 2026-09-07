@@ -152,3 +152,16 @@ def skip_below(db:Session,user_id:int,below:int)->int:
         db.rollback()
         raise
     return n
+
+def mark_above(db:Session,user_id:int,above:int)->int:
+    n=db.query(JobLead).filter(
+        JobLead.user_id==user_id,
+        JobLead.quick_score>=above,
+        JobLead.status=='新抓取'
+    ).update({'status':'待投递'},synchronize_session=False)
+    try:
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise
+    return n

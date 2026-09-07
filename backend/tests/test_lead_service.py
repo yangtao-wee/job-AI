@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from unittest.mock import MagicMock
 import pytest
 from app.models import Base, JobLead
-from app.services.lead_service import update_status, save_leads
+from app.services.lead_service import update_status, save_leads, mark_above
 from app.schemas import LeadIn
 from app.services import lead_service as service
 
@@ -60,3 +60,30 @@ def test_analyze_next_keeps_one_transaction(monkeypatch):
     assert save.call_args.kwargs['commit'] is False
     assert job.report_id==9
     db.commit.assert_called_once()
+
+def make_db():
+    engine = create_engine('sqlite:///:memory:')
+    Base.metadata.create_all(engine)
+    return Session(engine)
+
+
+def test_mark_above_only_touches_new():
+    with make_db() as db:
+        db.add_all([
+            JobLead(user_id=1, title='高分', url='u1', quick_score=80),
+            JobLead(user_id=1, title='刚好', url='u2', quick_score=60),
+            JobLead(user_id=1, title='低分', url='u3', quick_score=30),
+            JobLead(user_id=1, title='已跳过的高分', url='u4',
+                    quick_score=90, status='已跳过'),
+            JobLead(user_id=2, title='别人的高分', url='u5', quick_score=95),
+        ])
+        db.commit()
+
+        assert mark_above(db, 1, 60) == 2
+
+        got = {r.url: r.status for r in db.query(JobLead).all()}
+        assert got['u1'] == '待投递'
+        assert got['u2'] == '待投递'
+        assert got['u3'] == '新抓取'
+        assert got['u4'] == '已跳过'
+        assert got['u5'] == '新抓取'

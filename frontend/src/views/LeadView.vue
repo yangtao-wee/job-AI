@@ -7,7 +7,7 @@ const resumes = ref([])
 const loading = ref(false)
 const error = ref('')
 const filter = ref('')
-
+const minShow = ref(0)
 // 精判参数
 const resumeId = ref(null)
 const minScore = ref(60)
@@ -81,6 +81,19 @@ async function skipBelow() {
   }
 }
 
+async function markAbove() {
+  if (!confirm(`把 ${minScore.value} 分及以上、状态还是「新抓取」的岗位全部标为待投递？`)) return
+  try {
+    const res = await request.post('/leads/mark-above', { above: minScore.value })
+    error.value = ''
+    await load()
+    lastTitle.value = `已标记 ${res.data.marked} 个岗位为待投递`
+  } catch (e) {
+    error.value = e.response?.data?.detail || '批量标记失败'
+  }
+}
+
+
 // 精判：一次一个，循环调用。前端驱动，随时可停。
 async function runAnalyze() {
   if (!resumeId.value) {
@@ -129,6 +142,10 @@ function tone(score) {
   return 'low'
 }
 
+const shown = computed(() =>
+  leads.value.filter(l => l.quick_score >= minShow.value)
+)
+
 const counts = computed(() => {
   const c = {}
   for (const l of leads.value) c[l.status] = (c[l.status] || 0) + 1
@@ -172,7 +189,9 @@ const counts = computed(() => {
       <button class="btn ghost" :disabled="running" @click="skipBelow">
         跳过 {{ minScore }} 分以下
       </button>
-
+      <button class="btn go" :disabled="running" @click="markAbove">
+        标记 {{ minScore }} 分以上要投
+      </button>
       <div v-if="running || lastTitle" class="progress">
         <span v-if="running" class="dot"></span>
         <span v-if="doneCount">已完成 {{ doneCount }} 个</span>
@@ -192,7 +211,11 @@ const counts = computed(() => {
         {{ f.label }}
         <span v-if="f.value && counts[f.value]" class="n">{{ counts[f.value] }}</span>
       </button>
-      <span class="total">共 {{ leads.length }} 条</span>
+      <label class="minshow">
+        分数 ≥
+        <input v-model.number="minShow" type="number" min="0" max="100">
+      </label>
+        <span class="total">显示 {{ shown.length }} / 共 {{ leads.length }} 条</span>
     </div>
 
     <p v-if="error" class="err">{{ error }}</p>
@@ -204,7 +227,7 @@ const counts = computed(() => {
 
     <ul v-else class="list">
       <li
-        v-for="l in leads"
+        v-for="l in shown"
         :key="l.id"
         class="row"
         :class="[tone(l.quick_score), { off: l.status === '已跳过' }]"
@@ -305,6 +328,7 @@ select { min-width: 190px; }
 .btn:disabled { opacity: .5; cursor: default; }
 .btn.ghost { background: transparent; color: #35c48a; }
 .btn.stop { background: #8a2f2f; border-color: #8a2f2f; }
+.btn.go { background: #1d5fb8; border-color: #1d5fb8; }
 
 .progress { color: #9aa5bd; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
 .cur { color: #35c48a; }

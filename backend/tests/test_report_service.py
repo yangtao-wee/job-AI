@@ -33,7 +33,10 @@ def test_save_report():
                 stored_filename='test.pdf', content_type='application/pdf', file_size=1
             ))
             db.commit()
-
+            pending=save_report(db,1,request,result,commit=False)
+            assert pending.id is not None
+            db.rollback()
+            assert db.query(SavedReport).count()==0
             save_report(db, 1, request, result)
 
             with pytest.raises(IntegrityError):

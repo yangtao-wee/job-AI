@@ -6,6 +6,7 @@ import pytest
 from app.models import Base, JobLead
 from app.services.lead_service import update_status, save_leads
 from app.schemas import LeadIn
+from app.services import lead_service as service
 
 def test_update_status_isolated():
     engine = create_engine('sqlite:///:memory:')
@@ -42,3 +43,20 @@ def test_save_leads_is_idempotent():
         rows = db.query(JobLead).all()
         assert len(rows) == 1
         assert rows[0].quick_score == 80
+
+def test_analyze_next_keeps_one_transaction(monkeypatch):
+    db=MagicMock()
+    base=db.query.return_value.filter.return_value
+    job=MagicMock(
+        jd_text='负责Python后端、AI应用工程和系统稳定性建设工作。',
+        title='Python开发',company='A'
+    )
+    base.order_by.return_value.first.return_value=job
+    result=MagicMock(checks=[])
+    monkeypatch.setattr(service,'make_report',lambda *args:result)
+    save=MagicMock(return_value=MagicMock(id=9))
+    monkeypatch.setattr(service,'save_report',save)
+    service.analyze_next(db,1,2,['proof'])
+    assert save.call_args.kwargs['commit'] is False
+    assert job.report_id==9
+    db.commit.assert_called_once()

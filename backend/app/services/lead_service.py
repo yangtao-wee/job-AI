@@ -101,7 +101,7 @@ def analyze_next(db:Session,user_id:int,resume_id:int,proofs:list[str],min_score
         jd_text=lead.jd_text,
         job_title=lead.title[:100],
         company=(lead.company or '未知')[:100]
-    ),result)
+    ),result,commit=False)
     lead.deep_ok=sum(1 for c in result.checks if c.status=='有依据')
     lead.deep_part=sum(1 for c in result.checks if c.status=='部分支持')
     lead.deep_total=len(result.checks)

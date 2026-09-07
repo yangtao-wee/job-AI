@@ -3,7 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..models import SavedReport
 from ..schemas import JobAssistRequest, Report
 
-def save_report(db: Session, user_id: int, request: JobAssistRequest, result: Report) -> SavedReport:
+def save_report(db: Session, user_id: int, request: JobAssistRequest, result: Report,commit:bool=True) -> SavedReport:
     row = SavedReport(
         user_id=user_id, resume_id=request.resume_id,
         title=request.job_title, company=request.company,
@@ -11,11 +11,15 @@ def save_report(db: Session, user_id: int, request: JobAssistRequest, result: Re
     )
     try:
         db.add(row)
-        db.commit()
+        if commit:
+            db.commit()
+        else:
+            db.flush()
     except SQLAlchemyError:
         db.rollback()
         raise
-    db.refresh(row)
+    if commit:
+        db.refresh(row)
     return row
 
 def list_reports(db:Session,user_id:int,offset:int=0):

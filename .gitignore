@@ -11,3 +11,4 @@
 tmp/
 backend/.pytest_tmp/
 /output/
+/backups/

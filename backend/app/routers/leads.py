@@ -1,7 +1,7 @@
 from fastapi import APIRouter,Depends,Query,HTTPException
 from sqlalchemy.orm import Session
 import logging
-from ..dependencies import get_current_user,get_db
+from ..dependencies import get_current_user,get_db,check_limit
 from ..models import User
 from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult
 from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below
@@ -43,6 +43,7 @@ def analyze_lead(
     current_user:User=Depends(get_current_user),
     db:Session=Depends(get_db)
 ):
+    check_limit('lead', current_user.id, 30, 3600)
     try:
         proofs=load_proofs(db,current_user.id,request.resume_id)
     except ValueError as error:

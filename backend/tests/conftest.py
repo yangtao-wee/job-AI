@@ -12,3 +12,17 @@ from alembic.config import Config
 
 cfg = Config(str(project_dir / 'backend' / 'alembic.ini'))
 command.upgrade(cfg, 'head')
+import pytest
+from app.main import app
+from app.routers import agent,jobs,leads,rag,resumes
+
+@pytest.fixture(autouse=True)
+def allow_ai_limits(monkeypatch):
+    for router in (agent,jobs,leads,rag,resumes):
+        monkeypatch.setattr(
+            router,
+            'check_limit',
+            lambda *args, **kwargs: None
+        )
+    yield
+    app.dependency_overrides.clear()

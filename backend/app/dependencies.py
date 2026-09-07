@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from .models import User
 from .utils.security import decode_access_token
 from .database import SessionLocal
-
+from .services.rate_service import use_limit
 # Depends：让 FastAPI 自动提供 Token 和数据库连接。
 # HTTPException、status：返回标准 401错误。
 # HTTPBearer：从请求头读取 Bearer Token。
@@ -46,3 +46,19 @@ def get_current_user(
             detail='用户不存在'
         )
     return user
+
+def check_limit(name: str, user_id: int, limit: int, window: int) -> None:
+    try:
+        retry = use_limit(
+            f'rate:{name}:{user_id}',
+            limit,
+            window
+        )
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    if retry:
+        raise HTTPException(
+            status_code=429,
+            detail='请求次数过多，请稍后重试',
+            headers={'Retry-After': str(retry)}
+        )

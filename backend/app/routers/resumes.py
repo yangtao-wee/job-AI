@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
 
-from ..dependencies import get_current_user, get_db
+from ..dependencies import get_current_user, get_db, check_limit
 from ..models import Application,Resume,ResumeAnalysis,SavedReport,User,JobLead
 from ..schemas import ResumeResponse,ResumeProfile,ProfileBuildRequest
 from ..services.resume_parser import extract_pdf_text
@@ -198,6 +198,8 @@ def analyze_resume(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail='当前仅支持分析PDF简历'
         )
+    if use_ai:
+        check_limit('resume_ai', current_user.id, 10, 3600)
     file_path = UPLOAD_DIR / resume_record.stored_filename
     try:
         text = extract_pdf_text(file_path)
@@ -235,6 +237,7 @@ def build_resume_profile(
     request:ProfileBuildRequest,
     _current_user:User=Depends(get_current_user)
 ):
+    check_limit('resume_profile', _current_user.id, 10, 3600)
     try:
         return build_profile(request.raw,request.target)
     except Exception as error:

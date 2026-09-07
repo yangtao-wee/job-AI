@@ -1,3 +1,4 @@
+from types import SimpleNamespace as NS
 from fastapi.testclient import TestClient
 # TestClient它可以在pytest中模拟浏览器发送HTTP请求，不需要手动启动后端服务器。
 from app.main import app
@@ -16,7 +17,7 @@ def test_rag_unauth():
 
 
 def fake_user():
-    return object()
+    return NS(id=7)
 
 def fake_answer(q,parts):
     sources=[{'text':part,'score':0.8} for part in parts]

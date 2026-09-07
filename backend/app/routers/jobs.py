@@ -4,7 +4,7 @@ from sqlalchemy.orm  import Session
 from pathlib import Path
 from sqlalchemy.exc import SQLAlchemyError
 from ..database import SessionLocal
-from ..dependencies import get_current_user,get_db
+from ..dependencies import get_current_user,get_db,check_limit
 from ..models import Job,User,Resume
 from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch,JobAssistRequest,JobAssistResponse,Report,ReportBoag,ReportDeta,ApplyCreate,ApplyUpdate,ApplyOut,ApplyItem,QuickScoreRequest,QuickScoreItem,ReportSaved
 from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref,build_job_requirements,quick_score
@@ -63,7 +63,8 @@ def match_job(
     request:JobMatchRequest,
     current_user:User = Depends(get_current_user),
     db: Session = Depends(get_db)
-):
+):  
+    check_limit('job_match', current_user.id, 30, 3600)
     analysis = get_user_resume_analysis(db,request.resume_id,current_user.id)
     job = db.query(Job).filter(Job.id == request.job_id).first()
     if not analysis or not job:
@@ -125,6 +126,7 @@ def assist_pasted_job(
      current_user:User=Depends(get_current_user),
      db:Session=Depends(get_db)
 ):
+     check_limit('job_assist', current_user.id, 10, 3600)
      analysis=get_user_resume_analysis(
           db,request.resume_id,current_user.id
      )
@@ -164,6 +166,7 @@ def job_report(
      current_user: User=Depends(get_current_user),
      db:Session=Depends(get_db)
 ):
+     check_limit('job_report', current_user.id, 10, 3600)
      resume=db.query(Resume).filter(
           Resume.id==request.resume_id,Resume.user_id==current_user.id 
      ).first()

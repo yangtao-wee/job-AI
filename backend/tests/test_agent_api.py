@@ -1,3 +1,4 @@
+from types import SimpleNamespace as NS
 from fastapi.testclient import TestClient
 from app.main import app
 from app.dependencies import get_current_user
@@ -11,7 +12,7 @@ def test_agent_unauth():
     assert res.status_code==401
 
 def fake_user():
-    return object()
+    return NS(id=7)
 
 def fake_answer(goal):
     return f'测试Agent回答:{goal}'

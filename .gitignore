@@ -10,5 +10,6 @@
 .vscode/
 tmp/
 backend/.pytest_tmp/
+backend/.pytest_tmp*/
 /output/
 /backups/

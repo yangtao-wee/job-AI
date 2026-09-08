@@ -82,35 +82,45 @@ def ask_model(client,messages):
     log_use(response, used_model)
     return response
 
-def run_agent(client,goal:str)->str:
+def run_agent(
+    client,
+    goal:str,
+    history:list[dict]|None=None
+)->str:
     msgs=[
         # system：【第三方接口固定值】系统角色，负责给模型规定身份和规则。
-        {'role':'system','content':'你是AI求职助手，需要资料时调用find_kb。'},
-        # 系统告诉模型——你是求职助手，需要资料时可以选择查询知识库。
-        {'role':'user','content':goal}
-        # user用户告诉模型——查询 Docker。
+        {
+            'role':'system',
+            'content':(
+                '你是AI求职助手。用户只输入一个岗位或方向时，不调用工具，'
+                '先询问他想了解岗位要求、优化简历、准备面试还是制定投递计划。'
+                '需要资料时调用find_kb；工具返回空列表时不要重复调用，'
+                '直接说明知识库资料不足。'
+            )
+        },
     ]
-    first=ask_model(client,msgs)
-    msg=first.choices[0].message
-    # choices：【第三方接口响应字段】候选回答列表。【0】message取第一个回答
-    calls=msg.tool_calls or []
-    # tool_calls：【第三方接口响应字段】模型提出的工具调用请求,不代表工具已经执行。
-    log.info('Agent首轮完成 tool_calls=%d',len(calls))
-    if not calls:
-        return msg.content or ''
-    # model_dump：【第三方库提供】把模型消息对象转换成 Python（蟒蛇语言）字典
-    msgs.append(msg.model_dump(exclude_none=True))
-    # exclude_none：【第三方库固定参数】排除值为“空值”的字段。
-    msgs.extend(run_call(call) for call in calls)
-    # extend：【语言固定方法】把多个元素加入列表。
-    second=ask_model(client,msgs)
-    # 把工具结果再次交给模型，让模型整理成自然语言：
-    return second.choices[0].message.content or ''
+    msgs.extend(history or [])
+    msgs.append({'role':'user','content':goal})
+    max_steps=3
+    for step in range(max_steps):
+        reply=ask_model(client,msgs)
+        msg=reply.choices[0].message
+        calls=msg.tool_calls or []
+        log.info('Agent第%d轮完成 tool_calls=%d',step+1,len(calls))
+        if not calls:
+            return msg.content or ''
+        if step == max_steps-1:
+            return '任务步骤过多，请补充更明确的求职目标'
+        msgs.append(msg.model_dump(exclude_none=True))
+        msgs.extend(run_call(call) for call in calls)
 
-def ask_agent(goal:str)->str:
+def ask_agent(
+    goal:str,
+    history:list[dict]|None=None
+)->str:
     if settings.llm_mock_mode:
         return f'模拟Agent回答:{goal}'
     if not settings.llm_model:
         raise RuntimeError('未配置 LLM_MODEL')
-    return run_agent(get_llm_client(),goal)
+    return run_agent(get_llm_client(),goal,history)
 # get_llm_client【自己命名】创建配置好的真实客户端。

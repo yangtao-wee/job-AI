@@ -14,7 +14,7 @@ def test_agent_unauth():
 def fake_user():
     return NS(id=7)
 
-def fake_answer(goal):
+def fake_answer(goal,history=None):
     return f'测试Agent回答:{goal}'
 
 def test_agent_ok(monkeypatch):
@@ -25,6 +25,25 @@ def test_agent_ok(monkeypatch):
     app.dependency_overrides.clear()
     assert (res.status_code,res.json()['answer'])==(200,'测试Agent回答:查询Docker')
     # res.json()：【框架提供】把响应 JSON 转成 Python 字典。
+
+def test_agent_forwards_history(monkeypatch):
+    seen={}
+    def fake_history(goal,history=None):
+        seen['goal']=goal
+        seen['history']=history
+        return '继续回答'
+    app.dependency_overrides[get_current_user]=fake_user
+    monkeypatch.setattr(agent,'ask_agent',fake_history)
+    res=client.post('/agent/ask',json={
+        'goal':'继续优化',
+        'history':[{'role':'user','content':'目标是AI工程师'}]
+    })
+    app.dependency_overrides.clear()
+    assert (res.status_code,res.json()['answer'])==(200,'继续回答')
+    assert seen=={
+        'goal':'继续优化',
+        'history':[{'role':'user','content':'目标是AI工程师'}]
+    }
 
 def test_agent_bad():
     app.dependency_overrides[get_current_user]=fake_user

@@ -10,7 +10,7 @@
     <div class="assistant-shell">
       <div class="conversation-area">
         <div
-          v-if="!lastGoal"
+          v-if="!messages.length && !loading && !err"
           class="assistant-empty"
         >
           <span class="assistant-glyph">
@@ -31,52 +31,65 @@
             规划投递策略和整理求职行动。
           </p>
         </div>
-
         <div
-          v-else
-          class="assistant-thread"
-        >
-          <article class="agent-message user-message">
-            <span class="message-avatar user-avatar">
-              我
-            </span>
+  v-else
+  class="assistant-thread"
+>
+  <article
+    v-for="(item,index) in messages"
+    :key="index"
+    class="agent-message"
+    :class="{ 'user-message': item.role === 'user' }"
+  >
+    <span
+      class="message-avatar"
+      :class="
+        item.role === 'user'
+          ? 'user-avatar'
+          : 'agent-avatar'
+      "
+    >
+      {{ item.role === 'user' ? '我' : 'AI' }}
+    </span>
 
-            <div class="message-body">
-              <span class="message-role">你的目标</span>
-              <p>{{ lastGoal }}</p>
-            </div>
-          </article>
+    <div class="message-body">
+      <span class="message-role">
+        {{
+          item.role === 'user'
+            ? '你的目标'
+            : 'AI 求职助手'
+        }}
+      </span>
 
-          <article class="agent-message">
-            <span class="message-avatar agent-avatar">
-              AI
-            </span>
+      <p class="answer">
+        {{ item.content }}
+      </p>
+    </div>
+  </article>
 
-            <div
-              class="message-body"
-              :class="{ error: err }"
-            >
-              <span class="message-role">
-                AI 求职助手
-              </span>
+  <article
+    v-if="loading || err"
+    class="agent-message"
+  >
+    <span class="message-avatar agent-avatar">
+      AI
+    </span>
 
-              <p v-if="loading" class="thinking">
-                正在分析你的目标
-                <span></span>
-                <span></span>
-                <span></span>
-              </p>
+    <div
+      class="message-body"
+      :class="{ error: err }"
+    >
+      <span class="message-role">
+        AI 求职助手
+      </span>
 
-              <p v-else-if="err">
-                {{ err }}
-              </p>
+      <p>
+        {{ loading ? '正在分析你的目标…' : err }}
+      </p>
+    </div>
+  </article>
+</div>
 
-              <p v-else class="answer">
-                {{ answer }}
-              </p>
-            </div>
-          </article>
-        </div>
       </div>
 
       <form
@@ -111,8 +124,7 @@ import { ref } from 'vue'
 import { askAgent } from '../api/agent'
 
 const goal = ref('')
-const lastGoal = ref('')
-const answer = ref('')
+const messages = ref([])
 const err = ref('')
 const loading = ref(false)
 
@@ -120,15 +132,21 @@ async function run() {
     const text = goal.value.trim()
 
     if (!text || loading.value) return
-
-    lastGoal.value = text
-    answer.value = ''
+    const history = messages.value.slice(-10)
+    messages.value.push({
+      role:'user',
+      content:text
+    })
     err.value = ''
     loading.value = true
+    goal.value = ''
 
     try {
-        const response = await askAgent(text)
-        answer.value = response.data.answer
+        const response = await askAgent(text,history)
+        messages.value.push({
+          role:'assistant',
+          content:response.data.answer
+        })
     } catch (error) {
         err.value =
             error.response?.data?.detail

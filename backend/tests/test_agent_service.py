@@ -146,6 +146,40 @@ def test_run_agent(monkeypatch):
     assert agent.run_agent(None,'查Docker')=='最终回答'
     assert [m['role'] for m in sent[1]]==['system','user','assistant','tool']
 
+def test_agent_history_order(monkeypatch):
+    msg=NS(content='继续回答',tool_calls=None)
+    reply=NS(choices=[NS(message=msg)])
+    sent=[]
+    def fake_ask(client,msgs):
+        sent.extend(msgs)
+        return reply
+    monkeypatch.setattr(agent,'ask_model',fake_ask)
+    history=[
+        {'role':'user','content':'目标是AI工程师'},
+        {'role':'assistant','content':'已经记住'}
+    ]
+    assert agent.run_agent(None,'继续',history)=='继续回答'
+    assert [item['role'] for item in sent]==[
+        'system','user','assistant','user'
+    ]
+    assert sent[-1]['content']=='继续'
+
+def test_agent_allows_two_tool_rounds(monkeypatch):
+    tool_msg=NS(
+        content='',tool_calls=[FakeCall()],
+        model_dump=lambda exclude_none:{'role':'assistant'}
+    )
+    last=NS(content='两轮后完成',tool_calls=None)
+    replies=[
+        NS(choices=[NS(message=tool_msg)]),
+        NS(choices=[NS(message=tool_msg)]),
+        NS(choices=[NS(message=last)])
+    ]
+    monkeypatch.setattr(agent,'ask_model',lambda client,msgs:replies.pop(0))
+    monkeypatch.setattr(agent,'run_tool',fake_run)
+    assert agent.run_agent(None,'分两步查资料')=='两轮后完成'
+    assert replies==[]
+
 
 # 避免不必要的第二次模型请求，降低延迟和费用。
 def test_agent_direct(monkeypatch):
@@ -162,7 +196,7 @@ def test_agent_direct(monkeypatch):
 def fake_client():
     return 'client'
 
-def fake_agent(client,goal):
+def fake_agent(client,goal,history=None):
     return f'{client}:{goal}'
 
 def test_agent_mock(monkeypatch):

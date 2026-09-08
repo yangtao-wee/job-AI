@@ -293,11 +293,15 @@ class RagAnswer(BaseModel):
 
 
 # Agent提问请求：规定前端只能提交一个非空目标。
-class AgentAsk(BaseModel):
-    goal:str=Field(min_length=1,max_length=500)  # 用户希望Agent完成的目标。
-    # 自动去掉目标两端空格，并拒绝未声明字段。
+class AgentMsg(BaseModel):
+    role:Literal['user','assistant']
+    content:str=Field(min_length=1,max_length=2000)
     model_config=ConfigDict(str_strip_whitespace=True,extra='forbid')
 
+class AgentAsk(BaseModel):
+    goal:str=Field(min_length=1,max_length=500)
+    history:list[AgentMsg]=Field(default_factory=list,max_length=10)
+    model_config=ConfigDict(str_strip_whitespace=True,extra='forbid')
 
 # Agent回答结果：规定后端向前端返回最终回答文字。
 class AgentAnswer(BaseModel):

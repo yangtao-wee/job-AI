@@ -10,4 +10,7 @@ router=APIRouter()
 # response_model：【框架提供】要求返回结果符合 AgentAnswer
 def ask(data:AgentAsk,current_user:User=Depends(get_current_user)):
     check_limit('agent', current_user.id, 30, 3600)
-    return AgentAnswer(answer=ask_agent(data.goal))
+    history=[item.model_dump() for item in data.history]
+    return AgentAnswer(
+        answer=ask_agent(data.goal,history)
+    )

@@ -4,6 +4,7 @@ import logging
 import aiofiles
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 from fastapi.responses import FileResponse
 
 from ..dependencies import get_current_user, get_db, check_limit
@@ -16,17 +17,28 @@ from ..services.resume_build_service import build_profile
 
 log=logging.getLogger(__name__)
 router = APIRouter()
-ALLOWED_CONTENT_TYPES = {
-    'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-}
-ALLOWED_EXTENSIONS = {
-    '.pdf',
-    '.docx'
-}
+ALLOWED_CONTENT_TYPES = {'application/pdf'}
+ALLOWED_EXTENSIONS = {'.pdf'}
 MAX_FILE_SIZE = 5 * 1024 * 1024
 UPLOAD_DIR = Path(__file__).resolve().parents[2]/'uploads'/'resumes'
 CHUNK_SIZE = 1024 * 1024
+
+async def save_pdf(file: UploadFile, path: Path) -> int:
+    size = 0
+    first = True
+    async with aiofiles.open(path, 'wb') as output:
+        while chunk := await file.read(CHUNK_SIZE):
+            if first and b'%PDF-' not in chunk[:1024]:
+                raise ValueError('文件内容不是有效PDF')
+            first = False
+            size += len(chunk)
+            if size > MAX_FILE_SIZE:
+                raise OverflowError('简历文件不能超过5MB')
+            await output.write(chunk)
+    if size == 0:
+        raise ValueError('PDF文件不能为空')
+    return size
+
 @router.post('/upload')
 async def upload_resume(
     file:UploadFile=File(...),
@@ -36,13 +48,13 @@ async def upload_resume(
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise  HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail='仅支持 PDF 或 DOCX 简历'
+            detail='仅支持PDF简历'
         )
     file_extension = Path(file.filename or '').suffix.lower()
     if file_extension not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail='简历扩展名必须是 .pdf或 .docx'
+            detail='简历扩展名必须是.pdf'
         )
     if file.size is not None and file.size > MAX_FILE_SIZE:
         raise HTTPException(
@@ -52,21 +64,31 @@ async def upload_resume(
     UPLOAD_DIR.mkdir(parents=True,exist_ok=True)
     stored_filename = f'{current_user.id}_{uuid4().hex}{file_extension}'
     file_path = UPLOAD_DIR / stored_filename
-    async with aiofiles.open(file_path,'wb') as output_file:
-        while True:
-            chunk = await file.read(CHUNK_SIZE)
-            if not chunk:
-                break
-            await output_file.write(chunk)
+    temp_path = file_path.with_name(file_path.name + '.part')
+    try:
+        actual_size = await save_pdf(file, temp_path)
+        temp_path.replace(file_path)
+    except OverflowError as error:
+        raise HTTPException(status_code=413, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=415, detail=str(error)) from error
+    finally:
+        temp_path.unlink(missing_ok=True)
     resume_record = Resume(
         user_id = current_user.id,
         original_filename=file.filename,
         stored_filename=stored_filename,
         content_type=file.content_type,
-        file_size=file.size or 0
+        file_size=actual_size
         )
     db.add(resume_record)
-    db.commit()
+    try:
+        db.commit()
+    except SQLAlchemyError as error:
+        db.rollback()
+        file_path.unlink(missing_ok=True)
+        log.exception('简历记录保存失败')
+        raise HTTPException(status_code=500, detail='简历保存失败') from error
     db.refresh(resume_record)
     return{
         'resume_id':resume_record.id,

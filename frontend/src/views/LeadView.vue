@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import request from '../api/request'
 
 const leads = ref([])
@@ -60,7 +60,7 @@ async function loadResumes() {
 }
 
 onMounted(() => { load(); loadResumes() })
-
+onUnmounted(() => { stopped.value = true })
 function pick(value) {
   filter.value = value
   offset.value = 0
@@ -78,7 +78,7 @@ async function setStatus(lead, status) {
 }
 
 async function markAbove() {
-  if (!confirm(`把 ${minScore.value} 分及以上的岗位标为待投递（含之前跳过的，已投递的不动）？`)) return
+  
   try {
     const res = await request.post('/leads/mark-above', { above: minScore.value })
     error.value = ''
@@ -191,7 +191,9 @@ const shown = computed(() =>
       </label>
 
       <button v-if="!running" class="btn" @click="runAnalyze">开始精判</button>
-      <button v-else class="btn stop" @click="stopped = true">停止</button>
+      <button v-else class="btn stop" :disabled="stopped" @click="stopped = true">
+  {{ stopped ? '正在停止…' : '停止' }}
+</button>
 
       <button class="btn go" :disabled="running" @click="markAbove">
         ↑ 标记 {{ minScore }} 分以上

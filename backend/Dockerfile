@@ -23,4 +23,4 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
 
 USER appuser
 EXPOSE 8000
-CMD ["sh", "-c", "alembic upgrade head && python -m app.init_db && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "alembic upgrade head && python -m app.init_db && python -m app.seed_demo && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

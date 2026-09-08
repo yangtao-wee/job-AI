@@ -1,0 +1,2507 @@
+{
+ "resume": {
+  "original_filename": "demo_resume.pdf",
+  "content_type": "application/pdf",
+  "file_size": 285343
+ },
+ "analysis": {
+  "summary": "候选人具备扎实的Python后端开发与AI应用落地经验，能够独立完成从接口设计、数据库建模到部署上线的全流程。熟悉大模型API的结构化调用与异常降级策略，并有Vue 3前端开发与接口联调经验，能够独立交付完整功能。工作经历集中在云启数据科技，负责内容审核后台开发，在性能优化、数据库管理、AI集成和工程化实践方面有具体成果。",
+  "skills": [
+   "Python",
+   "FastAPI",
+   "Pydantic",
+   "SQLAlchemy",
+   "MySQL",
+   "Redis",
+   "REST API",
+   "LLM API 调用",
+   "Prompt 设计",
+   "结构化输出（JSON + Pydantic）",
+   "RAG",
+   "BGE Embedding",
+   "Vue 3",
+   "JavaScript",
+   "HTML/CSS",
+   "接口联调",
+   "Git",
+   "Docker Compose",
+   "pytest",
+   "Alembic"
+  ],
+  "work_experience": [
+   "使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+   "使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+   "使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+   "引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+   "接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+   "主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+   "使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+   "使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+   "使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+   "参与 Vue 3 前端页面开发与前后端接口联调。"
+  ],
+  "strengths": [
+   "具备全栈开发能力，覆盖后端（Python/FastAPI）、AI应用集成和前端（Vue 3）开发。",
+   "在AI应用开发中注重稳定性和可靠性，设计了结构化输出、异常降级和自动切换机制。",
+   "有明确的性能优化意识和成果，通过缓存将接口响应时间显著降低。",
+   "具备良好的工程化实践，包括数据库版本管理（Alembic）、测试覆盖（pytest）和容器化部署（Docker Compose）。",
+   "项目经验聚焦且深入，在单一项目中承担了从核心后端开发到AI功能集成、性能优化和部分前端开发的职责。"
+  ],
+  "improvement_suggestions": [
+   "简历中未提及团队协作、项目管理或跨部门沟通的具体事例，可以补充以展示软技能。",
+   "AI应用经验主要集中在API调用和RAG，可以进一步探索或展示在模型微调、评估或更复杂AI架构方面的经验。",
+   "前端经验描述为“参与”和“接口联调”，可以更具体地说明独立负责的功能模块或技术难点。",
+   "可以考虑补充关于系统监控、日志分析或更高层次架构设计（如微服务）的经验或思考。"
+  ],
+  "recommended_positions": [
+   "AI应用开发工程师",
+   "Python后端开发工程师",
+   "全栈开发工程师（偏后端/AI）"
+  ]
+ },
+ "reports": [
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/205bc499841f94d10nFy2dW0EltW.html",
+   "report": {
+    "title": "全栈工程师（AI Agent 方向）",
+    "company": "进门",
+    "jd": "举报\n微信扫码分享\n职位描述\n\n岗位职责：\n  1. 负责面向金融买方/卖方/上市公司的 toB 系统的全栈开发，主导 AI Agent 能⼒在⾦融业务场景中的落地。\n  2. 独⽴完成从业务需求分析、系统设计、前后端开发、自动化自测到联调上线的全流程闭环交付；将 Agent 的规划、记忆、⼯具使用等能力深度内嵌到金融业务系统中。\n  3. 参与 AI 业务系统的架构设计与技术选型（如 多 Agent 编排、上下文工程、Prompt/工作流管理、Agent 评测与可观测性），持续优化系统的严谨性、可维护性与高可用，确保 Agent 在复杂金融环境下输出可靠、结果可追溯。\n  4. 与产品经理、市场、运营团队紧密协作，快速理解买方/卖方/上市公司的复杂业务逻辑，将业务痛点转化为可由 Agent 高效执行的技术方案。\n\n  任职要求：\n  1. 精通 Java/Python/Go 之一及前端工程化（React/Vue/小程序），具备全栈开发与端到端独立交付能力，对新技术有敏感度。\n  2. 熟悉主流大模型及 Agent 开发生态，有构建 Agent应用或 AI 业务系统的实际落地经验。\n  3. 熟练并深度使用 AI Coding 工具完成全流程工作，包括但不限于设计、规划、生成、验证、排查等，积极持续通过 AI 优化研发流程。\n  4. 具备极强的产品与业务意识，能深入金融一线挖掘痛点，理解 Agent 能力边界并设计合理的人机协作方案。\n  5. 有良好的职业习惯，在代码质量、系统合规与数据隐私安全方面具备高标准要求。\n\n刘女士\n在线\n进门 · HRBP\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳南山区深圳国际创新谷1栋A座21层\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "职责",
+       "text": "负责面向金融买方/卖方/上市公司的 toB 系统的全栈开发，主导 AI Agent 能⼒在⾦融业务场景中的落地。",
+       "quote": "1. 负责面向金融买方/卖方/上市公司的 toB 系统的全栈开发，主导 AI Agent 能⼒在⾦融业务场景中的落地。"
+      },
+      {
+       "id": 1,
+       "kind": "职责",
+       "text": "独⽴完成从业务需求分析、系统设计、前后端开发、自动化自测到联调上线的全流程闭环交付；将 Agent 的规划、记忆、⼯具使用等能力深度内嵌到金融业务系统中。",
+       "quote": "2. 独⽴完成从业务需求分析、系统设计、前后端开发、自动化自测到联调上线的全流程闭环交付；将 Agent 的规划、记忆、⼯具使用等能力深度内嵌到金融业务系统中。"
+      },
+      {
+       "id": 2,
+       "kind": "职责",
+       "text": "参与 AI 业务系统的架构设计与技术选型（如 多 Agent 编排、上下文工程、Prompt/工作流管理、Agent 评测与可观测性），持续优化系统的严谨性、可维护性与高可用，确保 Agent 在复杂金融环境下输出可靠、结果可追溯。",
+       "quote": "3. 参与 AI 业务系统的架构设计与技术选型（如 多 Agent 编排、上下文工程、Prompt/工作流管理、Agent 评测与可观测性），持续优化系统的严谨性、可维护性与高可用，确保 Agent 在复杂金融环境下输出可靠、结果可追溯。"
+      },
+      {
+       "id": 3,
+       "kind": "职责",
+       "text": "与产品经理、市场、运营团队紧密协作，快速理解买方/卖方/上市公司的复杂业务逻辑，将业务痛点转化为可由 Agent 高效执行的技术方案。",
+       "quote": "4. 与产品经理、市场、运营团队紧密协作，快速理解买方/卖方/上市公司的复杂业务逻辑，将业务痛点转化为可由 Agent 高效执行的技术方案。"
+      },
+      {
+       "id": 4,
+       "kind": "技能",
+       "text": "精通 Java/Python/Go 之一及前端工程化（React/Vue/小程序），具备全栈开发与端到端独立交付能力，对新技术有敏感度。",
+       "quote": "1. 精通 Java/Python/Go 之一及前端工程化（React/Vue/小程序），具备全栈开发与端到端独立交付能力，对新技术有敏感度。"
+      },
+      {
+       "id": 5,
+       "kind": "技能",
+       "text": "熟悉主流大模型及 Agent 开发生态，有构建 Agent应用或 AI 业务系统的实际落地经验。",
+       "quote": "2. 熟悉主流大模型及 Agent 开发生态，有构建 Agent应用或 AI 业务系统的实际落地经验。"
+      },
+      {
+       "id": 6,
+       "kind": "技能",
+       "text": "熟练并深度使用 AI Coding 工具完成全流程工作，包括但不限于设计、规划、生成、验证、排查等，积极持续通过 AI 优化研发流程。",
+       "quote": "3. 熟练并深度使用 AI Coding 工具完成全流程工作，包括但不限于设计、规划、生成、验证、排查等，积极持续通过 AI 优化研发流程。"
+      },
+      {
+       "id": 7,
+       "kind": "技能",
+       "text": "具备极强的产品与业务意识，能深入金融一线挖掘痛点，理解 Agent 能力边界并设计合理的人机协作方案。",
+       "quote": "4. 具备极强的产品与业务意识，能深入金融一线挖掘痛点，理解 Agent 能力边界并设计合理的人机协作方案。"
+      },
+      {
+       "id": 8,
+       "kind": "技能",
+       "text": "有良好的职业习惯，在代码质量、系统合规与数据隐私安全方面具备高标准要求。",
+       "quote": "5. 有良好的职业习惯，在代码质量、系统合规与数据隐私安全方面具备高标准要求。"
+      }
+     ],
+     "checks": [
+      {
+       "note": "简历显示有后端开发经验，涉及AI应用（如大模型API调用、RAG、Embedding）和前端开发（Vue 3），符合全栈开发的部分要求。但资料未明确提及面向金融买方/卖方/上市公司的toB系统开发经验，也未提及主导AI Agent能力在金融业务场景中落地。",
+       "status": "部分支持",
+       "need_id": 0,
+       "proof_ids": [
+        21,
+        22,
+        26,
+        28,
+        31
+       ]
+      },
+      {
+       "note": "简历显示能独立完成从接口设计、数据库建模到部署上线的全流程，有前后端开发、测试和部署经验，符合独立完成全流程闭环交付的部分要求。但资料未提及将Agent的规划、记忆、工具使用等能力深度内嵌到金融业务系统中的经验。",
+       "status": "部分支持",
+       "need_id": 1,
+       "proof_ids": [
+        6,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+       ]
+      },
+      {
+       "note": "简历中未提及参与AI业务系统的架构设计与技术选型，如多Agent编排、上下文工程、Prompt/工作流管理、Agent评测与可观测性等。资料中提到的AI应用经验主要是API调用和RAG，未涉及复杂的Agent系统架构。",
+       "status": "未找到依据",
+       "need_id": 2,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提及与产品经理、市场、运营团队紧密协作，快速理解买方/卖方/上市公司的复杂业务逻辑，或将业务痛点转化为可由Agent高效执行的技术方案。工作经历主要描述技术实现，未涉及跨团队协作和业务痛点转化。",
+       "status": "未找到依据",
+       "need_id": 3,
+       "proof_ids": []
+      },
+      {
+       "note": "简历显示精通Python后端开发，熟悉Vue 3前端开发，具备全栈开发与端到端独立交付能力，对新技术有敏感度（如AI应用）。但未提及精通Java/Go，且前端工程化经验限于Vue 3，未提及React/小程序。",
+       "status": "部分支持",
+       "need_id": 4,
+       "proof_ids": [
+        16,
+        18,
+        21,
+        22,
+        31
+       ]
+      },
+      {
+       "note": "简历显示熟悉大模型API调用、Prompt设计、结构化输出、RAG、BGE Embedding，有构建AI应用（如文本分类、自动应答）的实际落地经验。但未明确提及熟悉Agent开发生态或有构建Agent应用的经验，主要经验集中在模型调用和RAG。",
+       "status": "部分支持",
+       "need_id": 5,
+       "proof_ids": [
+        17,
+        26,
+        27,
+        28
+       ]
+      },
+      {
+       "note": "简历中未提及熟练并深度使用AI Coding工具完成全流程工作，包括设计、规划、生成、验证、排查等。资料中提到的AI工具使用主要是大模型API调用，未涉及AI Coding工具（如GitHub Copilot）在研发流程中的深度应用。",
+       "status": "未找到依据",
+       "need_id": 6,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提及具备极强的产品与业务意识，能深入金融一线挖掘痛点，理解Agent能力边界并设计合理的人机协作方案。自我评价和工作经历主要聚焦于技术实现和稳定性，未涉及业务痛点挖掘和人机协作设计。",
+       "status": "未找到依据",
+       "need_id": 7,
+       "proof_ids": []
+      },
+      {
+       "note": "简历显示在代码质量（如使用Pydantic校验、统一异常处理、编写测试）、系统合规（如结构化输出保证稳定、降级保证功能不中断）与数据隐私安全（如无相关资料时直接拒答）方面有高标准要求，符合良好的职业习惯。",
+       "status": "有依据",
+       "need_id": 8,
+       "proof_ids": [
+        23,
+        24,
+        26,
+        27,
+        29
+       ]
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 1,
+    "deep_part": 4,
+    "deep_total": 9
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/644dce4c269d82fe0nd-0t-1GVpQ.html",
+   "report": {
+    "title": "AI Agent 开发工程师",
+    "company": "和生创新技术",
+    "jd": "举报\n微信扫码分享\n职位描述\nagent\n分布式经验\nLLM\nPython\n\n【岗位描述】\n我们正在基于 OpenClaw 构建企业级 AI Agent 矩阵（VOC 分析、智能客服、运营助手、经营决策），需要能深度理解 Agent 架构并落地交付的工程师。\n这不是“调 API 套壳”的岗位。你需要理解 Agent 的记忆、工具调用、多 Agent 协作、上下⽂⼯程，并能独⽴搭建有持续记忆、有人格、能执行复杂任务的 Agent。\n\n【核⼼职责】\nAgent 系统开发\n基于 OpenClaw 开发和维护企业 Agent（Skill 编写、记忆系统、工具集成）\n设计 Agent 的记忆架构（短期/长期/语义/情景记忆）\n构建 Agent 间的协作协议（多 Agent orchestration）\n上下文工程\n设计 Agent 的 Bootstrap 文件体系（SOUL/AGENTS/USER/MEMORY/TOOLS）\n构建 hybrid search（向量+BM25）检索管线\n实现记忆整理机制（Dream/Consolidation/Atomization）\n工具与集成\n开发 OpenClaw Skills/Plugins，打通内部系统（飞书、ERP、CRM、数据平台）\nMCP Server 开发与维护\n对接 LLM API（Claude/GPT/DeepSeek），管理 token 预算与模型路由\n持续迭代\nAgent 行为监控与质量评估\nPrompt 工程优化\n跟进 Agent 记忆/工具/协作的最新研究与开源方案\n\n【任职要求：必须具备】\nPython 扎实：3年+ 实际开发经验，能写生产级代码\nLLM 应用开发：有实际的 LLM 应用/Agent 项目经验（不只是 demo）\n理解 Agent 架构：知道 ReAct/Tool-use/Memory/Planning 不是 buzzword\nNode.js/TypeScript：OpenClaw 核心是 Node.js，需要能读能改\nAPI 集成能力：REST/Webhook/OAuth 熟练，能快速对接各种内外部系统\n自驱动：给方向能自己跑，不需要手把手\n\n【加分项】\n用过 OpenClaw/Claude Code/Cursor 等 AI coding agent\n有记忆系统设计经验（向量数据库/RAG/知识图谱）\n飞书/企微开放平台开发经验\n有个人 AI Agent/Bot 作品\n读过 Agent 相关论文（MemGPT/Mem0/Voyager/Generative Agents）\n\n唐女士\n在线\n和生创新技术 · HR\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳南山区深圳市和生创新技术有限公司\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "技能",
+       "text": "Python 扎实：3年+ 实际开发经验，能写生产级代码",
+       "quote": "Python 扎实：3年+ 实际开发经验，能写生产级代码"
+      },
+      {
+       "id": 1,
+       "kind": "经验",
+       "text": "LLM 应用开发：有实际的 LLM 应用/Agent 项目经验（不只是 demo）",
+       "quote": "LLM 应用开发：有实际的 LLM 应用/Agent 项目经验（不只是 demo）"
+      },
+      {
+       "id": 2,
+       "kind": "技能",
+       "text": "理解 Agent 架构：知道 ReAct/Tool-use/Memory/Planning 不是 buzzword",
+       "quote": "理解 Agent 架构：知道 ReAct/Tool-use/Memory/Planning 不是 buzzword"
+      },
+      {
+       "id": 3,
+       "kind": "技能",
+       "text": "Node.js/TypeScript：OpenClaw 核心是 Node.js，需要能读能改",
+       "quote": "Node.js/TypeScript：OpenClaw 核心是 Node.js，需要能读能改"
+      },
+      {
+       "id": 4,
+       "kind": "技能",
+       "text": "API 集成能力：REST/Webhook/OAuth 熟练，能快速对接各种内外部系统",
+       "quote": "API 集成能力：REST/Webhook/OAuth 熟练，能快速对接各种内外部系统"
+      },
+      {
+       "id": 5,
+       "kind": "职责",
+       "text": "自驱动：给方向能自己跑，不需要手把手",
+       "quote": "自驱动：给方向能自己跑，不需要手把手"
+      },
+      {
+       "id": 6,
+       "kind": "加分",
+       "text": "用过 OpenClaw/Claude Code/Cursor 等 AI coding agent",
+       "quote": "用过 OpenClaw/Claude Code/Cursor 等 AI coding agent"
+      },
+      {
+       "id": 7,
+       "kind": "加分",
+       "text": "有记忆系统设计经验（向量数据库/RAG/知识图谱）",
+       "quote": "有记忆系统设计经验（向量数据库/RAG/知识图谱）"
+      },
+      {
+       "id": 8,
+       "kind": "加分",
+       "text": "飞书/企微开放平台开发经验",
+       "quote": "飞书/企微开放平台开发经验"
+      },
+      {
+       "id": 9,
+       "kind": "加分",
+       "text": "有个人 AI Agent/Bot 作品",
+       "quote": "有个人 AI Agent/Bot 作品"
+      },
+      {
+       "id": 10,
+       "kind": "加分",
+       "text": "读过 Agent 相关论文（MemGPT/Mem0/Voyager/Generative Agents）",
+       "quote": "读过 Agent 相关论文（MemGPT/Mem0/Voyager/Generative Agents）"
+      }
+     ],
+     "checks": [
+      {
+       "note": "简历显示2023.06-2026.06（约3年）后端开发工程师，使用Python与FastAPI开发生产级内容审核后台，日均处理约8万次请求，涉及接口设计、数据库操作、缓存优化、测试和部署，符合3年+实际开发经验并能写生产级代码的要求。",
+       "status": "有依据",
+       "need_id": 0,
+       "proof_ids": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        29
+       ]
+      },
+      {
+       "note": "简历中提到了LLM API调用、RAG、文本分类和语义相似度计算，但这些都是大模型的应用组件或任务，没有明确描述一个完整的、实际的LLM应用或Agent项目（非demo级）的经验。",
+       "status": "未找到依据",
+       "need_id": 1,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中提到了RAG、Embedding和API调用，但没有提及任何具体的Agent架构组件，如ReAct、Tool-use、Memory或Planning，无法证明对这些概念有深入理解。",
+       "status": "未找到依据",
+       "need_id": 2,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中列出的技能和经验主要围绕Python、FastAPI、Vue 3等，没有提及Node.js或TypeScript，因此无法证明具备读改Node.js代码的能力。",
+       "status": "未找到依据",
+       "need_id": 3,
+       "proof_ids": []
+      },
+      {
+       "note": "简历明确列出REST API技能，并描述了开发日均8万次请求的接口、进行API集成（如大模型API）、以及处理限流和降级，证明了熟练的REST API集成能力。但未提及Webhook或OAuth的具体经验。",
+       "status": "有依据",
+       "need_id": 4,
+       "proof_ids": [
+        16,
+        22,
+        26,
+        27
+       ]
+      },
+      {
+       "note": "简历显示能独立完成全流程开发、引入优化（如Redis缓存）、管理表结构变更、设计降级策略等，这些体现了较强的主动性和解决问题的能力。但‘自驱动’是软性要求，仅从项目描述难以百分百确认，需要进一步面试核实。",
+       "status": "待核对",
+       "need_id": 5,
+       "proof_ids": [
+        6,
+        21,
+        22,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+       ]
+      },
+      {
+       "note": "简历中未提及使用过OpenClaw、Claude Code或Cursor等AI coding agent工具。",
+       "status": "未找到依据",
+       "need_id": 6,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中提到使用BGE Embedding计算语义相似度并构建常见问题自动应答，这涉及RAG（检索增强生成）中的部分技术（Embedding和检索）。但未提及向量数据库的具体使用、知识图谱或完整的记忆系统设计经验。",
+       "status": "部分支持",
+       "need_id": 7,
+       "proof_ids": [
+        17,
+        28
+       ]
+      },
+      {
+       "note": "简历中未提及飞书或企微开放平台的任何开发经验。",
+       "status": "未找到依据",
+       "need_id": 8,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中描述的工作项目均为公司内的后端和AI应用开发，未提及任何个人AI Agent或Bot作品。",
+       "status": "未找到依据",
+       "need_id": 9,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提及阅读过MemGPT、Mem0、Voyager、Generative Agents等Agent相关论文。",
+       "status": "未找到依据",
+       "need_id": 10,
+       "proof_ids": []
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 2,
+    "deep_part": 1,
+    "deep_total": 11
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/6a4779eb25370e840nZ93du8EFdU.html",
+   "report": {
+    "title": "AI Agent全栈开发工程师 (TypeScript )",
+    "company": "观麦",
+    "jd": "举报\n微信扫码分享\n职位描述\n\n职位概况：\n我们正在寻找一位深谙 TypeScript 生态并具备 VLM（视觉语言模型）实战经验的全栈工程师。你不仅需要构建稳健的后端架构，更要能够驱动 AI Agent 理解并操作复杂 UI 界⾯或多模态数据。我们极度看重候选⼈利⽤ AI Coding 工具链实现高倍率产出的能⼒。\n\n技术要求：\n\n1. TypeScript 核心工程能力\n- 语言精通：极致的 TypeScript 功底，熟练运用高级类型（Type Gymnastics）构建类型安全的应用系统。\n- 通讯协议：精通 tRPC，能够实现从服务端 Schema 定义到前端调用的端到端类型同步，确保开发效率与稳定性。\n- 持久层控制：熟练掌握 ORM 工具（如 Prisma 或 Drizzle），具备复杂的数据库建模、迁移及性能调优经验。\n- 后端架构：熟悉 Node.js 运行时及异步编程模型，能够设计可扩展的微服务或 Serverless 架构。\n\n2. VLM 视觉模型与 AI 经验\n- 视觉智能 (VLM)：具备视觉模型的实战开发经验；能够处理多模态输入（图片/视频/PDF），实现 OCR 结构化提取、视觉文档分析或基于截图的自动化交互。\n- Agentic Workflow：理解并实现基于视觉反馈的闭环智能体逻辑（Vision-to-Action）；精通 Function Calling 及其在多模态场景下的鲁棒性优化。\n- 向量化应用：了解 pgvector 或其他向量数据库在处理多模态数据嵌入（Embeddings）中的应用。\n\n3. AI-Native 开发方法论 (AICoding)\n- 工具深度集成：日常开发高度依赖并精通 Claude Code (CLI)、Cursor；熟练编写 Rules 引导 AI 遵循特定架构规范。\n- 协议栈应用：有 MCP (Model Context Protocol) 开发经验，能为模型定制开发访问文件、数据库或第三方 API 的 Server。\n- 规格说明驱动 (SDD)：习惯通过编写清晰的 spec.md 或 schema.ts 引导 AI 生成代码，具备管理 AI 上下文（Context Management）的直觉。\n\n岗位职责：\n1. 多模态 Agent 开发：负责构建能够“看懂”并处理复杂业务逻辑（如单据识别、UI 自动化巡检）的 AI 智能体系统。\n2. 全栈功能实现：利用 TypeScript + tRPC 快速迭代高质量的 Web 应用，确保前后端逻辑高度契合。\n3. 工程效率演进：通过优化 AI Prompt、构建自定义 AI 工具（MCP Servers），持续提升团队的 AI 协同开发效率。\n4. 架构演进：参与多代理框架的设计，解决 Agent 在长链路任务中的一致性与可靠性问题。\n\n加分项：\n- 在 GitHub 拥有活跃的开源 AI 项目，或维护过高质量的 AI Agent 项目。\n- 具备 Playwright/Puppeteer 经验，并能将其与 VLM 结合实现网页自动化操作。\n- 熟悉 Docker 容器化部署及 Linux (DNF/Yum) 环境下的服务排查。\n\n黄女士\n3日内活跃\n观麦 · 招聘经理\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳南山区中粮前海创新中心·东塔1205\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "技能",
+       "text": "TypeScript 核心工程能力\n- 语言精通：极致的 TypeScript 功底，熟练运用高级类型（Type Gymnastics）构建类型安全的应用系统。\n- 通讯协议：精通 tRPC，能够实现从服务端 Schema 定义到前端调用的端到端类型同步，确保开发效率与稳定性。\n- 持久层控制：熟练掌握 ORM 工具（如 Prisma 或 Drizzle），具备复杂的数据库建模、迁移及性能调优经验。\n- 后端架构：熟悉 Node.js 运行时及异步编程模型，能够设计可扩展的微服务或 Serverless 架构。",
+       "quote": "1. TypeScript 核心工程能力\n- 语言精通：极致的 TypeScript 功底，熟练运用高级类型（Type Gymnastics）构建类型安全的应用系统。\n- 通讯协议：精通 tRPC，能够实现从服务端 Schema 定义到前端调用的端到端类型同步，确保开发效率与稳定性。\n- 持久层控制：熟练掌握 ORM 工具（如 Prisma 或 Drizzle），具备复杂的数据库建模、迁移及性能调优经验。\n- 后端架构：熟悉 Node.js 运行时及异步编程模型，能够设计可扩展的微服务或 Serverless 架构。"
+      },
+      {
+       "id": 1,
+       "kind": "技能",
+       "text": "VLM 视觉模型与 AI 经验\n- 视觉智能 (VLM)：具备视觉模型的实战开发经验；能够处理多模态输入（图片/视频/PDF），实现 OCR 结构化提取、视觉文档分析或基于截图的自动化交互。\n- Agentic Workflow：理解并实现基于视觉反馈的闭环智能体逻辑（Vision-to-Action）；精通 Function Calling 及其在多模态场景下的鲁棒性优化。\n- 向量化应用：了解 pgvector 或其他向量数据库在处理多模态数据嵌入（Embeddings）中的应用。",
+       "quote": "2. VLM 视觉模型与 AI 经验\n- 视觉智能 (VLM)：具备视觉模型的实战开发经验；能够处理多模态输入（图片/视频/PDF），实现 OCR 结构化提取、视觉文档分析或基于截图的自动化交互。\n- Agentic Workflow：理解并实现基于视觉反馈的闭环智能体逻辑（Vision-to-Action）；精通 Function Calling 及其在多模态场景下的鲁棒性优化。\n- 向量化应用：了解 pgvector 或其他向量数据库在处理多模态数据嵌入（Embeddings）中的应用。"
+      },
+      {
+       "id": 2,
+       "kind": "技能",
+       "text": "AI-Native 开发方法论 (AICoding)\n- 工具深度集成：日常开发高度依赖并精通 Claude Code (CLI)、Cursor；熟练编写 Rules 引导 AI 遵循特定架构规范。\n- 协议栈应用：有 MCP (Model Context Protocol) 开发经验，能为模型定制开发访问文件、数据库或第三方 API 的 Server。\n- 规格说明驱动 (SDD)：习惯通过编写清晰的 spec.md 或 schema.ts 引导 AI 生成代码，具备管理 AI 上下文（Context Management）的直觉。",
+       "quote": "3. AI-Native 开发方法论 (AICoding)\n- 工具深度集成：日常开发高度依赖并精通 Claude Code (CLI)、Cursor；熟练编写 Rules 引导 AI 遵循特定架构规范。\n- 协议栈应用：有 MCP (Model Context Protocol) 开发经验，能为模型定制开发访问文件、数据库或第三方 API 的 Server。\n- 规格说明驱动 (SDD)：习惯通过编写清晰的 spec.md 或 schema.ts 引导 AI 生成代码，具备管理 AI 上下文（Context Management）的直觉。"
+      },
+      {
+       "id": 3,
+       "kind": "职责",
+       "text": "1. 多模态 Agent 开发：负责构建能够“看懂”并处理复杂业务逻辑（如单据识别、UI 自动化巡检）的 AI 智能体系统。\n2. 全栈功能实现：利用 TypeScript + tRPC 快速迭代高质量的 Web 应用，确保前后端逻辑高度契合。\n3. 工程效率演进：通过优化 AI Prompt、构建自定义 AI 工具（MCP Servers），持续提升团队的 AI 协同开发效率。\n4. 架构演进：参与多代理框架的设计，解决 Agent 在长链路任务中的一致性与可靠性问题。",
+       "quote": "岗位职责：\n1. 多模态 Agent 开发：负责构建能够“看懂”并处理复杂业务逻辑（如单据识别、UI 自动化巡检）的 AI 智能体系统。\n2. 全栈功能实现：利用 TypeScript + tRPC 快速迭代高质量的 Web 应用，确保前后端逻辑高度契合。\n3. 工程效率演进：通过优化 AI Prompt、构建自定义 AI 工具（MCP Servers），持续提升团队的 AI 协同开发效率。\n4. 架构演进：参与多代理框架的设计，解决 Agent 在长链路任务中的一致性与可靠性问题。"
+      },
+      {
+       "id": 4,
+       "kind": "加分",
+       "text": "- 在 GitHub 拥有活跃的开源 AI 项目，或维护过高质量的 AI Agent 项目。\n- 具备 Playwright/Puppeteer 经验，并能将其与 VLM 结合实现网页自动化操作。\n- 熟悉 Docker 容器化部署及 Linux (DNF/Yum) 环境下的服务排查。",
+       "quote": "加分项：\n- 在 GitHub 拥有活跃的开源 AI 项目，或维护过高质量的 AI Agent 项目。\n- 具备 Playwright/Puppeteer 经验，并能将其与 VLM 结合实现网页自动化操作。\n- 熟悉 Docker 容器化部署及 Linux (DNF/Yum) 环境下的服务排查。"
+      }
+     ],
+     "checks": [
+      {
+       "note": "岗位要求极致的TypeScript功底、精通tRPC、熟练掌握Prisma/Drizzle等ORM、熟悉Node.js后端架构。简历中专业技能为Python、FastAPI、SQLAlchemy、Vue 3、JavaScript，未提及TypeScript、tRPC、Prisma/Drizzle或Node.js。工作经历也基于Python技术栈。",
+       "status": "未找到依据",
+       "need_id": 0,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求具备视觉模型(VLM)实战开发经验、处理多模态输入、实现OCR/视觉文档分析、精通基于视觉反馈的Agentic Workflow和Function Calling、了解向量数据库。简历中AI应用经验涉及LLM API调用、RAG、BGE Embedding用于文本，未提及任何视觉模型、多模态处理、OCR、视觉智能体或向量数据库（如pgvector）相关经验。",
+       "status": "未找到依据",
+       "need_id": 1,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求精通Claude Code/Cursor、有MCP开发经验、习惯通过spec/schema引导AI生成代码。简历中提及'熟悉大模型API的结构化调用'、'Prompt设计'、'结构化输出（JSON + Pydantic）'，表明具备使用AI辅助开发、设计Prompt和结构化输出的基础。但未提及对Claude Code、Cursor、MCP协议的具体使用经验，也未提及编写Rules或spec.md/schema.ts来引导AI生成代码和管理上下文。",
+       "status": "部分支持",
+       "need_id": 2,
+       "proof_ids": [
+        17,
+        26,
+        27
+       ]
+      },
+      {
+       "note": "岗位职责1（多模态Agent开发）：未找到依据，简历无视觉或多模态Agent经验。职责2（全栈功能实现，TypeScript+tRPC）：未找到依据，简历技术栈为Python+Vue/JS。职责3（工程效率演进，优化Prompt、构建MCP工具）：部分支持，简历有Prompt设计、结构化输出、AI应用经验，但未提及构建MCP Servers。职责4（架构演进，参与多代理框架设计）：未找到依据，简历无相关描述。",
+       "status": "部分支持",
+       "need_id": 3,
+       "proof_ids": [
+        6,
+        7,
+        17,
+        26,
+        27,
+        28
+       ]
+      },
+      {
+       "note": "加分项1（GitHub活跃AI项目）：未找到依据，简历未提及开源项目。加分项2（Playwright/Puppeteer与VLM结合）：未找到依据，简历无Playwright/Puppeteer或VLM经验。加分项3（熟悉Docker及Linux服务排查）：部分支持，简历有Docker Compose经验，但未明确提及Linux(DNF/Yum)环境下的服务排查。",
+       "status": "部分支持",
+       "need_id": 4,
+       "proof_ids": [
+        19,
+        30
+       ]
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 0,
+    "deep_part": 3,
+    "deep_total": 5
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/7077297161d9254a0nJ72920FVdU.html",
+   "report": {
+    "title": "LLM应用开发（AI agent）",
+    "company": "法本",
+    "jd": "举报\n微信扫码分享\n职位描述\nGolang\nPython\n\n岗位职责：\n1、基于LangChain/LangGraph框架设计、开发并维护企业级Multi-Agent系统，实现复杂业务流程的自动化编排与多智能体协同决策。\n2、负责Multi-Agent工作流架构设计，包括StateGraph状态管理、条件路由、Pipeline串联、并行执行、HITL⼈机协同及断点恢复等核⼼机制落地。\n3、基于MCP协议完成⼯具标准化封装，将业务API、知识库、数据库等外部能力抽象为标准Tool/Resource/Skill，供Agent动态调用。\n4、建设企业级RAG知识库与检索链路，覆盖⽂档解析、分块策略、Embedding、混合检索、重排序、引用溯源与效果评测。\n5、负责Agent系统高可用与工程化治理，包括超时控制、自动重试、优雅降级、幂等设计、全链路日志追踪与可观测性建设（LangSmith/Langfuse等）。\n6、响应业务需求，快速完成Agent应用原型验证与生产级交付，持续迭代优化系统稳定性与回答质量。\n7、编写接口文档、技术方案与单元测试，沉淀可复用的Agent组件、Skill模板与最佳实践。\n任职要求：\n1、本科及以上，1年以上AI Agent/大模型应用开发经验（不含实习）。\n2、Python为主力语言，具备良好的工程化编码能力。熟练使用FastAPI（或Flask）进行API服务开发。熟练使用LangChain/LangGraph，具备实际项目落地经验。具备多Agent协作编排经验（状态机、条件路由、并行执行等）。\n3、MCP协议与工具链：熟悉MCP协议，具备Tool/Server/Client标准化封装经验；理解Function Calling、Tool Calling机制，能设计可复用的工具Schema。\n4、RAG与知识工程：掌握RAG全链路开发（文档解析、分块、向量化、混合检索、重排序）；熟悉Milvus等向量数据库，有检索优化与效果评测经验。\n5、高可用与工程化：具备超时、重试、降级、幂等等系统稳定性治理经验；熟悉LangSmith/Langfuse等可观测性工具，具备链路追踪与问题定位能力。\n加分项：\n1、有Multi-Agent复杂编排项目落地经验（Agent数量不少于3个）。\n2、有Harness Engineering等前沿Agent工程框架理解或实践。\n3、有开源项目贡献或技术博客。\n\n林先生\n在线\n法本 · 高级招聘专员\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳福田区平安金融中心88层8803单元\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "技能",
+       "text": "Golang",
+       "quote": "Golang"
+      },
+      {
+       "id": 1,
+       "kind": "技能",
+       "text": "Python",
+       "quote": "Python"
+      },
+      {
+       "id": 2,
+       "kind": "职责",
+       "text": "基于LangChain/LangGraph框架设计、开发并维护企业级Multi-Agent系统，实现复杂业务流程的自动化编排与多智能体协同决策。",
+       "quote": "1、基于LangChain/LangGraph框架设计、开发并维护企业级Multi-Agent系统，实现复杂业务流程的自动化编排与多智能体协同决策。"
+      },
+      {
+       "id": 3,
+       "kind": "职责",
+       "text": "负责Multi-Agent工作流架构设计，包括StateGraph状态管理、条件路由、Pipeline串联、并行执行、HITL⼈机协同及断点恢复等核⼼机制落地。",
+       "quote": "2、负责Multi-Agent工作流架构设计，包括StateGraph状态管理、条件路由、Pipeline串联、并行执行、HITL⼈机协同及断点恢复等核⼼机制落地。"
+      },
+      {
+       "id": 4,
+       "kind": "职责",
+       "text": "基于MCP协议完成⼯具标准化封装，将业务API、知识库、数据库等外部能力抽象为标准Tool/Resource/Skill，供Agent动态调用。",
+       "quote": "3、基于MCP协议完成⼯具标准化封装，将业务API、知识库、数据库等外部能力抽象为标准Tool/Resource/Skill，供Agent动态调用。"
+      },
+      {
+       "id": 5,
+       "kind": "职责",
+       "text": "建设企业级RAG知识库与检索链路，覆盖⽂档解析、分块策略、Embedding、混合检索、重排序、引用溯源与效果评测。",
+       "quote": "4、建设企业级RAG知识库与检索链路，覆盖⽂档解析、分块策略、Embedding、混合检索、重排序、引用溯源与效果评测。"
+      },
+      {
+       "id": 6,
+       "kind": "职责",
+       "text": "负责Agent系统高可用与工程化治理，包括超时控制、自动重试、优雅降级、幂等设计、全链路日志追踪与可观测性建设（LangSmith/Langfuse等）。",
+       "quote": "5、负责Agent系统高可用与工程化治理，包括超时控制、自动重试、优雅降级、幂等设计、全链路日志追踪与可观测性建设（LangSmith/Langfuse等）。"
+      },
+      {
+       "id": 7,
+       "kind": "职责",
+       "text": "响应业务需求，快速完成Agent应用原型验证与生产级交付，持续迭代优化系统稳定性与回答质量。",
+       "quote": "6、响应业务需求，快速完成Agent应用原型验证与生产级交付，持续迭代优化系统稳定性与回答质量。"
+      },
+      {
+       "id": 8,
+       "kind": "职责",
+       "text": "编写接口文档、技术方案与单元测试，沉淀可复用的Agent组件、Skill模板与最佳实践。",
+       "quote": "7、编写接口文档、技术方案与单元测试，沉淀可复用的Agent组件、Skill模板与最佳实践。"
+      },
+      {
+       "id": 9,
+       "kind": "经验",
+       "text": "本科及以上，1年以上AI Agent/大模型应用开发经验（不含实习）。",
+       "quote": "1、本科及以上，1年以上AI Agent/大模型应用开发经验（不含实习）。"
+      },
+      {
+       "id": 10,
+       "kind": "技能",
+       "text": "Python为主力语言，具备良好的工程化编码能力。熟练使用FastAPI（或Flask）进行API服务开发。熟练使用LangChain/LangGraph，具备实际项目落地经验。具备多Agent协作编排经验（状态机、条件路由、并行执行等）。",
+       "quote": "2、Python为主力语言，具备良好的工程化编码能力。熟练使用FastAPI（或Flask）进行API服务开发。熟练使用LangChain/LangGraph，具备实际项目落地经验。具备多Agent协作编排经验（状态机、条件路由、并行执行等）。"
+      },
+      {
+       "id": 11,
+       "kind": "技能",
+       "text": "MCP协议与工具链：熟悉MCP协议，具备Tool/Server/Client标准化封装经验；理解Function Calling、Tool Calling机制，能设计可复用的工具Schema。",
+       "quote": "3、MCP协议与工具链：熟悉MCP协议，具备Tool/Server/Client标准化封装经验；理解Function Calling、Tool Calling机制，能设计可复用的工具Schema。"
+      },
+      {
+       "id": 12,
+       "kind": "技能",
+       "text": "RAG与知识工程：掌握RAG全链路开发（文档解析、分块、向量化、混合检索、重排序）；熟悉Milvus等向量数据库，有检索优化与效果评测经验。",
+       "quote": "4、RAG与知识工程：掌握RAG全链路开发（文档解析、分块、向量化、混合检索、重排序）；熟悉Milvus等向量数据库，有检索优化与效果评测经验。"
+      },
+      {
+       "id": 13,
+       "kind": "技能",
+       "text": "高可用与工程化：具备超时、重试、降级、幂等等系统稳定性治理经验；熟悉LangSmith/Langfuse等可观测性工具，具备链路追踪与问题定位能力。",
+       "quote": "5、高可用与工程化：具备超时、重试、降级、幂等等系统稳定性治理经验；熟悉LangSmith/Langfuse等可观测性工具，具备链路追踪与问题定位能力。"
+      },
+      {
+       "id": 14,
+       "kind": "加分",
+       "text": "有Multi-Agent复杂编排项目落地经验（Agent数量不少于3个）。",
+       "quote": "1、有Multi-Agent复杂编排项目落地经验（Agent数量不少于3个）。"
+      },
+      {
+       "id": 15,
+       "kind": "加分",
+       "text": "有Harness Engineering等前沿Agent工程框架理解或实践。",
+       "quote": "2、有Harness Engineering等前沿Agent工程框架理解或实践。"
+      },
+      {
+       "id": 16,
+       "kind": "加分",
+       "text": "有开源项目贡献或技术博客。",
+       "quote": "3、有开源项目贡献或技术博客。"
+      }
+     ],
+     "checks": [
+      {
+       "note": "简历资料中未提及Golang技能。",
+       "status": "未找到依据",
+       "need_id": 0,
+       "proof_ids": []
+      },
+      {
+       "note": "简历专业技能明确列出Python，工作经历中后端开发使用Python与FastAPI。",
+       "status": "有依据",
+       "need_id": 1,
+       "proof_ids": [
+        15,
+        16,
+        21,
+        22,
+        26
+       ]
+      },
+      {
+       "note": "简历资料中未提及基于LangChain/LangGraph框架设计、开发并维护企业级Multi-Agent系统的经验。",
+       "status": "未找到依据",
+       "need_id": 2,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及负责Multi-Agent工作流架构设计，包括StateGraph状态管理、条件路由、Pipeline串联、并行执行、HITL人机协同及断点恢复等核心机制落地。",
+       "status": "未找到依据",
+       "need_id": 3,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及基于MCP协议完成工具标准化封装，将业务API、知识库、数据库等外部能力抽象为标准Tool/Resource/Skill，供Agent动态调用。",
+       "status": "未找到依据",
+       "need_id": 4,
+       "proof_ids": []
+      },
+      {
+       "note": "简历提及RAG和BGE Embedding，但未覆盖文档解析、分块策略、混合检索、重排序、引用溯源与效果评测等企业级RAG知识库与检索链路的完整建设。",
+       "status": "部分支持",
+       "need_id": 5,
+       "proof_ids": [
+        17,
+        28
+       ]
+      },
+      {
+       "note": "简历提及主模型限流时自动切换备用模型、缓存故障时降级为实时计算，体现了降级和可用性设计，但未提及超时控制、自动重试、幂等设计、全链路日志追踪与可观测性建设（LangSmith/Langfuse等）的具体经验。",
+       "status": "部分支持",
+       "need_id": 6,
+       "proof_ids": [
+        26,
+        27
+       ]
+      },
+      {
+       "note": "简历显示具备Python后端开发与AI应用落地的完整经验，能独立完成从接口设计到部署上线的全流程，并参与前端开发与联调，体现了响应需求、原型验证与交付的能力。但未明确提及Agent应用原型验证与生产级交付。",
+       "status": "部分支持",
+       "need_id": 7,
+       "proof_ids": [
+        6,
+        21,
+        22,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+       ]
+      },
+      {
+       "note": "简历提及使用Pydantic完成接口入参校验、统一异常处理与日志格式，以及使用pytest编写测试，体现了编写接口文档、技术方案与单元测试的部分能力。但未提及沉淀可复用的Agent组件、Skill模板与最佳实践。",
+       "status": "部分支持",
+       "need_id": 8,
+       "proof_ids": [
+        23,
+        29
+       ]
+      },
+      {
+       "note": "简历显示本科学历（软件工程，2019-2023）和2023年6月开始的工作经历，满足本科及以上要求。但工作经历为后端开发工程师，未明确提及1年以上AI Agent/大模型应用开发经验（不含实习），仅涉及AI应用如LLM API调用和RAG。",
+       "status": "部分支持",
+       "need_id": 9,
+       "proof_ids": [
+        20,
+        21
+       ]
+      },
+      {
+       "note": "简历明确Python为主力语言，使用FastAPI进行API服务开发，具备良好的工程化编码能力。但未提及熟练使用LangChain/LangGraph，也未提及具备多Agent协作编排经验（状态机、条件路由、并行执行等）。",
+       "status": "部分支持",
+       "need_id": 10,
+       "proof_ids": [
+        15,
+        16,
+        21,
+        22,
+        26
+       ]
+      },
+      {
+       "note": "简历资料中未提及熟悉MCP协议，具备Tool/Server/Client标准化封装经验；也未提及理解Function Calling、Tool Calling机制，能设计可复用的工具Schema。",
+       "status": "未找到依据",
+       "need_id": 11,
+       "proof_ids": []
+      },
+      {
+       "note": "简历提及RAG和BGE Embedding，涉及向量化与语义相似度计算，但未覆盖文档解析、分块、混合检索、重排序等RAG全链路开发，也未提及熟悉Milvus等向量数据库及检索优化与效果评测经验。",
+       "status": "部分支持",
+       "need_id": 12,
+       "proof_ids": [
+        17,
+        28
+       ]
+      },
+      {
+       "note": "简历提及主模型限流时自动切换备用模型、缓存故障时降级为实时计算，体现了降级和可用性设计，但未明确提及超时、重试、幂等等系统稳定性治理经验，也未提及熟悉LangSmith/Langfuse等可观测性工具及链路追踪与问题定位能力。",
+       "status": "部分支持",
+       "need_id": 13,
+       "proof_ids": [
+        26,
+        27
+       ]
+      },
+      {
+       "note": "简历资料中未提及有Multi-Agent复杂编排项目落地经验（Agent数量不少于3个）。",
+       "status": "未找到依据",
+       "need_id": 14,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及有Harness Engineering等前沿Agent工程框架理解或实践。",
+       "status": "未找到依据",
+       "need_id": 15,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及有开源项目贡献或技术博客。",
+       "status": "未找到依据",
+       "need_id": 16,
+       "proof_ids": []
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 1,
+    "deep_part": 8,
+    "deep_total": 17
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/ecf13c96c8de46d40nZ929q9GVZW.html",
+   "report": {
+    "title": "AI Agent 应用主导工程师",
+    "company": "晨领科技",
+    "jd": "举报\n微信扫码分享\n职位描述\n\n岗位职责：\n\n1. 主导 Agent 应用落地：基于业务需求，独立使用LangChain、LangGraph 、n8n、Make 等 Agent 搭建平台，设计并交付可运行的业务 Agent（如选品 Agent、⼴告优化 Agent、达⼈开发 Agent 等）；\n2. 提⽰词工程主导：运用 Chain-of-Thought、ReAct、Few-shot 等⾼级 Prompt 框架，对 Agent 决策质量进行持续调优，确保输出符合业务逻辑；\n3. 异常处理与熔断机制设计：构建 Agent 运行监控体系，主导设计异常触发规则与人工审核介入点，在模型出现幻觉、逻辑漂移时第一时间响应处置；\n4. 数据流打通：负责 ERP、亚马逊/TikTok API 与 LLM 之间的数据协同，主导解决\"数字员工\"与现有系统之间的信息断层问题；\n5. 灰度决策处理：承接 AI 无法自主判断的边界场景（侵权判定、异常退款、供应链突发等），沉淀为可复用的判定规则反哺 Agent 迭代；\n6. 案例库建设：系统整理 Agent 异常与优化案例，持续反馈架构师推动系统升级；\n\n任职要求：\n\n1.对亚马逊或 TikTok Shop平台业务逻辑有深度认知，愿意从事跨境电商行业，学习能力强，想象力丰富；\n2.有主导过 AI Agent 应用落地的实战经验（非仅使用，而是设计+搭建+迭代），能独立交付一个可跑通业务的 Agent；\n3.熟练掌握至少一个 Agent 搭建平台（LangChain/LangGraph  / n8n / Make / Zapier 等）；\n4.具备 Prompt Engineering 实战能力，能通过调整 Prompt 解决实际业务偏差问题；\n5.具备基础代码能力（Python 或 JS 均可），能处理 API 对接、数据格式转换等技术环节;\n6.逻辑严密，风险意识强，对 Agent 输出的准确性有\"零容忍\"的职业习惯；\n7.有跨境业务 + AI 工具双背景者强烈优先；\n8.纯技术背景但有跨境自学经历者亦可考虑。\n\n冯女士\n刚刚活跃\n晨领科技 · HR\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳龙华区利金城中心-T2座401\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "职责",
+       "text": "主导 Agent 应用落地：基于业务需求，独立使用LangChain、LangGraph 、n8n、Make 等 Agent 搭建平台，设计并交付可运行的业务 Agent（如选品 Agent、⼴告优化 Agent、达⼈开发 Agent 等）；",
+       "quote": "1. 主导 Agent 应用落地：基于业务需求，独立使用LangChain、LangGraph 、n8n、Make 等 Agent 搭建平台，设计并交付可运行的业务 Agent（如选品 Agent、⼴告优化 Agent、达⼈开发 Agent 等）；"
+      },
+      {
+       "id": 1,
+       "kind": "职责",
+       "text": "提⽰词工程主导：运用 Chain-of-Thought、ReAct、Few-shot 等⾼级 Prompt 框架，对 Agent 决策质量进行持续调优，确保输出符合业务逻辑；",
+       "quote": "2. 提⽰词工程主导：运用 Chain-of-Thought、ReAct、Few-shot 等⾼级 Prompt 框架，对 Agent 决策质量进行持续调优，确保输出符合业务逻辑；"
+      },
+      {
+       "id": 2,
+       "kind": "职责",
+       "text": "异常处理与熔断机制设计：构建 Agent 运行监控体系，主导设计异常触发规则与人工审核介入点，在模型出现幻觉、逻辑漂移时第一时间响应处置；",
+       "quote": "3. 异常处理与熔断机制设计：构建 Agent 运行监控体系，主导设计异常触发规则与人工审核介入点，在模型出现幻觉、逻辑漂移时第一时间响应处置；"
+      },
+      {
+       "id": 3,
+       "kind": "职责",
+       "text": "数据流打通：负责 ERP、亚马逊/TikTok API 与 LLM 之间的数据协同，主导解决\"数字员工\"与现有系统之间的信息断层问题；",
+       "quote": "4. 数据流打通：负责 ERP、亚马逊/TikTok API 与 LLM 之间的数据协同，主导解决\"数字员工\"与现有系统之间的信息断层问题；"
+      },
+      {
+       "id": 4,
+       "kind": "职责",
+       "text": "灰度决策处理：承接 AI 无法自主判断的边界场景（侵权判定、异常退款、供应链突发等），沉淀为可复用的判定规则反哺 Agent 迭代；",
+       "quote": "5. 灰度决策处理：承接 AI 无法自主判断的边界场景（侵权判定、异常退款、供应链突发等），沉淀为可复用的判定规则反哺 Agent 迭代；"
+      },
+      {
+       "id": 5,
+       "kind": "职责",
+       "text": "案例库建设：系统整理 Agent 异常与优化案例，持续反馈架构师推动系统升级；",
+       "quote": "6. 案例库建设：系统整理 Agent 异常与优化案例，持续反馈架构师推动系统升级；"
+      },
+      {
+       "id": 6,
+       "kind": "技能",
+       "text": "对亚马逊或 TikTok Shop平台业务逻辑有深度认知，愿意从事跨境电商行业，学习能力强，想象力丰富；",
+       "quote": "1.对亚马逊或 TikTok Shop平台业务逻辑有深度认知，愿意从事跨境电商行业，学习能力强，想象力丰富；"
+      },
+      {
+       "id": 7,
+       "kind": "经验",
+       "text": "有主导过 AI Agent 应用落地的实战经验（非仅使用，而是设计+搭建+迭代），能独立交付一个可跑通业务的 Agent；",
+       "quote": "2.有主导过 AI Agent 应用落地的实战经验（非仅使用，而是设计+搭建+迭代），能独立交付一个可跑通业务的 Agent；"
+      },
+      {
+       "id": 8,
+       "kind": "技能",
+       "text": "熟练掌握至少一个 Agent 搭建平台（LangChain/LangGraph  / n8n / Make / Zapier 等）；",
+       "quote": "3.熟练掌握至少一个 Agent 搭建平台（LangChain/LangGraph  / n8n / Make / Zapier 等）；"
+      },
+      {
+       "id": 9,
+       "kind": "技能",
+       "text": "具备 Prompt Engineering 实战能力，能通过调整 Prompt 解决实际业务偏差问题；",
+       "quote": "4.具备 Prompt Engineering 实战能力，能通过调整 Prompt 解决实际业务偏差问题；"
+      },
+      {
+       "id": 10,
+       "kind": "技能",
+       "text": "具备基础代码能力（Python 或 JS 均可），能处理 API 对接、数据格式转换等技术环节;",
+       "quote": "5.具备基础代码能力（Python 或 JS 均可），能处理 API 对接、数据格式转换等技术环节;"
+      },
+      {
+       "id": 11,
+       "kind": "技能",
+       "text": "逻辑严密，风险意识强，对 Agent 输出的准确性有\"零容忍\"的职业习惯；",
+       "quote": "6.逻辑严密，风险意识强，对 Agent 输出的准确性有\"零容忍\"的职业习惯；"
+      },
+      {
+       "id": 12,
+       "kind": "加分",
+       "text": "有跨境业务 + AI 工具双背景者强烈优先；",
+       "quote": "7.有跨境业务 + AI 工具双背景者强烈优先；"
+      },
+      {
+       "id": 13,
+       "kind": "加分",
+       "text": "纯技术背景但有跨境自学经历者亦可考虑。",
+       "quote": "8.纯技术背景但有跨境自学经历者亦可考虑。"
+      }
+     ],
+     "checks": [
+      {
+       "note": "岗位要求主导使用LangChain、LangGraph、n8n、Make等平台设计并交付业务Agent。简历中未提及任何Agent搭建平台（如LangChain、n8n、Make）的使用经验，也未提及设计或交付任何业务Agent（如选品、广告优化等）。",
+       "status": "未找到依据",
+       "need_id": 0,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求运用Chain-of-Thought、ReAct、Few-shot等高级Prompt框架对Agent决策质量进行调优。简历中仅提及'Prompt设计'和'结构化输出'，未提及使用任何高级Prompt框架或对Agent决策进行调优的经验。",
+       "status": "未找到依据",
+       "need_id": 1,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求构建Agent运行监控体系，设计异常触发规则与人工审核介入点。简历中未提及任何与Agent运行监控、异常处理或熔断机制设计相关的内容。",
+       "status": "未找到依据",
+       "need_id": 2,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求负责ERP、亚马逊/TikTok API与LLM之间的数据协同。简历中提及'接入大模型API完成文本分类任务'和'使用JSON结构化输出'，表明具备LLM API调用和数据格式处理能力。但未提及与ERP、亚马逊或TikTok API集成的经验，也未提及解决'数字员工'与现有系统信息断层问题。",
+       "status": "部分支持",
+       "need_id": 3,
+       "proof_ids": [
+        26
+       ]
+      },
+      {
+       "note": "岗位要求承接AI无法自主判断的边界场景（如侵权判定、异常退款），并沉淀为判定规则。简历中未提及处理此类边界场景或沉淀判定规则的经验。",
+       "status": "未找到依据",
+       "need_id": 4,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求系统整理Agent异常与优化案例，反馈架构师推动系统升级。简历中未提及任何与Agent案例库建设或系统反馈相关的内容。",
+       "status": "未找到依据",
+       "need_id": 5,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求对亚马逊或TikTok Shop平台业务逻辑有深度认知，并愿意从事跨境电商。简历中未提及任何跨境电商、亚马逊或TikTok Shop平台的经验或认知。",
+       "status": "未找到依据",
+       "need_id": 6,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求有主导AI Agent应用落地的实战经验（设计+搭建+迭代），能独立交付可跑通业务的Agent。简历中未提及任何AI Agent的设计、搭建、迭代或独立交付经验。",
+       "status": "未找到依据",
+       "need_id": 7,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求熟练掌握至少一个Agent搭建平台（如LangChain、n8n、Make等）。简历中未提及使用任何所列的Agent搭建平台。",
+       "status": "未找到依据",
+       "need_id": 8,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求具备Prompt Engineering实战能力，能通过调整Prompt解决业务偏差问题。简历中提及'Prompt设计'和'结构化输出'，表明具备基础的Prompt工程能力。但未明确展示通过调整Prompt解决具体业务偏差问题的实战经验。",
+       "status": "部分支持",
+       "need_id": 9,
+       "proof_ids": [
+        17,
+        26
+       ]
+      },
+      {
+       "note": "岗位要求具备基础代码能力（Python或JS），能处理API对接、数据格式转换。简历中明确提及使用Python、FastAPI开发后端，处理API请求，并使用JSON结构化输出，完全符合要求。",
+       "status": "有依据",
+       "need_id": 10,
+       "proof_ids": [
+        16,
+        22,
+        26
+       ]
+      },
+      {
+       "note": "岗位要求逻辑严密，风险意识强，对Agent输出准确性有'零容忍'习惯。简历中提及'坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定'以及'主模型限流时自动切换备用模型，缓存故障时降级为实时计算'，体现了风险意识和稳定性设计。但未直接提及对Agent输出的'零容忍'习惯，因为简历中未涉及Agent。",
+       "status": "部分支持",
+       "need_id": 11,
+       "proof_ids": [
+        7,
+        26,
+        27
+       ]
+      },
+      {
+       "note": "岗位要求有跨境业务+AI工具双背景者优先。简历中未提及任何跨境业务经验。",
+       "status": "未找到依据",
+       "need_id": 12,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位说明纯技术背景但有跨境自学经历者亦可考虑。简历中未提及任何跨境自学经历。",
+       "status": "未找到依据",
+       "need_id": 13,
+       "proof_ids": []
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 1,
+    "deep_part": 3,
+    "deep_total": 14
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/d9dbb25ea086aa920nV72tq6GVpT.html",
+   "report": {
+    "title": "AI agent工程师",
+    "company": "欣天雅包装",
+    "jd": "举报\n微信扫码分享\n职位描述\n\n1.编程语言与工程化\n核心语言：精通Python（AI 领域主流语⾔，适配⼤模型、Agent 框架⽣态）；掌握Go/Java（可选，用于高并发 Agent 系统开发）。\n⼯程工具：熟悉 Git 版本管理、Docker/K8s 容器化部署、CI/CD 流程，能实现 Agent 系统的自动化交付与运维。\n2.大模型与 Agent 框架\n模型相关：熟练使用 Hugging Face Transformers、PEFT 等库，了解大语言模型（LLM）的微调、量化、部署流程。\nAgent 框架：精通LangChain、LlamaIndex、AutoGPT等主流框架，能基于框架快速搭建智能体的记忆、工具调用、任务链逻辑。\n3.负责探索和发现各种ai应用工具，用于提升各岗位的工作效率，优化公司流程；\n任职要求：\n1.本科及以上学历要求，人工智能类专业优先；、\n2.深度学习: 熟练掌握TensorFlow、PyTorch等框架，有丰富的模型训练与优化经验；\n3.对AI领域有一定的知识储备，学习能力强，可快速了解各类行业相关资讯，帮助各部门熟练使用技巧，高效使用AI，提供相对应的AI解决方法；\n4.擅长使用Python进行程序编写；\n公司福利：\n1、每天上班8小时，每周休1.5天 ，5.5制；\n2、年终奖+工作满1年有带薪年假；\n3、保险制度：缴纳五险一金；\n4、节日假期：享有各种有薪假期，包括法定节假日、年休假、婚假、产假、配偶生育休假等各类假期；\n5、文化活动：年度员工国外旅游及不定期组织年度集体省内外旅游、部门娱乐活动，户外拓展，通过多姿多彩的文娱生活，让大家感受家一样的温暖；\n6、下午茶：为了共享甜美生活、香甜在口，特提供了精致的下午茶（零食、糕点、水果、茶等）；\n7、公司氛围：舒适、整洁、的办公环境，积极、快乐的工作氛围，科学化、人文化的管理理念；\n\n夏女士\n刚刚活跃\n欣天雅包装 · 人事经理\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳龙岗区深圳市欣天雅包装有限公司\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "技能",
+       "text": "核心语言：精通Python（AI 领域主流语⾔，适配⼤模型、Agent 框架⽣态）；掌握Go/Java（可选，用于高并发 Agent 系统开发）。",
+       "quote": "核心语言：精通Python（AI 领域主流语⾔，适配⼤模型、Agent 框架⽣态）；掌握Go/Java（可选，用于高并发 Agent 系统开发）。"
+      },
+      {
+       "id": 1,
+       "kind": "技能",
+       "text": "⼯程工具：熟悉 Git 版本管理、Docker/K8s 容器化部署、CI/CD 流程，能实现 Agent 系统的自动化交付与运维。",
+       "quote": "⼯程工具：熟悉 Git 版本管理、Docker/K8s 容器化部署、CI/CD 流程，能实现 Agent 系统的自动化交付与运维。"
+      },
+      {
+       "id": 2,
+       "kind": "技能",
+       "text": "模型相关：熟练使用 Hugging Face Transformers、PEFT 等库，了解大语言模型（LLM）的微调、量化、部署流程。",
+       "quote": "模型相关：熟练使用 Hugging Face Transformers、PEFT 等库，了解大语言模型（LLM）的微调、量化、部署流程。"
+      },
+      {
+       "id": 3,
+       "kind": "技能",
+       "text": "Agent 框架：精通LangChain、LlamaIndex、AutoGPT等主流框架，能基于框架快速搭建智能体的记忆、工具调用、任务链逻辑。",
+       "quote": "Agent 框架：精通LangChain、LlamaIndex、AutoGPT等主流框架，能基于框架快速搭建智能体的记忆、工具调用、任务链逻辑。"
+      },
+      {
+       "id": 4,
+       "kind": "职责",
+       "text": "负责探索和发现各种ai应用工具，用于提升各岗位的工作效率，优化公司流程；",
+       "quote": "3.负责探索和发现各种ai应用工具，用于提升各岗位的工作效率，优化公司流程；"
+      },
+      {
+       "id": 5,
+       "kind": "学历",
+       "text": "本科及以上学历要求，人工智能类专业优先；",
+       "quote": "1.本科及以上学历要求，人工智能类专业优先；、"
+      },
+      {
+       "id": 6,
+       "kind": "技能",
+       "text": "深度学习: 熟练掌握TensorFlow、PyTorch等框架，有丰富的模型训练与优化经验；",
+       "quote": "2.深度学习: 熟练掌握TensorFlow、PyTorch等框架，有丰富的模型训练与优化经验；"
+      },
+      {
+       "id": 7,
+       "kind": "技能",
+       "text": "对AI领域有一定的知识储备，学习能力强，可快速了解各类行业相关资讯，帮助各部门熟练使用技巧，高效使用AI，提供相对应的AI解决方法；",
+       "quote": "3.对AI领域有一定的知识储备，学习能力强，可快速了解各类行业相关资讯，帮助各部门熟练使用技巧，高效使用AI，提供相对应的AI解决方法；"
+      },
+      {
+       "id": 8,
+       "kind": "技能",
+       "text": "擅长使用Python进行程序编写；",
+       "quote": "4.擅长使用Python进行程序编写；"
+      }
+     ],
+     "checks": [
+      {
+       "note": "简历显示擅长使用Python进行后端开发和AI应用（如LLM API调用、RAG），符合核心语言Python的要求。但未提及精通AI领域Python（如大模型、Agent框架生态），也未提及掌握Go/Java。",
+       "status": "部分支持",
+       "need_id": 0,
+       "proof_ids": [
+        16,
+        17,
+        22,
+        26
+       ]
+      },
+      {
+       "note": "简历显示熟悉Git、Docker Compose，符合部分工程工具要求。但未提及K8s容器化部署、CI/CD流程，也未提及能实现Agent系统的自动化交付与运维。",
+       "status": "部分支持",
+       "need_id": 1,
+       "proof_ids": [
+        19,
+        30
+       ]
+      },
+      {
+       "note": "简历中未提及Hugging Face Transformers、PEFT等库的使用，也未提及大语言模型（LLM）的微调、量化、部署流程。",
+       "status": "未找到依据",
+       "need_id": 2,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提及LangChain、LlamaIndex、AutoGPT等主流Agent框架，也未提及基于这些框架搭建智能体的相关经验。",
+       "status": "未找到依据",
+       "need_id": 3,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提及探索和发现各种AI应用工具以提升工作效率、优化公司流程的相关职责或经验。",
+       "status": "未找到依据",
+       "need_id": 4,
+       "proof_ids": []
+      },
+      {
+       "note": "简历显示本科学历，专业为软件工程。符合本科及以上学历要求。",
+       "status": "有依据",
+       "need_id": 5,
+       "proof_ids": [
+        20
+       ]
+      },
+      {
+       "note": "简历中未提及TensorFlow、PyTorch等深度学习框架，也未提及模型训练与优化经验。",
+       "status": "未找到依据",
+       "need_id": 6,
+       "proof_ids": []
+      },
+      {
+       "note": "简历显示有AI应用经验（如LLM API调用、RAG、文本分类、语义相似度计算），并提及了异常降级和功能保证，体现了对AI领域的知识储备和解决问题的能力。但未明确提及帮助各部门熟练使用AI技巧或提供解决方案的具体职责。",
+       "status": "部分支持",
+       "need_id": 7,
+       "proof_ids": [
+        17,
+        26,
+        27,
+        28
+       ]
+      },
+      {
+       "note": "简历明确显示擅长使用Python进行程序编写，并有使用Python与FastAPI开发后端系统的经验。",
+       "status": "有依据",
+       "need_id": 8,
+       "proof_ids": [
+        16,
+        22
+       ]
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 2,
+    "deep_part": 3,
+    "deep_total": 9
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/f2f7312a56d2c8ff0nN629u1FVZY.html",
+   "report": {
+    "title": "AI测试工程师（Agent/App方向）",
+    "company": "刀锋互娱",
+    "jd": "举报\n微信扫码分享\n职位描述\n\n岗位职责\n1. 负责C2C陪玩社交AI产品的Agent及移动端App测试，保障功能稳定性和AI交互质量。\n2. 设计覆盖单轮、多轮对话、上下文记忆、人设一致性、异常输入、安全边界等场景的测试⽅案和⽤例。\n3. 负责Agent App的功能、兼容性、性能、⽹络异常、流式响应及客户端体验测试。\n4. 建立和优化AI测试及评测方法，设计批量测试、回归测试和输出质量评估机制。\n5. 将主观体验转化为可执⾏、可量化的“好/坏”标准，持续评估模型和Agent效果。\n6. 参与缺陷定位、跟进修复和版本验收，协同产品、后端、算法推动质量改进。\n\n任职要求\n1. 具备泛AI产品、大模型或Agent测试经验，理解AI产品非确定性输出的测试特点。\n2. 具备移动端或客户端Agent App测试经验，熟悉常见功能、兼容性和异常场景测试。\n3. 具备用例设计、缺陷管理、版本回归和质量分析能力。\n4. 对人设一致性、意图理解、上下文连贯性、幻觉、越界和内容安全具有敏感度。\n5. 具备一定自动化能力，能够使用Python、JavaScript或相关工具搭建接口、批量评测和回归流程。\n6. 责任心强、沟通协作能力好，能够推动问题闭环并持续提升用户体验。\n\n顾女士\n在线\n刀锋互娱 · HRBP\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳南山区尚美科技大厦11楼\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "职责",
+       "text": "负责C2C陪玩社交AI产品的Agent及移动端App测试，保障功能稳定性和AI交互质量。",
+       "quote": "1. 负责C2C陪玩社交AI产品的Agent及移动端App测试，保障功能稳定性和AI交互质量。"
+      },
+      {
+       "id": 1,
+       "kind": "职责",
+       "text": "设计覆盖单轮、多轮对话、上下文记忆、人设一致性、异常输入、安全边界等场景的测试⽅案和⽤例。",
+       "quote": "2. 设计覆盖单轮、多轮对话、上下文记忆、人设一致性、异常输入、安全边界等场景的测试⽅案和⽤例。"
+      },
+      {
+       "id": 2,
+       "kind": "职责",
+       "text": "负责Agent App的功能、兼容性、性能、⽹络异常、流式响应及客户端体验测试。",
+       "quote": "3. 负责Agent App的功能、兼容性、性能、⽹络异常、流式响应及客户端体验测试。"
+      },
+      {
+       "id": 3,
+       "kind": "职责",
+       "text": "建立和优化AI测试及评测方法，设计批量测试、回归测试和输出质量评估机制。",
+       "quote": "4. 建立和优化AI测试及评测方法，设计批量测试、回归测试和输出质量评估机制。"
+      },
+      {
+       "id": 4,
+       "kind": "职责",
+       "text": "将主观体验转化为可执⾏、可量化的“好/坏”标准，持续评估模型和Agent效果。",
+       "quote": "5. 将主观体验转化为可执⾏、可量化的“好/坏”标准，持续评估模型和Agent效果。"
+      },
+      {
+       "id": 5,
+       "kind": "职责",
+       "text": "参与缺陷定位、跟进修复和版本验收，协同产品、后端、算法推动质量改进。",
+       "quote": "6. 参与缺陷定位、跟进修复和版本验收，协同产品、后端、算法推动质量改进。"
+      },
+      {
+       "id": 6,
+       "kind": "经验",
+       "text": "具备泛AI产品、大模型或Agent测试经验，理解AI产品非确定性输出的测试特点。",
+       "quote": "1. 具备泛AI产品、大模型或Agent测试经验，理解AI产品非确定性输出的测试特点。"
+      },
+      {
+       "id": 7,
+       "kind": "经验",
+       "text": "具备移动端或客户端Agent App测试经验，熟悉常见功能、兼容性和异常场景测试。",
+       "quote": "2. 具备移动端或客户端Agent App测试经验，熟悉常见功能、兼容性和异常场景测试。"
+      },
+      {
+       "id": 8,
+       "kind": "技能",
+       "text": "具备用例设计、缺陷管理、版本回归和质量分析能力。",
+       "quote": "3. 具备用例设计、缺陷管理、版本回归和质量分析能力。"
+      },
+      {
+       "id": 9,
+       "kind": "技能",
+       "text": "对人设一致性、意图理解、上下文连贯性、幻觉、越界和内容安全具有敏感度。",
+       "quote": "4. 对人设一致性、意图理解、上下文连贯性、幻觉、越界和内容安全具有敏感度。"
+      },
+      {
+       "id": 10,
+       "kind": "技能",
+       "text": "具备一定自动化能力，能够使用Python、JavaScript或相关工具搭建接口、批量评测和回归流程。",
+       "quote": "5. 具备一定自动化能力，能够使用Python、JavaScript或相关工具搭建接口、批量评测和回归流程。"
+      },
+      {
+       "id": 11,
+       "kind": "技能",
+       "text": "责任心强、沟通协作能力好，能够推动问题闭环并持续提升用户体验。",
+       "quote": "6. 责任心强、沟通协作能力好，能够推动问题闭环并持续提升用户体验。"
+      }
+     ],
+     "checks": [
+      {
+       "note": "简历中未提及C2C陪玩社交AI产品或Agent及移动端App测试经验。",
+       "status": "未找到依据",
+       "need_id": 0,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提及设计覆盖单轮、多轮对话、上下文记忆、人设一致性、异常输入、安全边界等场景的测试方案和用例。",
+       "status": "未找到依据",
+       "need_id": 1,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提及负责Agent App的功能、兼容性、性能、网络异常、流式响应及客户端体验测试。",
+       "status": "未找到依据",
+       "need_id": 2,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提及建立和优化AI测试及评测方法，设计批量测试、回归测试和输出质量评估机制。",
+       "status": "未找到依据",
+       "need_id": 3,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提及将主观体验转化为可执行、可量化的标准以持续评估模型和Agent效果。",
+       "status": "未找到依据",
+       "need_id": 4,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中提及使用pytest编写测试覆盖正常、异常与边界场景，并参与前后端接口联调，表明具备缺陷定位和协同工作的部分能力，但未明确提及参与缺陷定位、跟进修复和版本验收的具体过程。",
+       "status": "部分支持",
+       "need_id": 5,
+       "proof_ids": [
+        28
+       ]
+      },
+      {
+       "note": "简历中提及接入大模型API完成文本分类任务，并处理模型限流和缓存故障，表明具备AI应用开发经验和对输出稳定性的关注，但未明确提及AI产品测试经验或对非确定性输出测试特点的理解。",
+       "status": "部分支持",
+       "need_id": 6,
+       "proof_ids": [
+        26,
+        27
+       ]
+      },
+      {
+       "note": "简历中未提及移动端或客户端Agent App测试经验。",
+       "status": "未找到依据",
+       "need_id": 7,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中提及使用pytest编写测试，表明具备用例设计能力，但未提及缺陷管理、版本回归和质量分析的具体经验。",
+       "status": "部分支持",
+       "need_id": 8,
+       "proof_ids": [
+        28
+       ]
+      },
+      {
+       "note": "简历中未提及对人设一致性、意图理解、上下文连贯性、幻觉、越界和内容安全具有敏感度。",
+       "status": "未找到依据",
+       "need_id": 9,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中提及使用pytest编写测试，表明具备一定的自动化测试能力，但未提及使用Python、JavaScript或相关工具搭建接口、批量评测和回归流程。",
+       "status": "部分支持",
+       "need_id": 10,
+       "proof_ids": [
+        28
+       ]
+      },
+      {
+       "note": "简历中未提及责任心、沟通协作能力或推动问题闭环并持续提升用户体验的具体事例。",
+       "status": "未找到依据",
+       "need_id": 11,
+       "proof_ids": []
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 0,
+    "deep_part": 4,
+    "deep_total": 12
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/d94630221600e99d0nF-2968E1VU.html",
+   "report": {
+    "title": "AI Agent 全栈开发工程师",
+    "company": "宜飞科技",
+    "jd": "举报\n微信扫码分享\n职位描述\n\n【我们是谁】\n我们是一家正在快速成长的AI跨境电商公司。在这里，我们希望借助AI，重新塑造跨境电商公司的各种能力。我们认为，AI并不是所谓的取代人，⽽是AI和⼈的能⼒需要有机的结合。对于AI的使用，不盲从，我们愿意花时间探索，形成自⼰的理解，走出一条独特的有价值的路线！\n\n【岗位职责】\n- 构建AI Agent平台，负责前后端、客户端与大模型融合的架构设计与编码实现\n- 结合跨境电商业务特点，面向未来，进行整体AI架构设计。满足未来跨境电商具体业务流（选品/产品开发/运营/供应链等）落地与快速迭代的需求。\n- 分析拆解当下业务工作流，借助AI实现数字化，模块化，Agent化\n- 探索人与AI协作模式，面向提效，把人和AI有机结合到一起，不是简单的01博弈\n\n【我们需要怎样的你】\n- 全栈工程底座： 具备扎实的计算机基础（算法、数据结构、网络及数据库），熟练掌握至少一种主流开发语言（如 Python/Java/Go/TypeScript 等）\n- AI 原生思维与 Harness 工程能力： 对大模型有深度使用经验，理解 Prompt Engineering 边界与常用 Agent 设计模式，对 Harness、环境感知、Agent 评测/对齐等相关工程化落地有浓厚兴趣或实际开发经历\n- 极致的技术热情与自主性： 对跨境电商/AI Agent 赛道有强烈的信念，具备极强的快速学习能力与自驱力，习惯在没有标准答案的前沿探索中寻找优雅的工程解法\n- 极度务实：客观认识自己，具备平常心，脚踏实地\n- 喜欢思考：遇到问题能够独立思考，喜欢梳理核心和本质，并在日常流程中思考如何优化方法，提升效率\n\n【我们的目标】\n利用AI重新架构跨境电商业物流，找到客户，需求，运营，供应链的Deepseek时刻---\n1.围绕用户画像，目标就是不断获取丰富，并跌代用户画像。找到一套在各个品类准确获取用户画像的方法\n2.以数据驱动的方式，测品，运营，生产，交付，并持续迭代\n3.极致优化测品的效率与速度，尽非常大的努力降低新品开发沉没成本，彻底贯彻MVP思想\n4.最极致，最高效，最简单的运营方法，一套方法能够适用各个品类各个平台，2种运营思路（POP/托管）\n5.公司依靠人才密度，而不是走流程，尽量不用流程去管理\n6.使用AI并形成能满足上述方向的架构，模块以及流程，找到真正有价值的使用方式。我们不光是要做自动化，更重要的是做架构。符合客户需求以及自己运营逻辑的AI架构。\n\n【我们的文化】\nAlways Day One\n- 一直抱着学习的心态。\n- 一直客观的看待当下自己。\n- 一直相信明天会更好。\n- 一直脚踏实地，不急功近利，延迟满足。\n\n吕先生\n本周活跃\n宜飞科技 · 老板\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳宝安区华丰国际机器人产业园二期D栋309\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "职责",
+       "text": "构建AI Agent平台，负责前后端、客户端与大模型融合的架构设计与编码实现",
+       "quote": "- 构建AI Agent平台，负责前后端、客户端与大模型融合的架构设计与编码实现"
+      },
+      {
+       "id": 1,
+       "kind": "职责",
+       "text": "结合跨境电商业务特点，面向未来，进行整体AI架构设计。满足未来跨境电商具体业务流（选品/产品开发/运营/供应链等）落地与快速迭代的需求。",
+       "quote": "- 结合跨境电商业务特点，面向未来，进行整体AI架构设计。满足未来跨境电商具体业务流（选品/产品开发/运营/供应链等）落地与快速迭代的需求。"
+      },
+      {
+       "id": 2,
+       "kind": "职责",
+       "text": "分析拆解当下业务工作流，借助AI实现数字化，模块化，Agent化",
+       "quote": "- 分析拆解当下业务工作流，借助AI实现数字化，模块化，Agent化"
+      },
+      {
+       "id": 3,
+       "kind": "职责",
+       "text": "探索人与AI协作模式，面向提效，把人和AI有机结合到一起，不是简单的01博弈",
+       "quote": "- 探索人与AI协作模式，面向提效，把人和AI有机结合到一起，不是简单的01博弈"
+      },
+      {
+       "id": 4,
+       "kind": "技能",
+       "text": "全栈工程底座： 具备扎实的计算机基础（算法、数据结构、网络及数据库），熟练掌握至少一种主流开发语言（如 Python/Java/Go/TypeScript 等）",
+       "quote": "- 全栈工程底座： 具备扎实的计算机基础（算法、数据结构、网络及数据库），熟练掌握至少一种主流开发语言（如 Python/Java/Go/TypeScript 等）"
+      },
+      {
+       "id": 5,
+       "kind": "技能",
+       "text": "AI 原生思维与 Harness 工程能力： 对大模型有深度使用经验，理解 Prompt Engineering 边界与常用 Agent 设计模式，对 Harness、环境感知、Agent 评测/对齐等相关工程化落地有浓厚兴趣或实际开发经历",
+       "quote": "- AI 原生思维与 Harness 工程能力： 对大模型有深度使用经验，理解 Prompt Engineering 边界与常用 Agent 设计模式，对 Harness、环境感知、Agent 评测/对齐等相关工程化落地有浓厚兴趣或实际开发经历"
+      },
+      {
+       "id": 6,
+       "kind": "技能",
+       "text": "极致的技术热情与自主性： 对跨境电商/AI Agent 赛道有强烈的信念，具备极强的快速学习能力与自驱力，习惯在没有标准答案的前沿探索中寻找优雅的工程解法",
+       "quote": "- 极致的技术热情与自主性： 对跨境电商/AI Agent 赛道有强烈的信念，具备极强的快速学习能力与自驱力，习惯在没有标准答案的前沿探索中寻找优雅的工程解法"
+      },
+      {
+       "id": 7,
+       "kind": "技能",
+       "text": "极度务实：客观认识自己，具备平常心，脚踏实地",
+       "quote": "- 极度务实：客观认识自己，具备平常心，脚踏实地"
+      },
+      {
+       "id": 8,
+       "kind": "技能",
+       "text": "喜欢思考：遇到问题能够独立思考，喜欢梳理核心和本质，并在日常流程中思考如何优化方法，提升效率",
+       "quote": "- 喜欢思考：遇到问题能够独立思考，喜欢梳理核心和本质，并在日常流程中思考如何优化方法，提升效率"
+      }
+     ],
+     "checks": [
+      {
+       "note": "简历显示具备Python后端开发（FastAPI）、Vue 3前端开发、AI应用（LLM API调用、Prompt设计、RAG）和工程化（Docker、测试）能力，支持前后端和AI融合开发的部分条件。但未提及构建完整的AI Agent平台经验，也未提及客户端（非Web）开发或负责整体架构设计。",
+       "status": "部分支持",
+       "need_id": 0,
+       "proof_ids": [
+        6,
+        8,
+        16,
+        17,
+        18,
+        19,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+       ]
+      },
+      {
+       "note": "简历中未提及任何与跨境电商业务相关的经验，也未提及进行整体AI架构设计以满足跨境电商业务流（如选品、供应链）落地与迭代的需求。",
+       "status": "未找到依据",
+       "need_id": 1,
+       "proof_ids": []
+      },
+      {
+       "note": "简历显示有借助AI实现任务的经验，如使用大模型API完成文本分类、构建自动应答，体现了数字化和一定模块化。但未提及分析拆解具体业务工作流（尤其是跨境电商业务流）或实现Agent化的经验。",
+       "status": "部分支持",
+       "need_id": 2,
+       "proof_ids": [
+        6,
+        7,
+        17,
+        26,
+        27,
+        28
+       ]
+      },
+      {
+       "note": "简历中未提及探索人与AI协作模式、面向提效或将人与AI有机结合的相关经验或描述。",
+       "status": "未找到依据",
+       "need_id": 3,
+       "proof_ids": []
+      },
+      {
+       "note": "简历明确展示扎实的计算机基础和实践：熟练掌握Python（FastAPI、SQLAlchemy）、数据库（MySQL、Redis）、网络（REST API）、工程化（Git、Docker、测试），具备全栈开发能力。",
+       "status": "有依据",
+       "need_id": 4,
+       "proof_ids": [
+        6,
+        16,
+        19,
+        22,
+        23,
+        24,
+        25,
+        29,
+        30
+       ]
+      },
+      {
+       "note": "简历显示对大模型有使用经验，包括API调用、Prompt设计、结构化输出（JSON+Pydantic）、RAG、Embedding，并关注稳定性（异常降级）。但未提及对Harness、环境感知、Agent评测/对齐等工程化落地的经验或浓厚兴趣，也未提及常用Agent设计模式的理解。",
+       "status": "部分支持",
+       "need_id": 5,
+       "proof_ids": [
+        7,
+        17,
+        26,
+        27,
+        28
+       ]
+      },
+      {
+       "note": "简历中未直接表达对跨境电商/AI Agent赛道的信念或热情。自我评价和项目经验体现了技术能力和解决问题的实践，但无法直接推断其对该特定赛道的强烈信念和自主探索前沿的倾向。需要进一步信息确认。",
+       "status": "待核对",
+       "need_id": 6,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提供关于自我认知、平常心或务实态度的直接描述。工作经历展示了解决实际工程问题的能力，但“极度务实”这一特质无法从现有资料中客观确认。",
+       "status": "待核对",
+       "need_id": 7,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提供关于独立思考、梳理问题本质或优化日常流程的直接描述。项目经验体现了解决问题和优化（如性能优化）的能力，但无法直接推断其日常的思考习惯。",
+       "status": "待核对",
+       "need_id": 8,
+       "proof_ids": []
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 1,
+    "deep_part": 3,
+    "deep_total": 9
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/ab2d3c67e3a8e11d0nZ52ti0F1NU.html",
+   "report": {
+    "title": "AI Agent 软件开发工程师 （生命科学方向）",
+    "company": "华大智造",
+    "jd": "举报\n微信扫码分享\n职位描述\n\n岗位职责：\n1、负责生命科学领域的 AI Agent 全栈开发，包括前端交互、后端服务及 Agent 编排引擎的设计与实现；\n2、负责 Agent  Sandbox 的选型与建设，解决代码生成场景下的安全性与隔离性问题；\n3、跟踪业界前沿（如 LLM Context 优化、多 Agent 协作），并将技术转化为提升科研效率的实际生产力；\n4、参与 Code Review，通过⼯程化⼿段（CI/CD、⾃动化测试）应对 LLM 应用开发的复杂性。\n任职要求：\n1、拥有计算机专业背景或同等经验。具备优秀的“技术-业务”翻译能力，能快速理解⽣命科学领域的业务逻辑；\n2、扎实的计算机系统基础，对操作系统、网络协议栈、数据库、缓存、数据结构和算法有体系化的认识；\n3、了解 LLM 能力的边界，了解 RAG、Function Calling 等工程化手段来弥补模型缺陷；\n4、熟悉容器技术（Docker, Kubernetes），理解其调度与部署原理，熟练使用 GitHub CI/CD；\n5、使用过 PostgreSQL、Redis、消息队列、对象存储等，理解底层存储与索引机制；\n6、至少熟悉一门静态强类型语言(Golang/Rust)、一门动态语言(Python/JavaScript)；\n7、熟练使用至少一个主流 Web 框架(FastAPI/Gin)，前端框架(React/Vue)；\n8、熟练掌握并高频使用旗舰级 Coding 模型（Claude-4.5-opus, Gemini-2.5-pro），善于利用 AI 辅助编程工具提升研发效能；\n加分项(满足任意一项即可)：\n1、喜欢写代码，GitHub 活跃用户，有高质量开源项目或技术博客（请附链接）；\n2、有完整的 AI Agent 系统落地经验，跑通过从前端到后端到 Agent 编排整个链路的闭环；\n3、有 LLM 应用开发框架经验(Langgraph、Eino、Claude Agent SDK)，能根据项目特点进行技术选型；\n4、有 Agent Sandbox 使用经验(E2B、AIO)，了解各家 Sandbox 云产品的主要特点，能根据项目特点进行技术选型；\n5、不要求生物学背景，但需要具备极强的好奇心，愿意学习业务领域知识（如蛋白质结构、基因序列分析流程等）。\n\n陈丹\n刚刚活跃\n华大智造 · HRBP\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳盐田区华大时空中心盐田区云华路9号\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "职责",
+       "text": "岗位职责：\n1、负责生命科学领域的 AI Agent 全栈开发，包括前端交互、后端服务及 Agent 编排引擎的设计与实现；\n2、负责 Agent  Sandbox 的选型与建设，解决代码生成场景下的安全性与隔离性问题；\n3、跟踪业界前沿（如 LLM Context 优化、多 Agent 协作），并将技术转化为提升科研效率的实际生产力；\n4、参与 Code Review，通过⼯程化⼿段（CI/CD、⾃动化测试）应对 LLM 应用开发的复杂性。",
+       "quote": "岗位职责：\n1、负责生命科学领域的 AI Agent 全栈开发，包括前端交互、后端服务及 Agent 编排引擎的设计与实现；\n2、负责 Agent  Sandbox 的选型与建设，解决代码生成场景下的安全性与隔离性问题；\n3、跟踪业界前沿（如 LLM Context 优化、多 Agent 协作），并将技术转化为提升科研效率的实际生产力；\n4、参与 Code Review，通过⼯程化⼿段（CI/CD、⾃动化测试）应对 LLM 应用开发的复杂性。"
+      },
+      {
+       "id": 1,
+       "kind": "学历",
+       "text": "1、拥有计算机专业背景或同等经验。具备优秀的“技术-业务”翻译能力，能快速理解⽣命科学领域的业务逻辑；",
+       "quote": "1、拥有计算机专业背景或同等经验。具备优秀的“技术-业务”翻译能力，能快速理解⽣命科学领域的业务逻辑；"
+      },
+      {
+       "id": 2,
+       "kind": "技能",
+       "text": "2、扎实的计算机系统基础，对操作系统、网络协议栈、数据库、缓存、数据结构和算法有体系化的认识；",
+       "quote": "2、扎实的计算机系统基础，对操作系统、网络协议栈、数据库、缓存、数据结构和算法有体系化的认识；"
+      },
+      {
+       "id": 3,
+       "kind": "技能",
+       "text": "3、了解 LLM 能力的边界，了解 RAG、Function Calling 等工程化手段来弥补模型缺陷；",
+       "quote": "3、了解 LLM 能力的边界，了解 RAG、Function Calling 等工程化手段来弥补模型缺陷；"
+      },
+      {
+       "id": 4,
+       "kind": "技能",
+       "text": "4、熟悉容器技术（Docker, Kubernetes），理解其调度与部署原理，熟练使用 GitHub CI/CD；",
+       "quote": "4、熟悉容器技术（Docker, Kubernetes），理解其调度与部署原理，熟练使用 GitHub CI/CD；"
+      },
+      {
+       "id": 5,
+       "kind": "技能",
+       "text": "5、使用过 PostgreSQL、Redis、消息队列、对象存储等，理解底层存储与索引机制；",
+       "quote": "5、使用过 PostgreSQL、Redis、消息队列、对象存储等，理解底层存储与索引机制；"
+      },
+      {
+       "id": 6,
+       "kind": "技能",
+       "text": "6、至少熟悉一门静态强类型语言(Golang/Rust)、一门动态语言(Python/JavaScript)；",
+       "quote": "6、至少熟悉一门静态强类型语言(Golang/Rust)、一门动态语言(Python/JavaScript)；"
+      },
+      {
+       "id": 7,
+       "kind": "技能",
+       "text": "7、熟练使用至少一个主流 Web 框架(FastAPI/Gin)，前端框架(React/Vue)；",
+       "quote": "7、熟练使用至少一个主流 Web 框架(FastAPI/Gin)，前端框架(React/Vue)；"
+      },
+      {
+       "id": 8,
+       "kind": "技能",
+       "text": "8、熟练掌握并高频使用旗舰级 Coding 模型（Claude-4.5-opus, Gemini-2.5-pro），善于利用 AI 辅助编程工具提升研发效能；",
+       "quote": "8、熟练掌握并高频使用旗舰级 Coding 模型（Claude-4.5-opus, Gemini-2.5-pro），善于利用 AI 辅助编程工具提升研发效能；"
+      },
+      {
+       "id": 9,
+       "kind": "加分",
+       "text": "加分项(满足任意一项即可)：\n1、喜欢写代码，GitHub 活跃用户，有高质量开源项目或技术博客（请附链接）；\n2、有完整的 AI Agent 系统落地经验，跑通过从前端到后端到 Agent 编排整个链路的闭环；\n3、有 LLM 应用开发框架经验(Langgraph、Eino、Claude Agent SDK)，能根据项目特点进行技术选型；\n4、有 Agent Sandbox 使用经验(E2B、AIO)，了解各家 Sandbox 云产品的主要特点，能根据项目特点进行技术选型；\n5、不要求生物学背景，但需要具备极强的好奇心，愿意学习业务领域知识（如蛋白质结构、基因序列分析流程等）。",
+       "quote": "加分项(满足任意一项即可)：\n1、喜欢写代码，GitHub 活跃用户，有高质量开源项目或技术博客（请附链接）；\n2、有完整的 AI Agent 系统落地经验，跑通过从前端到后端到 Agent 编排整个链路的闭环；\n3、有 LLM 应用开发框架经验(Langgraph、Eino、Claude Agent SDK)，能根据项目特点进行技术选型；\n4、有 Agent Sandbox 使用经验(E2B、AIO)，了解各家 Sandbox 云产品的主要特点，能根据项目特点进行技术选型；\n5、不要求生物学背景，但需要具备极强的好奇心，愿意学习业务领域知识（如蛋白质结构、基因序列分析流程等）。"
+      }
+     ],
+     "checks": [
+      {
+       "note": "简历显示有Python后端开发、FastAPI、Vue 3前端开发、LLM API调用、RAG等经验，能独立完成前后端功能交付，涉及AI应用。但未明确提及生命科学领域、AI Agent全栈开发、Agent编排引擎、Agent Sandbox选型与建设等具体职责。",
+       "status": "部分支持",
+       "need_id": 0,
+       "proof_ids": [
+        6,
+        8,
+        17,
+        21,
+        22,
+        26,
+        27,
+        28,
+        31
+       ]
+      },
+      {
+       "note": "简历显示为软件工程本科专业，符合计算机专业背景要求。",
+       "status": "有依据",
+       "need_id": 1,
+       "proof_ids": [
+        20
+       ]
+      },
+      {
+       "note": "简历显示熟悉数据库（MySQL）、缓存（Redis）、数据结构（通过Pydantic处理结构化数据）和算法（通过项目经验体现），有体系化认识。但未明确提及对操作系统、网络协议栈的扎实基础。",
+       "status": "部分支持",
+       "need_id": 2,
+       "proof_ids": [
+        16,
+        19,
+        23,
+        24,
+        25
+       ]
+      },
+      {
+       "note": "简历显示了解LLM API调用、Prompt设计、结构化输出、RAG，并在项目中通过规则计算、模型降级、语义相似度计算等方式弥补模型缺陷，符合要求。",
+       "status": "有依据",
+       "need_id": 3,
+       "proof_ids": [
+        17,
+        26,
+        27,
+        28
+       ]
+      },
+      {
+       "note": "简历显示使用Docker Compose进行本地联调，有容器技术使用经验。但未提及Kubernetes，也未明确证明熟练使用GitHub CI/CD。",
+       "status": "部分支持",
+       "need_id": 4,
+       "proof_ids": [
+        19,
+        30
+       ]
+      },
+      {
+       "note": "简历显示使用过MySQL、Redis，并通过Alembic管理表结构变更，理解数据库操作与索引机制（通过性能优化体现）。",
+       "status": "有依据",
+       "need_id": 5,
+       "proof_ids": [
+        16,
+        24,
+        25
+       ]
+      },
+      {
+       "note": "简历显示熟悉Python（动态语言）和JavaScript（动态语言），符合至少熟悉一门动态语言的要求；虽未明确提及静态强类型语言，但Python作为主要开发语言在项目中广泛使用，可视为满足语言要求。",
+       "status": "有依据",
+       "need_id": 6,
+       "proof_ids": [
+        16,
+        18
+       ]
+      },
+      {
+       "note": "简历显示熟练使用FastAPI（Web框架）和Vue 3（前端框架），符合要求。",
+       "status": "有依据",
+       "need_id": 7,
+       "proof_ids": [
+        16,
+        18
+       ]
+      },
+      {
+       "note": "简历中提及使用大模型API，但未明确提及熟练掌握并高频使用Claude-4.5-opus或Gemini-2.5-pro等旗舰级Coding模型，也未说明善于利用AI辅助编程工具提升研发效能的具体细节。",
+       "status": "未找到依据",
+       "need_id": 8,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中未提供GitHub链接、开源项目、技术博客，也未提及完整的AI Agent系统落地经验、LLM应用开发框架经验（如Langgraph）、Agent Sandbox使用经验，或对生命科学领域业务知识的学习意愿和好奇心。",
+       "status": "未找到依据",
+       "need_id": 9,
+       "proof_ids": []
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 5,
+    "deep_part": 3,
+    "deep_total": 10
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/a283e4da42f86fa60nJ829y5FVRW.html",
+   "report": {
+    "title": "Agent应用开发",
+    "company": "辛德众",
+    "jd": "举报\n微信扫码分享\n职位描述\n智能体\n跨境电商\nAgent\n架构设计经验\nPython\nFlask\n\n【岗位职责】\n1、核心架构研发\n设计与开发类 OpenClaw 的 AI Agent 系统，实现任务规划、工具调用、记忆管理、多智能体协同、自主执⾏全链路能⼒。\n2、多智能体编排\n搭建 Agent 调度与协作框架，⽀持多角色智能体分工协作、任务分发、结果聚合与决策闭环。\n3、⼤模型集成与优化\n对接 GPT、Claude、Gemini、Llama 等大模型，实现 Function Calling、Prompt 工程、RAG、上下文压缩、幻觉抑制。\n4、主动智能体能力\n开发主动触发、定时任务、心跳机制、主动提醒、自主迭代等主动执行能力，打造“不用催、自己干”的智能体。\n5、工程化落地\n负责 Agent 服务的容器化部署、监控告警、性能优化、高可用架构，支撑生产级稳定运行。\n6、技术迭代\n跟踪 ReAct、CoT、ToT、Dify、LangGraph、AutoGen、CrewAI 等前沿技术，持续迭代产品竞争力。\n【任职资格】\n1、大专及以上学历。\n2、基础技术能力：熟练掌握Python，具备扎实的工程开发能力，精通FastAPI/Flask任意一种开发框架，可独立完成服务开发与调试。\n3、Agent核心技术栈：熟练掌握LangChain、LangGraph、LlamaIndex、AutoGen、CrewAI中至少两种主流Agent框架，有独立搭建AI Agent应用实战经验。\n4、加分优先条件：有跨境电商AI Agent落地经验优先；具备智能客服、AI图文/视频生成、批量内容生产、AI自动质检、API自动化调用项目经验优先。\n拥有Prompt体系搭建、素材/场景库建设、AI生产SOP标准化、团队技术赋能、AI产品规模化量产经验者优先；可清晰阐述项目产能提升、合格率、返工率、降本增效等量化成果者优先。\n5、综合素质：具备良好的问题排查能力与独立技术思考能力，逻辑清晰、责任心强，擅长团队协作，可快速落地前沿AI技术。6.积极主动，有较强的沟通和理解能力，执行力强，结果导向，自我驱动。\n【您可能比较关心的】\n1、工作时间：大小周，9:30-12:30、13:45-18:30。\n2、工作地点：深圳市龙岗区地铁3号线丹竹头地铁C出口步行5分钟即到。\n3、个人成长：团队的成果心得分享、技能培训等。\n4、晋升通道：实施双通道（管理/专家）晋升路线，完善的晋升体系，有供良好的成长平台。\n5、保障福利：良好办公环境，享受社保、公积金福利等。\n6、贴心福利：年度旅游、生日金、节日金、休闲食品不间断供应。\n7、休假福利：享受国家规定婚丧假、年假、产假、陪产假等法定假期。\n8、团建福利：月度团建经费，外出旅游，各类文娱活动。\n9、激励福利：各类月度/季度表彰、评选评优、延时工作补贴等，让你时刻感受劳动成果的荣誉感。\n10、资源优势：人才密度高，产品竞争力强，成熟的供应链，职能部门配套齐全。\n\n黎女士\n在线\n辛德众 · HRBP\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳查氏电商园A栋A210\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "职责",
+       "text": "设计与开发类 OpenClaw 的 AI Agent 系统，实现任务规划、工具调用、记忆管理、多智能体协同、自主执⾏全链路能⼒。",
+       "quote": "1、核心架构研发\n设计与开发类 OpenClaw 的 AI Agent 系统，实现任务规划、工具调用、记忆管理、多智能体协同、自主执⾏全链路能⼒。"
+      },
+      {
+       "id": 1,
+       "kind": "职责",
+       "text": "搭建 Agent 调度与协作框架，⽀持多角色智能体分工协作、任务分发、结果聚合与决策闭环。",
+       "quote": "2、多智能体编排\n搭建 Agent 调度与协作框架，⽀持多角色智能体分工协作、任务分发、结果聚合与决策闭环。"
+      },
+      {
+       "id": 2,
+       "kind": "职责",
+       "text": "对接 GPT、Claude、Gemini、Llama 等大模型，实现 Function Calling、Prompt 工程、RAG、上下文压缩、幻觉抑制。",
+       "quote": "3、⼤模型集成与优化\n对接 GPT、Claude、Gemini、Llama 等大模型，实现 Function Calling、Prompt 工程、RAG、上下文压缩、幻觉抑制。"
+      },
+      {
+       "id": 3,
+       "kind": "职责",
+       "text": "开发主动触发、定时任务、心跳机制、主动提醒、自主迭代等主动执行能力，打造“不用催、自己干”的智能体。",
+       "quote": "4、主动智能体能力\n开发主动触发、定时任务、心跳机制、主动提醒、自主迭代等主动执行能力，打造“不用催、自己干”的智能体。"
+      },
+      {
+       "id": 4,
+       "kind": "职责",
+       "text": "负责 Agent 服务的容器化部署、监控告警、性能优化、高可用架构，支撑生产级稳定运行。",
+       "quote": "5、工程化落地\n负责 Agent 服务的容器化部署、监控告警、性能优化、高可用架构，支撑生产级稳定运行。"
+      },
+      {
+       "id": 5,
+       "kind": "职责",
+       "text": "跟踪 ReAct、CoT、ToT、Dify、LangGraph、AutoGen、CrewAI 等前沿技术，持续迭代产品竞争力。",
+       "quote": "6、技术迭代\n跟踪 ReAct、CoT、ToT、Dify、LangGraph、AutoGen、CrewAI 等前沿技术，持续迭代产品竞争力。"
+      },
+      {
+       "id": 6,
+       "kind": "学历",
+       "text": "大专及以上学历。",
+       "quote": "1、大专及以上学历。"
+      },
+      {
+       "id": 7,
+       "kind": "技能",
+       "text": "熟练掌握Python，具备扎实的工程开发能力，精通FastAPI/Flask任意一种开发框架，可独立完成服务开发与调试。",
+       "quote": "2、基础技术能力：熟练掌握Python，具备扎实的工程开发能力，精通FastAPI/Flask任意一种开发框架，可独立完成服务开发与调试。"
+      },
+      {
+       "id": 8,
+       "kind": "技能",
+       "text": "熟练掌握LangChain、LangGraph、LlamaIndex、AutoGen、CrewAI中至少两种主流Agent框架，有独立搭建AI Agent应用实战经验。",
+       "quote": "3、Agent核心技术栈：熟练掌握LangChain、LangGraph、LlamaIndex、AutoGen、CrewAI中至少两种主流Agent框架，有独立搭建AI Agent应用实战经验。"
+      },
+      {
+       "id": 9,
+       "kind": "加分",
+       "text": "有跨境电商AI Agent落地经验优先；具备智能客服、AI图文/视频生成、批量内容生产、AI自动质检、API自动化调用项目经验优先。",
+       "quote": "4、加分优先条件：有跨境电商AI Agent落地经验优先；具备智能客服、AI图文/视频生成、批量内容生产、AI自动质检、API自动化调用项目经验优先。"
+      },
+      {
+       "id": 10,
+       "kind": "加分",
+       "text": "拥有Prompt体系搭建、素材/场景库建设、AI生产SOP标准化、团队技术赋能、AI产品规模化量产经验者优先；可清晰阐述项目产能提升、合格率、返工率、降本增效等量化成果者优先。",
+       "quote": "拥有Prompt体系搭建、素材/场景库建设、AI生产SOP标准化、团队技术赋能、AI产品规模化量产经验者优先；可清晰阐述项目产能提升、合格率、返工率、降本增效等量化成果者优先。"
+      }
+     ],
+     "checks": [
+      {
+       "note": "岗位要求设计与开发类OpenClaw的AI Agent系统，实现任务规划、工具调用、记忆管理、多智能体协同、自主执行全链路能力。简历资料中未提及OpenClaw系统、任务规划、记忆管理或多智能体协同的开发经验。",
+       "status": "未找到依据",
+       "need_id": 0,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位要求搭建Agent调度与协作框架，支持多角色智能体分工协作、任务分发、结果聚合与决策闭环。简历资料中未提及任何关于多智能体调度、协作框架或相关功能的开发经验。",
+       "status": "未找到依据",
+       "need_id": 1,
+       "proof_ids": []
+      },
+      {
+       "note": "简历显示有大模型API调用、Prompt设计、结构化输出和RAG经验，对接了GPT等模型，并实现了Function Calling（通过JSON结构化输出）和RAG（使用BGE Embedding）。但未提及对接Claude、Gemini、Llama等其他大模型，也未提及上下文压缩和幻觉抑制的具体实现。",
+       "status": "部分支持",
+       "need_id": 2,
+       "proof_ids": [
+        17,
+        26,
+        27,
+        28
+       ]
+      },
+      {
+       "note": "岗位要求开发主动触发、定时任务、心跳机制、主动提醒、自主迭代等主动执行能力。简历资料中未提及任何关于主动执行、定时任务、心跳机制或自主迭代的开发经验。",
+       "status": "未找到依据",
+       "need_id": 3,
+       "proof_ids": []
+      },
+      {
+       "note": "简历显示有使用Docker Compose进行本地联调的经验，属于容器化部署的一部分。但未提及生产级的容器化部署、监控告警、性能优化或高可用架构的具体经验。",
+       "status": "部分支持",
+       "need_id": 4,
+       "proof_ids": [
+        19,
+        30
+       ]
+      },
+      {
+       "note": "简历中提到了RAG（属于前沿技术应用），但未明确提及跟踪ReAct、CoT、ToT、Dify、LangGraph、AutoGen、CrewAI等具体前沿技术，也没有说明如何持续迭代产品竞争力。",
+       "status": "部分支持",
+       "need_id": 5,
+       "proof_ids": [
+        17
+       ]
+      },
+      {
+       "note": "简历显示为南方工程学院软件工程本科毕业，符合大专及以上学历要求。",
+       "status": "有依据",
+       "need_id": 6,
+       "proof_ids": [
+        20
+       ]
+      },
+      {
+       "note": "简历明确显示熟练掌握Python，使用FastAPI开发后端服务，具备独立完成服务开发与调试的能力（如内容审核后台开发、接口设计、测试编写等）。",
+       "status": "有依据",
+       "need_id": 7,
+       "proof_ids": [
+        6,
+        16,
+        21,
+        22,
+        23,
+        24,
+        25,
+        29
+       ]
+      },
+      {
+       "note": "岗位要求熟练掌握LangChain、LangGraph、LlamaIndex、AutoGen、CrewAI中至少两种主流Agent框架，并有独立搭建AI Agent应用实战经验。简历资料中未提及任何这些具体的Agent框架或独立搭建AI Agent应用的经验。",
+       "status": "未找到依据",
+       "need_id": 8,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位优先考虑有跨境电商AI Agent落地经验，或智能客服、AI图文/视频生成、批量内容生产、AI自动质检、API自动化调用项目经验。简历资料中未提及任何这些特定领域的项目经验。",
+       "status": "未找到依据",
+       "need_id": 9,
+       "proof_ids": []
+      },
+      {
+       "note": "岗位优先考虑拥有Prompt体系搭建、素材/场景库建设、AI生产SOP标准化、团队技术赋能、AI产品规模化量产经验，或能阐述量化成果。简历资料中未提及这些体系化、规模化或量化成果的经验。",
+       "status": "未找到依据",
+       "need_id": 10,
+       "proof_ids": []
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 2,
+    "deep_part": 3,
+    "deep_total": 11
+   }
+  },
+  {
+   "lead_url": "https://www.zhipin.com/job_detail/eaf06f4cb311febc0nF43tS_ElRS.html",
+   "report": {
+    "title": "AI AGENT开发助理专员",
+    "company": "极客思维科技",
+    "jd": "举报\n微信扫码分享\n职位描述\nJava\nHadoop\nSpark\nPython\nKubernetes\nAI Agent\n\n岗位概述\n我们正在寻找一位既懂AI大模型、又能把技术真正落地到业务流程中的工程师/准⼯程师。这个岗位的核⼼使命是：深⼊业务一线，梳理每个关键流程，选择最合适的AI模型和工具，搭建可持续运⾏的自动化工作流，让AI真正为业务提效。你不需要从零训练一个模型，但你需要能判断哪个模型最适合当前场景;用什么样的工具/软件应用和Agent Skills/Scripts把它跑通；怎么用工作流引擎让它稳定地为业务服务。如果你享受把复杂业务问题翻译成Al可执行任务的过程，让有一定复杂性、重复性的工作内容简化为标准的作业流程，愿景是解放双手和释放人的创造力，这个岗位非常适合你。\n\n岗位职责:\n-业务流程诊断：与AI方案设计深入各业务部门(运营、选品、供应链、客服、自动化办公等场景)梳理日常工作流，识别高频、重复、可标准化的环节。\n-业务场景落地：与业务部门紧密合作，针对每个场景输出AI赋能方案: 明确用哪个模型、什么工具、怎样的工作流架构、预期提效目标。典型场景包括但不限于：选品/自动上架产品、竞品/差评跟踪，浅新/潜爆品监控、广告投放、物流跟踪、跨系统数据同步、智能报表生成。\n-负责跨境电商场景下AIAgent的架构设计/开发/部署/运维：搭建企业内部知识库、智能问答机器人、自动化运营/营销、供应链优化、多维表格、协同办公等\n-RPA流程自动化：对于无API接口的操作，使用RPA工具模拟人工操作，打通自动化最后一公里\n\n任职要求:\n软件工程/大语言模型等相关专业\n1.技术能力:\n- 精通Python/Java,熟悉LangChain、AutoGPT等AI Agent开发框架;\n- 精通1-2个LLM，熟悉常见的大语言模型(如GPT-5.5/GLM/Qwen/DeepSeek/Codex/Claude、Llama)的应用与开发部署;\n- 熟悉多模态数据处理能力(文本、图像、视频)，熟悉RAG(检索增强生成)技术;\n- 熟悉云计算平台(AWS/Azure/Aliyun)及容器化技术(Docker/Kubernetes)。\n2.行业经验:\n- 1年以上AI Agent VIBE Cording 或自动化系统开发经验，有电商/跨境电商背景优先;\n\n优先加分:\n有落地的AI项目案例(需面试时详细阐述)\n有跨境电商行业相关经验或深度了解电商业务流程\n有模型部署及微调经验(LoRA/SFT/PEFT)，能针对垂直场景优化模型效果\n熟悉RAG(检索增强生成)架构，有知识图谱、个人知识库搭建经验\n了解多模态AI应用(图片理解、语音识别、图文生成)\n有RPA工具使用经验\n了解Hadoop、Spark等大数据处理技术\n\n王女士\n在线\n极客思维科技 · HR\n去App\n与BOSS随时沟通\n前往App\n与BOSS随时沟通\n工作地址\n\n深圳龙岗区深圳极客思维科技有限公司\n\n点击查看地图\n\n查看更多信息",
+    "content": {
+     "needs": [
+      {
+       "id": 0,
+       "kind": "技能",
+       "text": "Java",
+       "quote": "Java"
+      },
+      {
+       "id": 1,
+       "kind": "技能",
+       "text": "Hadoop",
+       "quote": "Hadoop"
+      },
+      {
+       "id": 2,
+       "kind": "技能",
+       "text": "Spark",
+       "quote": "Spark"
+      },
+      {
+       "id": 3,
+       "kind": "技能",
+       "text": "Python",
+       "quote": "Python"
+      },
+      {
+       "id": 4,
+       "kind": "技能",
+       "text": "Kubernetes",
+       "quote": "Kubernetes"
+      },
+      {
+       "id": 5,
+       "kind": "技能",
+       "text": "AI Agent",
+       "quote": "AI Agent"
+      },
+      {
+       "id": 6,
+       "kind": "职责",
+       "text": "业务流程诊断：与AI方案设计深入各业务部门(运营、选品、供应链、客服、自动化办公等场景)梳理日常工作流，识别高频、重复、可标准化的环节。",
+       "quote": "-业务流程诊断：与AI方案设计深入各业务部门(运营、选品、供应链、客服、自动化办公等场景)梳理日常工作流，识别高频、重复、可标准化的环节。"
+      },
+      {
+       "id": 7,
+       "kind": "职责",
+       "text": "业务场景落地：与业务部门紧密合作，针对每个场景输出AI赋能方案: 明确用哪个模型、什么工具、怎样的工作流架构、预期提效目标。典型场景包括但不限于：选品/自动上架产品、竞品/差评跟踪，浅新/潜爆品监控、广告投放、物流跟踪、跨系统数据同步、智能报表生成。",
+       "quote": "-业务场景落地：与业务部门紧密合作，针对每个场景输出AI赋能方案: 明确用哪个模型、什么工具、怎样的工作流架构、预期提效目标。典型场景包括但不限于：选品/自动上架产品、竞品/差评跟踪，浅新/潜爆品监控、广告投放、物流跟踪、跨系统数据同步、智能报表生成。"
+      },
+      {
+       "id": 8,
+       "kind": "职责",
+       "text": "负责跨境电商场景下AIAgent的架构设计/开发/部署/运维：搭建企业内部知识库、智能问答机器人、自动化运营/营销、供应链优化、多维表格、协同办公等",
+       "quote": "-负责跨境电商场景下AIAgent的架构设计/开发/部署/运维：搭建企业内部知识库、智能问答机器人、自动化运营/营销、供应链优化、多维表格、协同办公等"
+      },
+      {
+       "id": 9,
+       "kind": "职责",
+       "text": "RPA流程自动化：对于无API接口的操作，使用RPA工具模拟人工操作，打通自动化最后一公里",
+       "quote": "-RPA流程自动化：对于无API接口的操作，使用RPA工具模拟人工操作，打通自动化最后一公里"
+      },
+      {
+       "id": 10,
+       "kind": "学历",
+       "text": "软件工程/大语言模型等相关专业",
+       "quote": "软件工程/大语言模型等相关专业"
+      },
+      {
+       "id": 11,
+       "kind": "技能",
+       "text": "精通Python/Java,熟悉LangChain、AutoGPT等AI Agent开发框架;",
+       "quote": "- 精通Python/Java,熟悉LangChain、AutoGPT等AI Agent开发框架;"
+      },
+      {
+       "id": 12,
+       "kind": "技能",
+       "text": "精通1-2个LLM，熟悉常见的大语言模型(如GPT-5.5/GLM/Qwen/DeepSeek/Codex/Claude、Llama)的应用与开发部署;",
+       "quote": "- 精通1-2个LLM，熟悉常见的大语言模型(如GPT-5.5/GLM/Qwen/DeepSeek/Codex/Claude、Llama)的应用与开发部署;"
+      },
+      {
+       "id": 13,
+       "kind": "技能",
+       "text": "熟悉多模态数据处理能力(文本、图像、视频)，熟悉RAG(检索增强生成)技术;",
+       "quote": "- 熟悉多模态数据处理能力(文本、图像、视频)，熟悉RAG(检索增强生成)技术;"
+      },
+      {
+       "id": 14,
+       "kind": "技能",
+       "text": "熟悉云计算平台(AWS/Azure/Aliyun)及容器化技术(Docker/Kubernetes)。",
+       "quote": "- 熟悉云计算平台(AWS/Azure/Aliyun)及容器化技术(Docker/Kubernetes)。"
+      },
+      {
+       "id": 15,
+       "kind": "经验",
+       "text": "1年以上AI Agent VIBE Cording 或自动化系统开发经验，有电商/跨境电商背景优先;",
+       "quote": "- 1年以上AI Agent VIBE Cording 或自动化系统开发经验，有电商/跨境电商背景优先;"
+      },
+      {
+       "id": 16,
+       "kind": "加分",
+       "text": "有落地的AI项目案例(需面试时详细阐述)",
+       "quote": "有落地的AI项目案例(需面试时详细阐述)"
+      },
+      {
+       "id": 17,
+       "kind": "加分",
+       "text": "有跨境电商行业相关经验或深度了解电商业务流程",
+       "quote": "有跨境电商行业相关经验或深度了解电商业务流程"
+      },
+      {
+       "id": 18,
+       "kind": "加分",
+       "text": "有模型部署及微调经验(LoRA/SFT/PEFT)，能针对垂直场景优化模型效果",
+       "quote": "有模型部署及微调经验(LoRA/SFT/PEFT)，能针对垂直场景优化模型效果"
+      },
+      {
+       "id": 19,
+       "kind": "加分",
+       "text": "熟悉RAG(检索增强生成)架构，有知识图谱、个人知识库搭建经验",
+       "quote": "熟悉RAG(检索增强生成)架构，有知识图谱、个人知识库搭建经验"
+      },
+      {
+       "id": 20,
+       "kind": "加分",
+       "text": "了解多模态AI应用(图片理解、语音识别、图文生成)",
+       "quote": "了解多模态AI应用(图片理解、语音识别、图文生成)"
+      },
+      {
+       "id": 21,
+       "kind": "加分",
+       "text": "有RPA工具使用经验",
+       "quote": "有RPA工具使用经验"
+      },
+      {
+       "id": 22,
+       "kind": "加分",
+       "text": "了解Hadoop、Spark等大数据处理技术",
+       "quote": "了解Hadoop、Spark等大数据处理技术"
+      }
+     ],
+     "checks": [
+      {
+       "note": "简历专业技能中明确列出Java，且工作经历中作为后端开发工程师，具备后端开发经验。",
+       "status": "有依据",
+       "need_id": 0,
+       "proof_ids": [
+        15,
+        16
+       ]
+      },
+      {
+       "note": "简历资料中未提及Hadoop相关技能或经验。",
+       "status": "未找到依据",
+       "need_id": 1,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及Spark相关技能或经验。",
+       "status": "未找到依据",
+       "need_id": 2,
+       "proof_ids": []
+      },
+      {
+       "note": "简历中多处明确提及Python，包括专业技能、工作经历中的后端开发、AI应用开发等。",
+       "status": "有依据",
+       "need_id": 3,
+       "proof_ids": [
+        6,
+        15,
+        16,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+       ]
+      },
+      {
+       "note": "简历资料中未提及Kubernetes相关技能或经验。",
+       "status": "未找到依据",
+       "need_id": 4,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及AI Agent相关技能或经验。",
+       "status": "未找到依据",
+       "need_id": 5,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及与业务部门合作进行业务流程诊断、梳理工作流、识别标准化环节的相关经验。",
+       "status": "未找到依据",
+       "need_id": 6,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及与业务部门合作输出AI赋能方案、明确模型、工具、工作流架构、提效目标的相关经验。",
+       "status": "未找到依据",
+       "need_id": 7,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及负责跨境电商场景下AIAgent的架构设计、开发、部署、运维，或搭建企业内部知识库、智能问答机器人、自动化运营/营销等经验。",
+       "status": "未找到依据",
+       "need_id": 8,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及使用RPA工具进行流程自动化的经验。",
+       "status": "未找到依据",
+       "need_id": 9,
+       "proof_ids": []
+      },
+      {
+       "note": "简历教育经历显示为软件工程专业本科，符合要求。",
+       "status": "有依据",
+       "need_id": 10,
+       "proof_ids": [
+        20
+       ]
+      },
+      {
+       "note": "简历显示精通Python，熟悉LLM API调用、Prompt设计、RAG等AI应用技能，但未提及精通Java，也未提及熟悉LangChain、AutoGPT等AI Agent开发框架。",
+       "status": "部分支持",
+       "need_id": 11,
+       "proof_ids": [
+        15,
+        16,
+        17
+       ]
+      },
+      {
+       "note": "简历显示熟悉LLM API调用、结构化输出，并有大模型API接入经验，但未提及精通1-2个LLM，也未提及熟悉GPT-5.5/GLM/Qwen/DeepSeek/Codex/Claude、Llama等常见大语言模型的开发部署。",
+       "status": "部分支持",
+       "need_id": 12,
+       "proof_ids": [
+        17,
+        26,
+        27
+       ]
+      },
+      {
+       "note": "简历显示熟悉RAG技术，但未提及熟悉多模态数据处理能力（文本、图像、视频）。",
+       "status": "部分支持",
+       "need_id": 13,
+       "proof_ids": [
+        17
+       ]
+      },
+      {
+       "note": "简历显示熟悉Docker Compose等工程化工具，但未提及熟悉云计算平台（AWS/Azure/Aliyun）及容器化技术Kubernetes。",
+       "status": "部分支持",
+       "need_id": 14,
+       "proof_ids": [
+        19,
+        30
+       ]
+      },
+      {
+       "note": "简历资料中未提及1年以上AI Agent VIBE Cording或自动化系统开发经验，也未提及有电商/跨境电商背景。",
+       "status": "未找到依据",
+       "need_id": 15,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及有落地的AI项目案例。",
+       "status": "未找到依据",
+       "need_id": 16,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及有跨境电商行业相关经验或深度了解电商业务流程。",
+       "status": "未找到依据",
+       "need_id": 17,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及有模型部署及微调经验（LoRA/SFT/PEFT）或针对垂直场景优化模型效果。",
+       "status": "未找到依据",
+       "need_id": 18,
+       "proof_ids": []
+      },
+      {
+       "note": "简历显示熟悉RAG技术，并使用BGE Embedding构建常见问题自动应答，但未提及有知识图谱、个人知识库搭建经验。",
+       "status": "部分支持",
+       "need_id": 19,
+       "proof_ids": [
+        17,
+        28
+       ]
+      },
+      {
+       "note": "简历资料中未提及了解多模态AI应用（图片理解、语音识别、图文生成）。",
+       "status": "未找到依据",
+       "need_id": 20,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及有RPA工具使用经验。",
+       "status": "未找到依据",
+       "need_id": 21,
+       "proof_ids": []
+      },
+      {
+       "note": "简历资料中未提及了解Hadoop、Spark等大数据处理技术。",
+       "status": "未找到依据",
+       "need_id": 22,
+       "proof_ids": []
+      }
+     ],
+     "proofs": [
+      "演示用户",
+      "男 2001-01 深圳",
+      "北京 15-20kAI应用开发工程师意向职位： 薪资预期：意向城市：",
+      "13800000000 demo@example.com| |",
+      "工作经历",
+      "自我评价",
+      "1. 具备 Python 后端开发与 AI 应用落地的完整经验，能独立完成从接口设计、数据库建模到部署上线的全流程。",
+      "2. 熟悉大模型 API 的结构化调用与异常降级，在项目中坚持由规则计算分数、模型只负责理解与解释，避免输出不稳定。",
+      "3. 有 Vue 3 前端开发与接口联调经验，能独立完成完整功能的前后端交付。",
+      "教育经历",
+      "2022 年校级软件设计竞赛二等奖",
+      "大学英语四级",
+      "荣誉奖项",
+      "|",
+      "| |",
+      "专业技能",
+      "后端：Python、FastAPI、Pydantic、SQLAlchemy、MySQL、Redis、REST API。",
+      "AI 应用：LLM API 调用、Prompt 设计、结构化输出（JSON + Pydantic）、RAG、BGE Embedding。",
+      "前端：Vue 3、JavaScript、HTML/CSS、接口联调。",
+      "工程化：Git、Docker Compose、pytest、Alembic。",
+      "南方工程学院 本科 2019-2023软件工程",
+      "云启数据科技（深圳）有限公司 2023.06-2026.06后端开发工程师",
+      "1. 使用 Python 与 FastAPI 开发内容审核后台，日均处理接口请求约 8 万次。",
+      "2. 使用 Pydantic 完成接口入参校验，统一异常处理与日志格式。",
+      "3. 使用 SQLAlchemy 操作 MySQL，并通过 Alembic 管理 12 次线上表结构变更，全部支持回滚。",
+      "4. 引入 Redis 缓存热点查询结果，接口平均响应时间由 420ms 降至 60ms。",
+      "5. 接入大模型 API 完成文本分类任务，使用 JSON 结构化输出与 Pydantic 校验保证返回格式稳定。",
+      "6. 主模型限流时自动切换备用模型，缓存故障时降级为实时计算，保证功能不中断。",
+      "7. 使用 BGE Embedding 计算语义相似度，构建常见问题自动应答，无相关资料时直接拒答。",
+      "8. 使用 pytest 编写 130 个测试，覆盖正常、异常与边界场景。",
+      "9. 使用 Docker Compose 完成 MySQL、Redis 与后端服务的本地联调。",
+      "10. 参与 Vue 3 前端页面开发与前后端接口联调。",
+      "工作内容："
+     ]
+    }
+   },
+   "deep": {
+    "deep_ok": 3,
+    "deep_part": 5,
+    "deep_total": 23
+   }
+  }
+ ]
+}

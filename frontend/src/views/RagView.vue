@@ -2,7 +2,7 @@
   <section class="rag-page">
     <header class="page-head">
       <div>
-        <p class="page-kicker">求职知识库</p>
+        <p class="page-kicker">项目知识库</p>
         <h2>知识问答</h2>
       </div>
     </header>
@@ -11,7 +11,7 @@
       <div class="qa-composer">
         <textarea
           v-model="q"
-          placeholder="请输入求职问题，例如：项目经历应该怎么写？"
+          placeholder="问一个关于这个项目的问题，例如：粗筛和精判是怎么分工的？"
           @keydown.ctrl.enter.prevent="ask"
         ></textarea>
 
@@ -116,7 +116,7 @@
         class="qa-empty"
       >
         <span class="empty-icon">?</span>
-        <h3>从一个求职问题开始</h3>
+        <h3>问一个关于这个项目的问题</h3>
 
         <p>
           系统会先检索知识库资料，再根据找到的内容生成回答。
@@ -133,10 +133,10 @@ const q=ref('')
 const lastQuestion = ref('')
 
 const suggestions = [
-    '如何写好项目经历？',
-    '面试常见问题有哪些？',
-    '薪资应该怎么谈？',
-    '转行应该如何准备简历？'
+    '为什么要分成粗筛和精判两层？',
+    '怎么防止模型编造我的经历？',
+    'Redis 挂了会怎么样？',
+    '薪资应该怎么谈？'
 ]
 
 function chooseQuestion(question) {

@@ -1,12 +1,17 @@
 services:
   mysql:
     ports: !reset []
+    restart: unless-stopped
   redis:
     ports: !reset []
+    restart: unless-stopped
   backend:
     ports: !reset []
+    restart: unless-stopped
     environment:
       LLM_MOCK_MODE: "false"
   frontend:
+    restart: unless-stopped
     ports: !override
       - "80:80"
+      - "443:443"

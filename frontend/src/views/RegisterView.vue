@@ -26,6 +26,13 @@
         minlength="6"
         required
       >
+      <label for="invite">邀请码</label>
+      <input
+        id="invite"
+        v-model="form.invite_code"
+        type="text"
+        placeholder="没有邀请码？用首页的演示账号登录"
+      >
 
       <button type="submit" :disabled="isLoading">{{isLoading ? '注册中...' : '注册'}}</button>
     </form>
@@ -46,7 +53,8 @@ import {useRouter} from 'vue-router'
 const form = reactive({
   username: '',
   email: '',
-  password: ''
+  password: '',
+  invite_code: ''
 })
 const errorMessage=ref('')
 const router=useRouter()
@@ -59,7 +67,8 @@ async function handleRegister() {
     const response = await request.post('/users/register',{
         username:form.username,
         email:form.email,
-        password:form.password
+        password:form.password,
+        invite_code:form.invite_code
     })
     console.log('注册成功',response.data)
     await router.push({name:'login'})

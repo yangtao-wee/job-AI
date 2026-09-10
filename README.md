@@ -16,7 +16,7 @@
 | 向量检索 | sentence-transformers（BAAI/bge-small-zh-v1.5，本地推理） |
 | 文件处理 | pypdf |
 | 前端 | Vue 3 · Vue Router · Axios · Vite |
-| 测试 | pytest（131 个用例，含接口层） |
+| 测试 | pytest（199 个用例，含接口层） |
 
 ---
 
@@ -180,7 +180,7 @@ backend/
       llm_cost.py             Token 成本统计
     models.py      数据表定义
     schemas.py     接口数据结构与校验
-  tests/           131 个测试用例
+  tests/           199 个测试用例
 frontend/
   src/
     views/         页面

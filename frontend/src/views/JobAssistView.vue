@@ -390,6 +390,10 @@ async function run() {
     margin-top: 20px;
 }
 
+.field-grid > .field {
+    margin-top: 0;
+}
+
 .field label {
     color: var(--text);
     font-weight: 600;

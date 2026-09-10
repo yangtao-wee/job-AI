@@ -11,12 +11,17 @@
       </div>
 
       <nav class="side-nav">
-        <router-link to="/jobs">
+                <router-link to="/">
           <svg viewBox="0 0 24 24">
-            <rect x="3" y="7" width="18" height="13" rx="2" />
-            <path d="M8 7V5h8v2M3 12h18" />
+            <path d="M4 11 12 4l8 7v9H4v-9Z" />
           </svg>
-          岗位列表
+          首页
+        </router-link>
+                <router-link to="/board">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
+          </svg>
+          求职看板
         </router-link>
 
         <router-link to="/resumes">
@@ -69,7 +74,14 @@
           投递管理
         </router-link>
       </nav>
-
+      <button
+  v-if="isLoggedIn"
+  class="logout-button"
+  type="button"
+  @click="logout"
+>
+  退出登录
+</button>
       <BackendStatus />
     </aside>
 
@@ -80,5 +92,19 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import BackendStatus from './components/BackendStatus.vue'
+
+const route = useRoute()
+const router = useRouter()
+const isLoggedIn = computed(() => {
+  route.fullPath
+  return Boolean(localStorage.getItem('access_token'))
+})
+
+function logout() {
+  localStorage.removeItem('access_token')
+  router.replace({ name: 'login' })
+}
 </script>

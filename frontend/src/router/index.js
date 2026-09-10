@@ -10,13 +10,16 @@ import AgentView from '../views/AgentView.vue'
 import JobAssistView from '../views/JobAssistView.vue'
 import ApplyView  from '../views/ApplyView.vue'
 import LeadView from '../views/LeadView.vue'
+import HomeView from '../views/HomeView.vue'
+import BoardView from '../views/BoardView.vue'
+import ReportView from '../views/ReportView.vue'
 const router=createRouter({
 history:createWebHistory(),
     routes:[
         {
         path:'/',
         name:'home',
-        component:JobList
+        component:HomeView
     },
 
         
@@ -30,6 +33,12 @@ history:createWebHistory(),
 // requiresAuth：表示该页面需要登录。
 // // true：确认必须检查登录状态。
         }
+    },
+        {
+        path:'/board',
+        name:'board',
+        component:BoardView,
+        meta:{requiresAuth:true}
     },
     {
         path:'/resumes',
@@ -85,6 +94,12 @@ history:createWebHistory(),
         path:'/register',
         name:'register',
         component:RegisterView
+    },
+        {
+        path:'/report/:id',
+        name:'report',
+        component:ReportView,
+        meta:{requiresAuth:true}
     }
     
 

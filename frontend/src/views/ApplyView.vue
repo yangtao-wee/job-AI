@@ -1,505 +1,178 @@
 <template>
-  <section class="apply-page">
-    <header class="page-head apply-head">
+  <section class="ap">
+    <header class="head">
       <div>
-        <p class="page-kicker">求职进度跟踪</p>
+        <p class="kicker">求职进度跟踪</p>
         <h2>投递管理</h2>
       </div>
-
-      <button
-        class="ghost-button"
-        :disabled="busy || saving"
-        @click="load"
-      >
-        {{ busy ? '刷新中...' : '刷新列表' }}
+      <button class="btn" :disabled="loading" @click="load">
+        {{ loading ? '刷新中…' : '刷新' }}
       </button>
     </header>
 
-    <div class="apply-content">
-      <section class="stats-grid">
-        <article class="stat-card">
-          <span>全部岗位</span>
-          <strong>{{ stats.all }}</strong>
-        </article>
+    <p v-if="error" class="err">{{ error }}</p>
 
-        <article class="stat-card">
-          <span>待投递</span>
-          <strong>{{ stats.pending }}</strong>
-        </article>
+    <div class="tiles">
+      <div class="tile"><b>{{ s.total }}</b><span>岗位池总数</span></div>
+      <div class="tile"><b>{{ s.to_apply }}</b><span>待投递</span></div>
+      <div class="tile hi"><b>{{ s.applied }}</b><span>已投递</span></div>
+      <div class="tile"><b>{{ s.skipped }}</b><span>已跳过</span></div>
+    </div>
 
-        <article class="stat-card">
-          <span>已投递</span>
-          <strong>{{ stats.applied }}</strong>
-        </article>
-
-        <article class="stat-card">
-          <span>面试中</span>
-          <strong class="highlight">{{ stats.interviewing }}</strong>
-        </article>
-      </section>
-
-      <p v-if="saving || msg" class="notice" role="status">
-        {{ saving ? '正在保存修改...' : msg }}
-      </p>
-
-      <div v-if="busy" class="empty-state">
-        <span class="empty-icon">↻</span>
-        <strong>正在读取投递记录</strong>
-      </div>
-
-      <div v-else-if="err" class="empty-state error-state">
-        <span class="empty-icon">!</span>
-        <strong>读取失败</strong>
-        <p>{{ err }}</p>
-        <button class="ghost-button" @click="load">重新读取</button>
-      </div>
-
-      <div v-else-if="!rows.length" class="empty-state">
-        <span class="empty-icon">➤</span>
-        <strong>还没有投递记录</strong>
-        <p>请在岗位分析报告中点击“加入投递管理”。</p>
-      </div>
-
-      <div v-else class="application-list">
-        <article
-          v-for="item in rows"
-          :key="item.id"
-          class="application-card"
-        >
-          <header class="card-head">
-            <div>
-              <span class="application-id">投递记录 #{{ item.id }}</span>
-              <h3>{{ item.title }}</h3>
-              <p>{{ item.company }}</p>
-            </div>
-
-            <span
-              class="status-tag"
-              :class="statusClass(item.status)"
-            >
-              {{ item.status }}
-            </span>
-          </header>
-
-          <div class="time-info">
-            <span>创建于 {{ formatDate(item.created_at) }}</span>
-            <span>更新于 {{ formatDate(item.updated_at) }}</span>
-          </div>
-
-          <div class="editor-grid">
-            <div class="field">
-              <label :for="'status-' + item.id">当前进度</label>
-              <select
-                :id="'status-' + item.id"
-                v-model="item.status"
-                :disabled="saving"
-              >
-                <option>待投递</option>
-                <option>已投递</option>
-                <option>面试中</option>
-                <option>已结束</option>
-              </select>
-            </div>
-
-            <div class="field note-field">
-              <label :for="'note-' + item.id">跟进备注</label>
-              <textarea
-                :id="'note-' + item.id"
-                v-model="item.note"
-                :disabled="saving"
-                maxlength="2000"
-                rows="4"
-                placeholder="记录投递时间、沟通结果、面试安排等信息"
-              ></textarea>
-              <span class="note-count">
-                {{ item.note?.length || 0 }} / 2000
-              </span>
-            </div>
-          </div>
-
-          <footer class="card-footer">
-            <span class="save-tip">修改状态或备注后记得保存</span>
-            <button
-              class="save-button"
-              :disabled="saving"
-              @click="save(item)"
-            >
-              {{ saving ? '保存中...' : '保存修改' }}
-            </button>
-          </footer>
-        </article>
+    <div v-if="!loading && !rows.length" class="empty">
+      <div class="empty-t">还没有投递记录</div>
+      <div class="empty-s">
+        去「岗位池」标记要投的岗位，再用浏览器插件点「开始投递」。
       </div>
     </div>
+
+    <template v-else>
+      <p class="tip">
+        共 <b>{{ rows.length }}</b> 条投递记录，按投递时间从新到旧。
+        点岗位名可回到 BOSS 页面查看沟通进展。
+      </p>
+
+      <ul class="list">
+        <li v-for="l in rows" :key="l.id" class="row">
+          <div class="score" :class="tone(l.quick_score)">{{ l.quick_score }}</div>
+
+          <div class="mid">
+            <a :href="l.url" target="_blank" rel="noopener" class="title">{{ l.title }}</a>
+            <div class="meta">
+              <span class="company">{{ l.company || '未标公司' }}</span>
+              <span v-for="t in l.tags" :key="t" class="tag">{{ t }}</span>
+            </div>
+          </div>
+
+          <div class="deep">
+            <router-link
+              v-if="l.report_id"
+              :to="'/report/' + l.report_id"
+              class="deeplink"
+            >
+              <b class="ok">{{ l.deep_ok }}</b> 有依据
+              <b class="part">{{ l.deep_part }}</b> 部分
+              <span class="dim">/ {{ l.deep_total }}</span>
+              <span class="go">›</span>
+            </router-link>
+            <span v-else class="dim">未精判</span>
+          </div>
+
+          <div class="when">{{ when(l.updated_at) }}</div>
+        </li>
+      </ul>
+    </template>
   </section>
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
-import { listApply,updateApply } from '../api/apply.js'
+import { ref, onMounted } from 'vue'
+import request from '../api/request'
+
 const rows = ref([])
-const stats = computed(() => ({
-  all: rows.value.length,
-  pending: rows.value.filter(item => item.status === '待投递').length,
-  applied: rows.value.filter(item => item.status === '已投递').length,
-  interviewing: rows.value.filter(item => item.status === '面试中').length
-}))
-const busy = ref(false)
-const err = ref('')
+const s = ref({ total: 0, to_apply: 0, applied: 0, skipped: 0 })
+const loading = ref(false)
+const error = ref('')
+
+function tone(score) {
+  if (score >= 60) return 'high'
+  if (score >= 30) return 'mid'
+  return 'low'
+}
+
+function when(value) {
+  if (!value) return ''
+  const d = new Date(value)
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 async function load() {
-  busy.value = true
-  err.value = ''
+  loading.value = true
+  error.value = ''
   try {
-    rows.value = (await listApply()).data
-  } catch {
-    err.value = '读取失败，请点击刷新列表重试'
+    const [list, stat] = await Promise.all([
+      request.get('/leads', { params: { status: '已投递', limit: 200 } }),
+      request.get('/leads/stats'),
+    ])
+    rows.value = [...list.data.items].sort(
+      (a, b) => new Date(b.updated_at) - new Date(a.updated_at)
+    )
+    s.value = stat.data
+  } catch (e) {
+    error.value = e.response?.data?.detail || '读取失败，请点刷新重试'
   } finally {
-    busy.value = false
+    loading.value = false
   }
-}
-const saving = ref(false)
-const msg = ref('')
-async function save(item) {
-  saving.value = true
-  msg.value = ''
-  try {
-    await updateApply(item.id, { status: item.status, note: item.note })
-    msg.value = '保存成功'
-  } catch {
-    msg.value = '保存失败，修改尚未确认保存，请重试'
-  } finally {
-    saving.value = false
-  }
-}
-
-function statusClass(status) {
-  const classes = {
-    待投递: 'status-pending',
-    已投递: 'status-applied',
-    面试中: 'status-interview',
-    已结束: 'status-ended'
-  }
-  return classes[status] ?? 'status-pending'
-}
-
-function formatDate(value) {
-  return value ? new Date(value).toLocaleString() : '暂无时间'
 }
 
 onMounted(load)
 </script>
 
 <style scoped>
-.apply-page {
-  width: 100%;
+.ap { max-width: 940px; padding-bottom: 64px; }
+
+.head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 26px; }
+.kicker { margin: 0 0 6px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.head h2 { margin: 0; font-size: 27px; }
+.btn {
+  padding: 9px 18px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--panel); color: var(--text); cursor: pointer; font-size: 13px;
+}
+.btn:hover:not(:disabled) { border-color: var(--primary); }
+.btn:disabled { opacity: .6; cursor: default; }
+
+.err { padding: 12px 16px; border-radius: 10px; background: rgba(255,90,90,.1); color: #ff9a8f; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 26px; }
+.tile { padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--panel); }
+.tile b { display: block; font-size: 30px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.tile span { display: block; margin-top: 6px; font-size: 12.5px; color: var(--muted); }
+.tile.hi { border-color: rgba(37,208,196,.4); }
+.tile.hi b { color: var(--cyan); }
+
+.tip { margin: 0 0 16px; font-size: 13px; color: var(--muted); line-height: 1.8; }
+.tip b { color: var(--text); }
+
+.empty { border: 1px dashed var(--border); border-radius: 16px; padding: 56px 24px; text-align: center; }
+.empty-t { color: var(--text); font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.empty-s { color: var(--muted); font-size: 12.5px; line-height: 1.8; }
+
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px; border: 1px solid var(--border);
+  border-left-width: 3px; border-left-color: var(--cyan);
+  border-radius: 12px; background: var(--panel);
 }
 
-.apply-content {
-  width: min(100%, 1120px);
+.score { flex: 0 0 42px; text-align: center; font-size: 17px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.score.high { color: var(--cyan); }
+.score.mid { color: var(--salary); }
+
+.mid { flex: 1; min-width: 0; }
+.title {
+  display: inline-block; max-width: 100%; color: var(--text); font-size: 14px;
+  text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+.title:hover { color: var(--cyan); text-decoration-color: var(--cyan); }
+.meta { display: flex; align-items: center; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
+.company { color: var(--muted); font-size: 12px; }
+.tag { color: var(--muted); font-size: 11px; border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; }
 
-.apply-head {
-  width: min(100%, 1120px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-}
+.deep { flex: 0 0 172px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.deeplink { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.deeplink:hover .go { transform: translateX(2px); }
+.deeplink .go { color: var(--cyan); font-size: 16px; line-height: 1; transition: transform .15s; }
+.ok { color: var(--cyan); }
+.part { color: var(--salary); }
+.dim { color: var(--muted); opacity: .7; }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin: 30px 0 24px;
-}
+.when { flex: 0 0 120px; text-align: right; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-.stat-card {
-  display: flex;
-  min-height: 104px;
-  padding: 20px;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--panel);
-}
-
-.stat-card span {
-  color: var(--muted);
-  font-size: 0.86rem;
-}
-
-.stat-card strong {
-  color: var(--text);
-  font-size: 1.8rem;
-}
-
-.stat-card .highlight {
-  color: #8b7aff;
-}
-
-.ghost-button,
-.save-button {
-  width: auto;
-  min-width: 112px;
-  margin: 0;
-  padding: 11px 18px;
-  border-radius: 10px;
-}
-
-.ghost-button {
-  color: #9db1d6;
-  border: 1px solid var(--border);
-  background: transparent;
-}
-
-.ghost-button:hover:not(:disabled) {
-  color: var(--text);
-  border-color: var(--primary);
-  background: rgba(76, 141, 255, 0.08);
-}
-
-.notice {
-  margin: 0 0 18px;
-  padding: 13px 16px;
-  color: #67dfb8;
-  border: 1px solid rgba(45, 212, 167, 0.25);
-  border-radius: 12px;
-  background: rgba(45, 212, 167, 0.08);
-}
-
-.application-list {
-  display: grid;
-  gap: 18px;
-}
-
-.application-card {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--panel);
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.application-card:hover {
-  border-color: rgba(76, 141, 255, 0.38);
-  transform: translateY(-2px);
-}
-
-.card-head {
-  display: flex;
-  padding: 24px 26px 18px;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.application-id {
-  color: var(--primary);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-}
-
-.card-head h3 {
-  margin: 7px 0 5px;
-  color: var(--text);
-  font-size: 1.25rem;
-}
-
-.card-head p {
-  margin: 0;
-  color: var(--muted);
-}
-
-.status-tag {
-  flex: 0 0 auto;
-  padding: 7px 13px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  border: 1px solid;
-  border-radius: 999px;
-}
-
-.status-pending {
-  color: #f2b84b;
-  border-color: rgba(242, 184, 75, 0.3);
-  background: rgba(242, 184, 75, 0.09);
-}
-
-.status-applied {
-  color: #79a7ff;
-  border-color: rgba(76, 141, 255, 0.3);
-  background: rgba(76, 141, 255, 0.09);
-}
-
-.status-interview {
-  color: #b898ff;
-  border-color: rgba(139, 92, 246, 0.3);
-  background: rgba(139, 92, 246, 0.09);
-}
-
-.status-ended {
-  color: #8997ad;
-  border-color: var(--border);
-  background: rgba(137, 151, 173, 0.07);
-}
-
-.time-info {
-  display: flex;
-  gap: 22px;
-  padding: 0 26px 18px;
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.editor-grid {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 18px;
-  padding: 22px 26px;
-  border-top: 1px solid var(--border);
-  background: rgba(5, 12, 24, 0.22);
-}
-
-.field {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 9px;
-}
-
-.field label {
-  color: var(--text);
-  font-size: 0.86rem;
-  font-weight: 600;
-}
-
-.field select,
-.field textarea {
-  width: 100%;
-  margin: 0;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  background: var(--panel-soft, #0b1423);
-}
-
-.field select {
-  height: 50px;
-}
-
-.field textarea {
-  min-height: 105px;
-  resize: vertical;
-  line-height: 1.65;
-}
-
-.field select:focus,
-.field textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(76, 141, 255, 0.12);
-}
-
-.note-field {
-  position: relative;
-}
-
-.note-count {
-  align-self: flex-end;
-  color: var(--muted);
-  font-size: 0.74rem;
-}
-
-.card-footer {
-  display: flex;
-  padding: 16px 26px 22px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.save-tip {
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.save-button {
-  color: #07101e;
-  font-weight: 700;
-  border: 0;
-  background: linear-gradient(135deg, var(--primary), var(--accent-2));
-}
-
-.empty-state {
-  display: grid;
-  min-height: 280px;
-  padding: 30px;
-  place-items: center;
-  align-content: center;
-  gap: 10px;
-  color: var(--muted);
-  text-align: center;
-  border: 1px dashed var(--border);
-  border-radius: 18px;
-}
-
-.empty-state strong {
-  color: var(--text);
-}
-
-.empty-state p {
-  margin: 0;
-}
-
-.empty-icon {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  place-items: center;
-  color: var(--primary);
-  font-size: 1.35rem;
-  border: 1px solid rgba(76, 141, 255, 0.25);
-  border-radius: 15px;
-  background: rgba(76, 141, 255, 0.1);
-}
-
-.error-state {
-  color: #ff8fa3;
-  border-color: rgba(255, 91, 117, 0.25);
-}
-
-@media (max-width: 900px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .editor-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  .apply-head,
-  .card-head,
-  .card-footer {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .time-info {
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .save-button,
-  .ghost-button {
-    width: 100%;
-  }
+@media (max-width: 720px) {
+  .row { flex-wrap: wrap; }
+  .deep, .when { flex: 0 0 auto; text-align: left; }
 }
 </style>

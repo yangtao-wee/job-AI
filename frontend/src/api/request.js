@@ -24,6 +24,9 @@ request.interceptors.response.use(
         return response
     },
     (error)=>{
+        if (Array.isArray(error.response?.data?.detail)) {
+            error.response.data.detail = '提交的内容不符合要求，请检查填的数值'
+        }
         if(error.response?.status === 401){
             localStorage.removeItem('access_token')
 

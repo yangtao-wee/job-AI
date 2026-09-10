@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import request from '../api/request'
+import ScorePicker from '../components/ScorePicker.vue'
 
 const leads = ref([])
 const total = ref(0)
@@ -30,6 +31,27 @@ const FILTERS = [
   { value: '已跳过', label: '已跳过' },
 ]
 
+const stats = ref(null)
+
+async function loadStats() {
+  try {
+    const res = await request.get('/leads/stats')
+    stats.value = res.data
+  } catch (e) {
+    stats.value = null
+  }
+}
+
+function countOf(value) {
+  const s = stats.value
+  if (!s) return ''
+  if (!value) return s.total
+  if (value === '待投递') return s.to_apply
+  if (value === '已投递') return s.applied
+  if (value === '已跳过') return s.skipped
+  return s.total - s.to_apply - s.applied - s.skipped
+}
+
 async function load() {
   loading.value = true
   error.value = ''
@@ -38,6 +60,7 @@ async function load() {
       offset: offset.value,
       limit: pageSize,
       status: filter.value || undefined,
+      min_score: minShow.value || undefined,
     }
     const res = await request.get('/leads', { params })
     leads.value = res.data.items
@@ -46,6 +69,7 @@ async function load() {
     error.value = e.response?.data?.detail || e.message || '加载失败'
   } finally {
     loading.value = false
+    loadStats()
   }
 }
 
@@ -60,7 +84,7 @@ async function loadResumes() {
 }
 
 onMounted(() => { load(); loadResumes() })
-onUnmounted(() => { stopped.value = true })
+onUnmounted(() => { stopAnalyze() })
 function pick(value) {
   filter.value = value
   offset.value = 0
@@ -72,6 +96,7 @@ async function setStatus(lead, status) {
   try {
     const res = await request.patch(`/leads/${lead.id}`, { status })
     Object.assign(lead, res.data)
+    loadStats()
   } catch (e) {
     error.value = e.response?.data?.detail || '状态更新失败'
   }
@@ -104,6 +129,14 @@ async function unmarkAll() {
 }
 
 
+let aborter = null
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+
+function stopAnalyze() {
+  stopped.value = true
+  aborter?.abort()
+}
+
 // 精判：一次一个，循环调用。前端驱动，随时可停。
 async function runAnalyze() {
   if (!resumeId.value) {
@@ -116,11 +149,23 @@ async function runAnalyze() {
   error.value = ''
   try {
     while (!stopped.value) {
-      const res = await request.post(
-        '/leads/analyze',
-        { resume_id: resumeId.value, min_score: minScore.value },
-        { timeout: 300000 },   // 单次精判可能 20-70 秒，默认 5 秒远远不够
-      )
+      aborter = new AbortController()
+      let res
+      try {
+        res = await request.post(
+          '/leads/analyze',
+          { resume_id: resumeId.value, min_score: minScore.value },
+          { timeout: 300000, signal: aborter.signal },
+        )
+      } catch (e) {
+        if (e.code === 'ERR_CANCELED') break
+        if (e.response?.status === 503) {
+          lastTitle.value = '上一个还在收尾，3 秒后自动重试…'
+          await sleep(3000)
+          continue
+        }
+        throw e
+      }
       const d = res.data
       if (!d.analyzed) {
         lastTitle.value = doneCount.value ? '全部精判完成' : '没有符合条件的岗位'
@@ -130,7 +175,6 @@ async function runAnalyze() {
       doneCount.value += 1
       lastTitle.value = d.title
       remaining.value = d.remaining
-      // 把结果写回列表里对应那一行，不用重新拉整个列表
       const row = leads.value.find(l => l.id === d.lead_id)
       if (row) {
         row.deep_ok = d.deep_ok
@@ -143,6 +187,10 @@ async function runAnalyze() {
     error.value = e.response?.data?.detail || e.message || '精判失败'
   } finally {
     running.value = false
+    aborter = null
+    if (stopped.value) {
+      lastTitle.value = `已停止（本次完成 ${doneCount.value} 个）`
+    }
   }
 }
 
@@ -152,12 +200,7 @@ function tone(score) {
   return 'low'
 }
 
-const shown = computed(() =>
-  leads.value.filter(l =>
-    l.quick_score >= minShow.value &&
-    (!filter.value || l.status === filter.value)
-  )
-)
+watch(minShow, () => { offset.value = 0; load() })
 </script>
 
 <template>
@@ -175,6 +218,7 @@ const shown = computed(() =>
       </button>
     </div>
 
+        
     <!-- 精判控制条 -->
     <div class="panel">
       <label class="f">
@@ -187,13 +231,11 @@ const shown = computed(() =>
       </label>
       <label class="f">
         最低分数
-        <input v-model.number="minScore" type="number" min="0" max="100" :disabled="running">
+      <ScorePicker v-model="minScore" :min="40" :disabled="running" />
       </label>
 
       <button v-if="!running" class="btn" @click="runAnalyze">开始精判</button>
-      <button v-else class="btn stop" :disabled="stopped" @click="stopped = true">
-  {{ stopped ? '正在停止…' : '停止' }}
-</button>
+      <button v-else class="btn stop" @click="stopAnalyze">停止</button>
 
       <button class="btn go" :disabled="running" @click="markAbove">
         ↑ 标记 {{ minScore }} 分以上
@@ -219,11 +261,11 @@ const shown = computed(() =>
         @click="pick(f.value)"
       >
         {{ f.label }}
-        <span v-if="f.value && filter === f.value" class="n">{{ total }}</span>
+          <span class="n">{{ countOf(f.value) }}</span>
       </button>
       <label class="minshow">
         分数 ≥
-        <input v-model.number="minShow" type="number" min="0" max="100">
+          <ScorePicker v-model="minShow" />
       </label>
       <button class="chip" :disabled="offset === 0 || loading"
         @click="offset = Math.max(0, offset - pageSize); load()">
@@ -234,7 +276,7 @@ const shown = computed(() =>
         下一页
       </button>
       <span class="total">
-        显示 {{ shown.length }} / 本页 {{ leads.length }} / 共 {{ total }} 条
+                第 {{ offset + 1 }}–{{ offset + leads.length }} 条 / 共 {{ total }} 条
       </span>
     </div>
 
@@ -247,7 +289,7 @@ const shown = computed(() =>
 
     <ul v-else class="list">
       <li
-        v-for="l in shown"
+        v-for="l in leads"
         :key="l.id"
         class="row"
         :class="[tone(l.quick_score), { off: l.status === '已跳过' }]"
@@ -262,12 +304,13 @@ const shown = computed(() =>
           </div>
         </div>
 
-        <div class="deep">
-          <template v-if="l.deep_at">
+                <div class="deep">
+          <router-link v-if="l.deep_at" :to="'/report/' + l.report_id" class="deeplink">
             <span class="ok">{{ l.deep_ok }}</span> 有依据
             <span class="part">{{ l.deep_part }}</span> 部分
             <span class="dim">/ {{ l.deep_total }}</span>
-          </template>
+            <span class="go">›</span>
+          </router-link>
           <span v-else class="dim">未精判</span>
         </div>
 
@@ -371,6 +414,7 @@ select { min-width: 190px; }
   font-size: 12px;
 }
 .chip.on { border-color: #0b7a4b; background: #0b7a4b; color: #fff; }
+.chip:disabled { opacity: .35; cursor: default; }
 .n { opacity: .75; margin-left: 4px; }
 .total { color: #6b7590; font-size: 12px; margin-left: auto; }
 
@@ -412,7 +456,10 @@ select { min-width: 190px; }
 .company { color: #8390aa; font-size: 12px; }
 .tag { color: #6b7590; font-size: 11px; border: 1px solid #232c40; border-radius: 4px; padding: 1px 6px; }
 
-.deep { flex: 0 0 150px; font-size: 12px; color: #8390aa; white-space: nowrap; }
+.deep { flex: 0 0 165px; font-size: 12px; color: #8390aa; white-space: nowrap; }
+.deeplink { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.deeplink:hover .go { transform: translateX(2px); }
+.deeplink .go { color: #35c48a; font-size: 17px; line-height: 1; transition: transform .15s; }
 .deep .ok { color: #35c48a; font-weight: 700; }
 .deep .part { color: #e0a03a; font-weight: 700; }
 .dim { color: #5c6580; }

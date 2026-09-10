@@ -227,7 +227,22 @@ body {
     );
   transform: translateY(-50%);
 }
+.logout-button {
+  margin: 12px 8px;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
 
+.logout-button:hover {
+  color: #ff7373;
+  background: rgba(255, 80, 80, 0.08);
+}
 .backend-status {
   display: flex;
   align-items: center;

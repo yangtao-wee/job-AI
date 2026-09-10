@@ -83,6 +83,6 @@ async function handleRegister() {
 }
 </script>
 
-<style>
+<style scoped>
 main { max-width: 420px; }
 </style>

@@ -22,7 +22,7 @@
       <div class="fig"><b>52</b><span>真实岗位，本人求职时抓取</span></div>
       <div class="fig"><b>11</b><span>份精判报告，逐条核对依据</span></div>
       <div class="fig"><b>20×</b><span>粗筛提速 0.88→0.04 秒</span></div>
-      <div class="fig"><b>197</b><span>个 pytest 测试</span></div>
+      <div class="fig"><b>199</b><span>个 pytest 测试</span></div>
     </div>
 
     <h2 class="sec">按这个顺序看</h2>

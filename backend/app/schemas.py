@@ -435,10 +435,12 @@ class LeadOut(BaseModel):
     deep_ok:int
     deep_part:int
     deep_total:int
+    report_id:int|None=None
     deep_at:datetime|None=None
     has_jd:bool=False
     status:str
     created_at:datetime
+    updated_at:datetime
 
 class LeadPage(BaseModel):
     items:list[LeadOut]
@@ -499,3 +501,18 @@ class LeadMarkResult(BaseModel):
 
 class LeadUnmarkResult(BaseModel):
     unmarked:int
+
+class LeadStats(BaseModel):
+    total:int
+    with_jd:int
+    passed:int
+    analyzed:int
+    to_apply:int
+    applied:int
+    skipped:int
+    high:int
+    mid:int
+    low:int
+    need_total:int
+    need_ok:int
+    need_part:int

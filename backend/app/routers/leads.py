@@ -4,8 +4,8 @@ import logging
 from ..config import settings
 from ..dependencies import get_current_user,get_db,check_limit
 from ..models import User
-from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult,LeadUnmarkResult,LeadPage
-from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below,mark_above,unmark_all
+from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult,LeadUnmarkResult,LeadPage,LeadStats
+from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below,mark_above,unmark_all,lead_stats
 from ..services.cache_service import take_lock, free_lock
 
 log=logging.getLogger(__name__)
@@ -26,12 +26,21 @@ def my_leads(
     status:str|None=Query(None),
     offset:int=Query(0,ge=0),
     limit:int|None=Query(None,ge=1,le=200),
+    min_score:int=Query(0,ge=0,le=100),
     current_user:User=Depends(get_current_user),
     db:Session=Depends(get_db)
 ):
     size=limit or settings.lead_page_size
-    rows,total=list_leads(db,current_user.id,status,offset,size)
+    rows,total=list_leads(db,current_user.id,status,offset,size,min_score)
     return {'items':rows,'total':total,'offset':offset,'limit':size}
+
+@router.get('/stats',response_model=LeadStats)
+def read_stats(
+    current_user:User=Depends(get_current_user),
+    db:Session=Depends(get_db)
+):
+    return lead_stats(db,current_user.id)
+
 
 @router.post('/jd',response_model=LeadJdResult)
 def upload_jd(

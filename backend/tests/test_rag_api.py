@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.dependencies import get_current_user
 from app.routers import rag
-
+from app.services.kb_service import load_parts
 client=TestClient(app)
 
 def test_rag_unauth():
@@ -44,7 +44,7 @@ def test_rag_ok(monkeypatch):
     # 如果不清除，后面的测试可能继续使用假用户，导致本应返回401的测试错误通过。
     assert(res.status_code,res.json()['enough'])==(200,True)
 # .json() = 把返回的 JSON 数据转成 Python 字典/列表，方便我们用 [] 取数据。
-    assert res.json()['sources'][1]['text'].startswith('Docker')
+    assert res.json()['sources'][1]['text'] == load_parts()[1]
     assert res.json()['sources'][1]['score']==0.8
 # startswith：【语言固定】Python字符串方法，检查是否以指定文字开头。
 

@@ -38,10 +38,12 @@ def save_leads(db:Session,user_id:int,leads:list[LeadIn])->dict:
 
 
 def list_leads(db:Session,user_id:int,status:str|None=None,
-               offset:int=0,limit:int=50)->tuple[list[JobLead],int]:
+               offset:int=0,limit:int=50,min_score:int=0)->tuple[list[JobLead],int]:
     q=db.query(JobLead).filter(JobLead.user_id==user_id)
     if status:
         q=q.filter(JobLead.status==status)
+    if min_score:
+        q=q.filter(JobLead.quick_score>=min_score)
     total=q.count()
     rows=(
         q.order_by(JobLead.quick_score.desc(),JobLead.id.desc())
@@ -95,7 +97,7 @@ def analyze_next(db:Session,user_id:int,resume_id:int,proofs:list[str],min_score
         JobLead.quick_score>=min_score,
         JobLead.status!='已跳过'
     )
-    lead=base.order_by(JobLead.quick_score.desc()).first()
+    lead=base.order_by(JobLead.quick_score.desc(),JobLead.id.desc()).first()
     if lead is None:
         return {'analyzed':False,'remaining':0}
     result=make_report(lead.jd_text,proofs)
@@ -180,3 +182,23 @@ def unmark_all(db:Session,user_id:int)->int:
         db.rollback()
         raise
     return n
+
+
+def lead_stats(db:Session,user_id:int)->dict:
+    rows=db.query(JobLead).filter(JobLead.user_id==user_id).all()
+    deep=[row for row in rows if row.deep_at]
+    return {
+        'total':len(rows),
+        'with_jd':sum(1 for row in rows if row.jd_text),
+        'passed':sum(1 for row in rows if row.quick_score>=60),
+        'analyzed':len(deep),
+        'to_apply':sum(1 for row in rows if row.status=='待投递'),
+        'applied':sum(1 for row in rows if row.status=='已投递'),
+        'skipped':sum(1 for row in rows if row.status=='已跳过'),
+        'high':sum(1 for row in rows if row.quick_score>=80),
+        'mid':sum(1 for row in rows if 60<=row.quick_score<80),
+        'low':sum(1 for row in rows if row.quick_score<60),
+        'need_total':sum(row.deep_total for row in deep),
+        'need_ok':sum(row.deep_ok for row in deep),
+        'need_part':sum(row.deep_part for row in deep),
+    }

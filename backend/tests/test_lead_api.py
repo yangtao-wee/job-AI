@@ -22,7 +22,7 @@ def test_list_leads_returns_page(monkeypatch):
 
     assert response.status_code==200
     assert response.json()=={'items':[],'total':3,'offset':1,'limit':2}
-    run.assert_called_once_with(db,7,'待投递',1,2)
+    run.assert_called_once_with(db,7,'待投递',1,2,0)
 
 def test_list_leads_rejects_large_limit(monkeypatch):
     app.dependency_overrides[get_current_user]=lambda:NS(id=7)

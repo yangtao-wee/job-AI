@@ -1,17 +1,60 @@
-const tip = document.createElement('div')
-tip.textContent = '[求职助手] 启动中…'
-tip.style.cssText = [
-  'position:fixed;bottom:70px;left:20px;z-index:2147483647',
-  'max-width:360px;white-space:normal;overflow-wrap:anywhere',
-  'background:#0B7A4B;color:#fff;padding:8px 12px',
-  'font-size:14px;line-height:1.4;border-radius:8px',
-  'box-shadow:0 4px 14px rgba(0,0,0,.25)'
+const panel = document.createElement('div')
+panel.style.cssText = [
+  'position:fixed;bottom:22px;left:22px;z-index:2147483647',
+  'width:286px;padding:14px 16px 15px;box-sizing:border-box',
+  'background:rgba(11,15,24,.94);backdrop-filter:blur(14px)',
+  'border:1px solid rgba(255,255,255,.09);border-radius:15px',
+  'box-shadow:0 14px 40px rgba(0,0,0,.42)',
+  'font:13px/1.65 -apple-system,"Microsoft YaHei",sans-serif;color:#e8ecf5'
 ].join(';')
-document.body.appendChild(tip)
+
+const dot = document.createElement('span')
+dot.style.cssText = 'width:7px;height:7px;border-radius:50%;background:#4a5570;flex:0 0 7px'
+
+const head = document.createElement('div')
+head.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:9px'
+const brand = document.createElement('span')
+brand.textContent = '求职助手'
+brand.style.cssText = 'font-weight:700;font-size:11px;letter-spacing:.18em;color:#7b88a6'
+head.append(dot, brand)
+
+const tipEl = document.createElement('div')
+tipEl.style.cssText = 'min-height:34px;margin-bottom:12px;color:#c8d1e4;overflow-wrap:anywhere'
+
+const row = document.createElement('div')
+row.style.cssText = 'display:flex;gap:8px'
+
+panel.append(head, tipEl, row)
+document.body.appendChild(panel)
+
+const tip = {
+  set textContent(v) { tipEl.textContent = String(v).replace(/^\[求职助手\]\s*/, '') },
+  get textContent() { return tipEl.textContent }
+}
+tip.textContent = '启动中…'
+
+function setDot(color) { dot.style.background = color }
+
+function makeBtn(text, color) {
+  const b = document.createElement('button')
+  b.textContent = text
+  b.style.cssText = [
+    'flex:1;padding:9px 0;border:0;border-radius:10px',
+    'font:600 12.5px/1 -apple-system,"Microsoft YaHei",sans-serif',
+    'color:#fff;cursor:pointer;transition:filter .15s,transform .1s',
+    `background:${color}`
+  ].join(';')
+  b.onmouseenter = () => { b.style.filter = 'brightness(1.18)' }
+  b.onmouseleave = () => { b.style.filter = '' }
+  b.onmousedown = () => { b.style.transform = 'scale(.97)' }
+  b.onmouseup = () => { b.style.transform = '' }
+  row.appendChild(b)
+  return b
+}
 
 const PASS = 60
 const DRY_RUN = false
-const DAILY_MAX = 1
+const DAILY_MAX = 40
 const APPLY_MIN = 3
 const MAX_DEEP = 3
 const API = 'http://127.0.0.1:8000'
@@ -20,21 +63,42 @@ const APPLY_GAP = 10000
 let lastFirst = ''
 let TOKEN = ''
 let RESUME_ID = null
+let SCAN_ON = false
+let SCANNING = false   
 
 chrome.storage.local.get(['token', 'resume_id'])
-  .then(data => {
+  .then(async data => {
     TOKEN = data.token || ''
     RESUME_ID = data.resume_id || null
     if (isDetailPage()) {
       runQueue().catch(e => { tip.textContent = `[求职助手] 投递失败：${e.message}` })
-    } else {
-      addStartButton()
-      scan()
+      return
     }
+    const q = (await chrome.storage.local.get(QUEUE_KEY))[QUEUE_KEY] || []
+    if (q.length && location.pathname.includes('/chat')) {
+      skipChatted().catch(e => { tip.textContent = `[求职助手] ${e.message}` })
+      return
+    }
+    addScanButton()
+    addStartButton()
+    tip.textContent = q.length
+      ? `[求职助手] 投递队列还剩 ${q.length} 个 · 点「开始投递」继续`
+      : '[求职助手] 待命中 · 点下方「获取岗位」'
   })
   .catch(e => { tip.textContent = `[求职助手] 读取Token失败：${e.message}` })
 
+chrome.storage.onChanged.addListener(changes => {
+  if (changes.resume_id) RESUME_ID = changes.resume_id.newValue || null
+  if (!changes.token) return
+  TOKEN = changes.token.newValue || ''
+  SCAN_ON = false
+  tip.textContent = TOKEN
+    ? '[求职助手] 已切换账号 · 点下方「获取岗位」'
+    : '[求职助手] 已退出登录 · 点插件图标登录'
+})
+
 function scan() {
+  if (!SCAN_ON || SCANNING) return
   if (!TOKEN){
     const message = '[求职助手] 请先点击插件图标保存Token'
     if(tip.textContent !== message){
@@ -46,20 +110,22 @@ function scan() {
     tip.textContent = '[求职助手] 请点插件图标选择一份简历'
     return
   }
-  const cards = document.querySelectorAll('.job-card-box')
-  if (cards.length === 0) return
-  const first = cards[0].querySelector('.job-name')?.innerText
-  if (first === lastFirst) return
-  lastFirst = first
+  const cards = [...document.querySelectorAll('.job-card-box')]
+    .filter(c => !c.dataset.jmDone)
+  if (!cards.length) {
+    tip.textContent = '[求职助手] 当前已全部处理，往下滚动加载更多岗位'
+    return
+  }
+  cards.forEach(c => { c.dataset.jmDone = '1' })
 
-  const list = [...cards].map(c => ({
+  const list = cards.map(c => ({
     el: c,
     name: c.querySelector('.job-name')?.innerText,
     url: c.querySelector('.job-name')?.href || '',
     company:c.querySelector('.boss-name')?.innerText || '未知',
     tags: [...c.querySelectorAll('.tag-list li')].map(li => li.innerText)
   }))
-
+  SCANNING = true  
   tip.textContent = `[求职助手] 正在给 ${list.length} 个岗位打分…`
   fetch('http://127.0.0.1:8000/jobs/quick-score', {
     method: 'POST',
@@ -72,7 +138,10 @@ function scan() {
       jobs: list.map(j => ({ name: j.name, tags: j.tags }))
     })
   })
-    .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
+      .then(r => {
+      if (r.status === 401) return Promise.reject('请点插件图标登录')
+      return r.ok ? r.json() : Promise.reject(`打分失败：HTTP ${r.status}`)
+    })
     .then(async scores => {
       scores.forEach((s, i) => mark(list[i].el, s))
       tip.textContent = `[求职助手] 已打分 ${scores.length} 个岗位`
@@ -89,7 +158,8 @@ function scan() {
         tip.textContent += ` · JD补全失败：${e.message}`
       }
     })
-    .catch(e => { tip.textContent = `[求职助手] 打分失败：${e}` })
+      .catch(e => { tip.textContent = `[求职助手] ${e}` })
+      .finally(() => { SCANNING = false })
 }
 
 function mark(el, s) {
@@ -124,7 +194,7 @@ async function uploadLeads(list, scores) {
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
     body: JSON.stringify({ leads })
   })
-  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  if (!r.ok) throw new Error(r.status === 401 ? '请点插件图标登录' : `HTTP ${r.status}`)
   const d = await r.json()
   return d.added
 }
@@ -148,6 +218,7 @@ async function collectJds(list) {
   const items = []
   let prev = document.querySelector('.job-detail-body')?.innerText || ''
   for (let i = 0; i < list.length && items.length < 20; i++) {
+    if (!SCAN_ON) break
     const t = list[i]
     if (!t.url) continue
     tip.textContent = `[求职助手] 读取JD ${i + 1}/${list.length}`
@@ -264,37 +335,76 @@ function isDetailPage() {
   return location.pathname.includes('/job_detail/')
 }
 
+async function skipChatted() {
+  const data = await chrome.storage.local.get(QUEUE_KEY)
+  const queue = data[QUEUE_KEY] || []
+  if (!queue.length) return
+  const cur = queue.shift()
+  await fetch(`${API}/leads/${cur.id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+    body: JSON.stringify({ status: '已投递' })
+  }).catch(() => {})
+  if (!queue.length) {
+    await chrome.storage.local.remove(QUEUE_KEY)
+    tip.textContent = '[求职助手] 队列全部完成'
+    return
+  }
+  await chrome.storage.local.set({ [QUEUE_KEY]: queue })
+  tip.textContent = `[求职助手] 这个之前已沟通过 · 3 秒后投下一个（还剩 ${queue.length}）`
+  await sleep(3000)
+  location.href = queue[0].url
+}
+
+
 function titleKey(s) {
   return (s || '').replace(/\s/g, '').slice(0, 10)
 }
 
-async function applyHere(expectTitle) {
+async function applyHere(expectTitle, leadId) {
   const h1 = document.querySelector('h1')?.innerText.trim()
   if (!h1) return '⛔页面没加载好'
   if (titleKey(h1) !== titleKey(expectTitle)) return `⛔标题对不上：${h1}`
+  if (document.body.innerText.includes('职位已关闭')) return '⏭岗位已关闭'
   const btn = document.querySelector('.btn-startchat')
   if (!btn) return '⛔没找到沟通按钮'
   if (!DRY_RUN && usedToday() >= DAILY_MAX) return '⛔今日已达上限'
   if (DRY_RUN) return '🧪演练·本该投出'
+  // 先记账再点击：点击可能让 BOSS 跳到聊天页，之后的代码不保证能跑完
+  await fetch(`${API}/leads/${leadId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+    body: JSON.stringify({ status: '已投递' })
+  }).catch(() => {})
   btn.click()
   addUsed()
   const closed = await closeDialog()
   return closed ? '✅已投递' : '⚠️投了但弹窗没关'
 }
 
-function addStartButton() {
-  const b = document.createElement('button')
-  b.textContent = '开始投递'
-  b.style.cssText = [
-  'position:fixed;bottom:20px;left:20px;z-index:2147483647',
-  'background:#B6791A;color:#fff;border:0',
-  'padding:8px 16px;font-size:13px;cursor:pointer',
-  'border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.25)'
-  ].join(';')
+function addScanButton() {
+  const b = makeBtn('获取岗位', '#1f6f4a')
   b.addEventListener('click', () => {
-    startApply().catch(e => { tip.textContent = `[求职助手] ${e.message}` })
+    SCAN_ON = !SCAN_ON
+    b.textContent = SCAN_ON ? '停止获取' : '获取岗位'
+    b.style.background = SCAN_ON ? '#8a3030' : '#1f6f4a'
+    setDot(SCAN_ON ? '#35c48a' : '#4a5570')
+    if (SCAN_ON) {
+      lastFirst = ''
+      scan()
+    } else {
+      tip.textContent = '正在收尾，当前这个岗位读完就停'
+    }
   })
-  document.body.appendChild(b)
+}
+
+
+function addStartButton() {
+  const b = makeBtn('开始投递', '#96651a')
+  b.addEventListener('click', () => {
+    setDot('#e0a03a')
+    startApply().catch(e => { tip.textContent = e.message })
+  })
 }
 
 async function startApply() {
@@ -309,6 +419,11 @@ async function startApply() {
   }
   if (!list.length) {
     tip.textContent = '[求职助手] 没有「待投递」的岗位，先去岗位池标记'
+    return
+  }
+  const bad = list.filter(l => l.quick_score < 60)
+  if (bad.length) {
+    tip.textContent = `⚠️队列里有 ${bad.length} 个 60 分以下的岗位（如「${bad[0].title}」），请回岗位池核对后再投`
     return
   }
   const left = Math.max(DAILY_MAX - usedToday(), 0)
@@ -330,21 +445,17 @@ async function runQueue() {
   const cur = queue[0]
   if (!location.href.startsWith(cur.url.split('?')[0])) return
   tip.textContent = `[求职助手] 投递中，还剩 ${queue.length} 个`
-  const st = await applyHere(cur.title)
+  const st = await applyHere(cur.title, cur.id)
   if (st.startsWith('⛔')) {
     tip.textContent = `[求职助手] ${st} · 已暂停，岗位仍在队列`
     return
   }
-  if (st.startsWith('✅') || st.startsWith('⚠️')) {
-    const saved = await fetch(`${API}/leads/${cur.id}`, {
+  if (st.startsWith('⏭')) {
+    await fetch(`${API}/leads/${cur.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-      body: JSON.stringify({ status: '已投递' })
-    })
-    if (!saved.ok) {
-      tip.textContent = `[求职助手] 已发送，但状态同步失败：HTTP ${saved.status}`
-      return
-    }
+      body: JSON.stringify({ status: '已跳过' })
+    }).catch(() => {})
   }
   queue.shift()
   if (!queue.length) {

@@ -5,24 +5,28 @@
   <style>
     body { width: 300px; padding: 16px; background: #0b111b; color: #eef2f8; }
     input, button { box-sizing: border-box; width: 100%; margin-top: 10px; padding: 10px; }
-    button { background: #5b7cff; border: 0; border-radius: 8px; cursor: pointer; }
-    #status { color: #34d399; }
-    select { box-sizing: border-box; width: 100%; margin-top: 10px; padding: 10px;
-             background: #0f1425; color: #eef2f8; border: 1px solid #2a3348; border-radius: 8px; }
-    label { display: block; margin-top: 14px; font-size: 12px; color: #9aa5bd; }
+    input { background: #0f1425; color: #eef2f8; border: 1px solid #2a3348; border-radius: 8px; }
+    button { background: #5b7cff; border: 0; border-radius: 8px; cursor: pointer; color: #fff; }
     button.ghost { background: transparent; border: 1px solid #2a3348; color: #9aa5bd; }
+    #status { margin-top: 12px; color: #34d399; font-size: 12px; line-height: 1.7; white-space: pre-line; }
+    #status.bad { color: #f78166; }
+    .ok-title { font-size: 15px; font-weight: 700; color: #34d399; }
   </style>
 </head>
 <body>
-  <strong>本地API身份配置</strong>
+  <div id="form">
+    <strong>登录求职助手</strong>
+    <input id="username" type="text" placeholder="用户名">
+    <input id="password" type="password" placeholder="密码">
+    <button id="login">登录</button>
+  </div>
 
-  <input id="token" type="password" placeholder="粘贴登录Token">
+   <div id="done" hidden>
+    <p class="ok-title">✅ 登录成功</p>
+    <button id="clearq" class="ghost">清空投递队列</button>
+    <button id="logout" class="ghost">切换账号</button>
+  </div>
 
-  <label for="resume">使用哪份简历</label>
-  <select id="resume"><option value="">先填Token再点加载</option></select>
-  <button id="load" class="ghost">加载简历列表</button>
-
-  <button id="save">保存</button>
   <p id="status"></p>
   <script src="popup.js"></script>
 </body>

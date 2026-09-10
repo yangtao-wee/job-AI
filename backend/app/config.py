@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{(BACKEND_DIR / 'jobs.db').as_posix()}"
     redis_url: str = 'redis://127.0.0.1:6379/0'
     algorithm:str = 'HS256'
-    access_token_expire_minutes:int = 60
+    access_token_expire_minutes:int = 480
     llm_api_key:str | None=None
     llm_base_url:str | None=None
     llm_model:str | None=None

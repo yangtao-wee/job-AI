@@ -54,36 +54,60 @@ function makeBtn(text, color) {
 
 const PASS = 60
 const DRY_RUN = false
-const DAILY_MAX = 40
+const DAILY_MAX = 150
 const APPLY_MIN = 3
 const MAX_DEEP = 3
 const API = 'http://127.0.0.1:8000'
 const QUEUE_KEY = 'jm_apply_queue'
 const APPLY_GAP = 10000
+const JD_GAP = 3000
+const JD_MAX = 10
+const SCROLL_GAP = 5000
 let lastFirst = ''
 let TOKEN = ''
 let RESUME_ID = null
 let SCAN_ON = false
 let SCANNING = false   
+let STOPPED = false
+let aborter = new AbortController()
+
+// 重新开始。一个中断控制器只能用一次，所以要换新的。
+function resume() {
+  STOPPED = false
+  aborter = new AbortController()
+}
 
 chrome.storage.local.get(['token', 'resume_id'])
   .then(async data => {
     TOKEN = data.token || ''
     RESUME_ID = data.resume_id || null
     if (isDetailPage()) {
-      runQueue().catch(e => { tip.textContent = `[求职助手] 投递失败：${e.message}` })
+      addStopButton()
+      runQueue().catch(e => {
+        if (STOPPED || e?.name === 'AbortError') return
+        tip.textContent = `[求职助手] 投递失败：${e.message}`
+      })
       return
     }
     const q = (await chrome.storage.local.get(QUEUE_KEY))[QUEUE_KEY] || []
     if (q.length && location.pathname.includes('/chat')) {
-      skipChatted().catch(e => { tip.textContent = `[求职助手] ${e.message}` })
+      addStopButton()
+      skipChatted().catch(e => {
+        if (STOPPED || e?.name === 'AbortError') return
+        tip.textContent = `[求职助手] ${e.message}`
+      })
       return
     }
     addScanButton()
     addStartButton()
-    tip.textContent = q.length
-      ? `[求职助手] 投递队列还剩 ${q.length} 个 · 点「开始投递」继续`
-      : '[求职助手] 待命中 · 点下方「获取岗位」'
+    addStopButton()
+    if (q.length) {
+      tip.textContent = `投递队列还剩 ${q.length} 个 · 3 秒后自动继续`
+      await sleep(3000)
+      await startApply()
+      return
+    }
+    tip.textContent = '待命中 · 点下方「获取岗位」'
   })
   .catch(e => { tip.textContent = `[求职助手] 读取Token失败：${e.message}` })
 
@@ -136,7 +160,8 @@ function scan() {
     body: JSON.stringify({
       resume_id: RESUME_ID,
       jobs: list.map(j => ({ name: j.name, tags: j.tags }))
-    })
+    }),
+    signal: aborter.signal
   })
       .then(r => {
       if (r.status === 401) return Promise.reject('请点插件图标登录')
@@ -152,14 +177,27 @@ function scan() {
         tip.textContent += ` · 入库失败：${e.message}`
       }
       try {
-        const n = await collectJds(list)
+        const n = await collectJds(list, scores)
         tip.textContent = `[求职助手] 已入库 ${scores.length} 个岗位，补全 ${n} 份JD。去「岗位池」页面开始精判`
       } catch (e) {
         tip.textContent += ` · JD补全失败：${e.message}`
       }
     })
-      .catch(e => { tip.textContent = `[求职助手] ${e}` })
-      .finally(() => { SCANNING = false })
+      .catch(e => {
+        // 用户点了停止 —— 这不是错误，别吓人
+        if (STOPPED || e?.name === 'AbortError') return
+        tip.textContent = `[求职助手] ${e}`
+      })
+      .finally(() => {
+        SCANNING = false
+        if (SCAN_ON) {
+          setTimeout(() => {
+            if (SCAN_ON && !SCANNING) {
+              window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })
+            }
+          }, SCROLL_GAP)
+        }
+      })
 }
 
 function mark(el, s) {
@@ -192,7 +230,8 @@ async function uploadLeads(list, scores) {
   const r = await fetch('http://127.0.0.1:8000/leads/batch', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-    body: JSON.stringify({ leads })
+    body: JSON.stringify({ leads }),
+    signal: aborter.signal
   })
   if (!r.ok) throw new Error(r.status === 401 ? '请点插件图标登录' : `HTTP ${r.status}`)
   const d = await r.json()
@@ -201,7 +240,14 @@ async function uploadLeads(list, scores) {
 
 
 function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms))
+  return new Promise((resolve, reject) => {
+    if (STOPPED) return reject(new Error('已停止'))
+    const t = setTimeout(resolve, ms)
+    aborter.signal.addEventListener('abort', () => {
+      clearTimeout(t)
+      reject(new Error('已停止'))
+    }, { once: true })
+  })
 }
 
 async function waitJd(prev) {
@@ -214,14 +260,16 @@ async function waitJd(prev) {
 }
 
 
-async function collectJds(list) {
+async function collectJds(list, scores) {
+  const targets = list.filter((_, i) => scores[i].score >= PASS)
   const items = []
   let prev = document.querySelector('.job-detail-body')?.innerText || ''
-  for (let i = 0; i < list.length && items.length < 20; i++) {
-    if (!SCAN_ON) break
-    const t = list[i]
+  for (let i = 0; i < targets.length && items.length < JD_MAX; i++) {
+    if (STOPPED || !SCAN_ON) break
+    const t = targets[i]
     if (!t.url) continue
-    tip.textContent = `[求职助手] 读取JD ${i + 1}/${list.length}`
+    tip.textContent = `[求职助手] 读取JD ${i + 1}/${targets.length}（只读 ${PASS} 分以上）`
+    await sleep(JD_GAP)
     t.el.click()
     const jd = await waitJd(prev)
     if (!jd || jd.length < 20) continue
@@ -232,7 +280,8 @@ async function collectJds(list) {
   const r = await fetch('http://127.0.0.1:8000/leads/jd', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-    body: JSON.stringify({ items })
+    body: JSON.stringify({ items }),
+    signal: aborter.signal
   })
   if (!r.ok) throw new Error(`HTTP ${r.status}`)
   const d = await r.json()
@@ -251,6 +300,7 @@ async function deepCheck(list, scores) {
   let prev = document.querySelector('.job-detail-body')?.innerText || ''
 
   for (let i = 0; i < targets.length; i++) {
+    if (STOPPED) return
     const t = targets[i]
     tip.textContent = `[求职助手] 精判 ${i + 1}/${targets.length}：${t.name}`
 
@@ -265,7 +315,8 @@ async function deepCheck(list, scores) {
       const r = await fetch('http://127.0.0.1:8000/jobs/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-        body: JSON.stringify({ resume_id: RESUME_ID, job_title: t.name, company: t.company, jd_text: jd })
+        body: JSON.stringify({ resume_id: RESUME_ID, job_title: t.name, company: t.company, jd_text: jd }),
+        signal: aborter.signal
       })
       if (!r.ok) throw new Error(`HTTP ${r.status}`)
       const rep = await r.json()
@@ -364,6 +415,11 @@ function titleKey(s) {
 async function applyHere(expectTitle, leadId) {
   const h1 = document.querySelector('h1')?.innerText.trim()
   if (!h1) return '⛔页面没加载好'
+  const pageText = document.body.innerText
+  const missingPage =
+    h1 === 'Oops!' ||
+    pageText.includes('您访问的页面不存在')
+  if (missingPage) return '⏭岗位不存在'
   if (titleKey(h1) !== titleKey(expectTitle)) return `⛔标题对不上：${h1}`
   if (document.body.innerText.includes('职位已关闭')) return '⏭岗位已关闭'
   const btn = document.querySelector('.btn-startchat')
@@ -390,6 +446,7 @@ function addScanButton() {
     b.style.background = SCAN_ON ? '#8a3030' : '#1f6f4a'
     setDot(SCAN_ON ? '#35c48a' : '#4a5570')
     if (SCAN_ON) {
+      resume()
       lastFirst = ''
       scan()
     } else {
@@ -398,10 +455,24 @@ function addScanButton() {
   })
 }
 
+function addStopButton() {
+  const b = makeBtn('■ 全部停止', '#8a2f2f')
+  b.addEventListener('click', async () => {
+    STOPPED = true
+    SCAN_ON = false
+    SCANNING = false
+    aborter.abort()
+    clearTimeout(scanTimer)
+    await chrome.storage.local.remove(QUEUE_KEY)
+    setDot('#4a5570')
+    tip.textContent = '[求职助手] 已全部停止，投递队列已清空'
+  })
+}
 
 function addStartButton() {
   const b = makeBtn('开始投递', '#96651a')
   b.addEventListener('click', () => {
+    resume()
     setDot('#e0a03a')
     startApply().catch(e => { tip.textContent = e.message })
   })
@@ -409,7 +480,8 @@ function addStartButton() {
 
 async function startApply() {
   const r = await fetch(`${API}/leads?status=待投递`, {
-    headers: { 'Authorization': `Bearer ${TOKEN}` }
+    headers: { 'Authorization': `Bearer ${TOKEN}` },
+    signal: aborter.signal
   })
   if (!r.ok) throw new Error(`HTTP ${r.status}`)
   const data = await r.json()
@@ -466,6 +538,7 @@ async function runQueue() {
   await chrome.storage.local.set({ [QUEUE_KEY]: queue })
   tip.textContent = `[求职助手] ${st} · ${APPLY_GAP / 1000} 秒后投下一个（还剩 ${queue.length}）`
   await sleep(APPLY_GAP)
+  if (STOPPED) return
   location.href = queue[0].url
 }
 
@@ -503,7 +576,7 @@ let scanTimer = null
 
 const observer = new MutationObserver(() => {
   clearTimeout(scanTimer)
-  scanTimer = setTimeout(scan, 500)
+  scanTimer = setTimeout(scan, 1500)
 })
 
 observer.observe(document.body, { childList: true, subtree: true })

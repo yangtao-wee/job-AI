@@ -24,6 +24,23 @@ LEARNING_WORDS = (
     '目标是',
 )
 ROLE_KEYS=['Python','Vue','全栈','后端','前端','产品']
+# 反向语义锚点：岗位标题跟这些方向更像时，直接判 0 分。
+# 比关键词黑名单准——「AI短视频编剪师」标题里没有「剪辑」二字，
+# 但它的语义跟「短视频剪辑师」的距离远近于跟「AI应用开发工程师」。
+AVOID_ROLES = (
+    '电话销售代表', '销售顾问', '客户经理', '课程顾问', '招商加盟',
+    '内容运营', '直播运营', '市场推广专员',
+    '短视频剪辑师', '视频制作师',
+    '人力资源专员', '行政专员',
+    '销售', '销售经理', '商务专员', '产品经理', '新媒体运营', '运营专员',
+)
+
+# 岗位性质不对，跟方向无关，语义抓不到，只能靠关键词
+BLOCK_WORDS = ('实习', '兼职')
+
+# 只比「要避开的方向」像一点点不算数，
+# 必须明显更像我要的岗位才给分。
+AVOID_MARGIN = 0.08
 
 def is_learning_text(text: str) -> bool:
     return any(
@@ -246,19 +263,30 @@ def calculate_required_skill_score(
         )
 
 
-def quick_score(analysis,jobs:list[QuickJob])->list[QuickScoreItem]:
-    names=[job.name for job in jobs]
-    positions=list(analysis.recommended_positions)
-    vecs=embed_many(names+positions)
-    items=[]
+def quick_score(analysis, jobs):
+    names = [job.name for job in jobs]
+    positions = list(analysis.recommended_positions)
+    vecs = embed_many(names + positions + list(AVOID_ROLES))
+    items = []
     for job in jobs:
-        jv=vecs.get(job.name)
-        sims=[dot(jv,vecs[p]) for p in positions if jv and p in vecs]
-        sim=max(sims,default=0.0)
-        role=round(sim*10) if sim>=0.5 else 0
-        real_tags=[t for t in job.tags if not SKIP_TAG.search(t)]
-        skill=calculate_skill_score(analysis.skills,real_tags)
-        full=10+(35 if real_tags else 0)
-        total=round((role+skill.score)/full*100)
-        items.append(QuickScoreItem(name=job.name,score=total,matched=skill.matched_skills))
+        title = job.name.lower()
+        if any(w.lower() in title for w in BLOCK_WORDS):
+            items.append(QuickScoreItem(name=job.name, score=0, matched=[]))
+            continue
+
+        jv = vecs.get(job.name)
+        want = max((dot(jv, vecs[p]) for p in positions if jv and p in vecs), default=0.0)
+        avoid = max((dot(jv, vecs[p]) for p in AVOID_ROLES if jv and p in vecs), default=0.0)
+
+        # 跟要避开的方向更像 —— 不是我要的岗位
+        if avoid + AVOID_MARGIN > want:
+            items.append(QuickScoreItem(name=job.name, score=0, matched=[]))
+            continue
+
+        base = round(want * 100) if want >= 0.5 else 0
+        real_tags = [t for t in job.tags if not SKIP_TAG.search(t)]
+        skill = calculate_skill_score(analysis.skills, real_tags)
+        bonus = min(len(skill.matched_skills), 2) * 5
+        total = min(100, base + bonus)
+        items.append(QuickScoreItem(name=job.name, score=total, matched=skill.matched_skills))
     return items

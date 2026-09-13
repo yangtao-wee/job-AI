@@ -214,19 +214,24 @@ def test_build_job_requirements():
     ]
 
 def test_quick_score(monkeypatch):
+    # 用二维假向量表达「方向」：第一维=开发，第二维=剪辑
+    VEC = {
+        'AI开发工程师': [1.0, 0.0],   # 纯开发
+        'AI剪辑师': [0.2, 1.0],       # 挂着 AI 的名，本质是剪辑
+        '短视频剪辑师': [0.0, 1.0],   # 纯剪辑（AVOID_ROLES 里的锚点）
+    }
     monkeypatch.setattr(
         'app.services.matching_service.embed_many',
-        lambda texts: {t: [1.0] for t in texts}
-    )
-    monkeypatch.setattr(
-        'app.services.matching_service.dot',
-        lambda *_: 0.8
+        lambda texts: {t: VEC.get(t, [0.0, 0.0]) for t in texts}
     )
     analysis = SimpleNamespace(
         skills=['Python'],
         recommended_positions=['AI开发工程师']
     )
-    jobs = [QuickJob(name='AI开发工程师', tags=['Python', '本科', '3-5年'])]
+    jobs = [
+        QuickJob(name='AI开发工程师', tags=['Python', '本科', '3-5年']),
+        QuickJob(name='AI剪辑师', tags=['本科', '1-3年']),
+    ]
     result = quick_score(analysis, jobs)
-    assert result[0].score == 96
+    assert [item.score for item in result] == [100, 0]
     assert result[0].matched == ['python']

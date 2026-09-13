@@ -12,6 +12,9 @@ const loading = ref(false)
 const error = ref('')
 const filter = ref('')
 const minShow = ref(0)
+// 排序方式。这三个名字必须和后端 lead_service.py 里 ORDERS 的键一模一样。
+const ORDER_OPTIONS = ['分数高', '分数低', '最新']
+const order = ref('分数高')
 // 精判参数
 const resumeId = ref(null)
 const minScore = ref(60)
@@ -61,6 +64,7 @@ async function load() {
       limit: pageSize,
       status: filter.value || undefined,
       min_score: minShow.value || undefined,
+      order: order.value,
     }
     const res = await request.get('/leads', { params })
     leads.value = res.data.items
@@ -99,6 +103,68 @@ async function setStatus(lead, status) {
     loadStats()
   } catch (e) {
     error.value = e.response?.data?.detail || '状态更新失败'
+  }
+}
+
+// 删除一条岗位。已投递的后端会拒（409），这里也不显示按钮，双保险。
+async function removeLead(lead) {
+  if (!confirm(`确定删除「${lead.title}」？\n删掉后插件再抓到它，会当成没见过的新岗位重新收进来。`)) return
+  try {
+    await request.delete(`/leads/${lead.id}`)
+    leads.value = leads.value.filter(l => l.id !== lead.id)
+    total.value -= 1
+    error.value = ''
+    loadStats()
+  } catch (e) {
+    error.value = e.response?.data?.detail || '删除失败'
+  }
+}
+
+// 「已投递」的岗位后端不会删，统计时也要排除，否则确认框里的数字对不上。
+const DELETABLE = ['新抓取', '待投递', '已跳过']
+
+// 算出真正会被删掉的条数。
+// 接口只支持「分数 >= N」，没有「< N」，所以用「该状态总数 - 该状态里 1 分以上的」倒推出 0 分的。
+async function countZeroScore() {
+  const calls = []
+  for (const s of DELETABLE) {
+    calls.push(request.get('/leads', { params: { status: s, limit: 1 } }))
+    calls.push(request.get('/leads', { params: { status: s, limit: 1, min_score: 1 } }))
+  }
+  const res = await Promise.all(calls)
+  let n = 0
+  for (let i = 0; i < res.length; i += 2) n += res[i].data.total - res[i + 1].data.total
+  return n
+}
+
+async function deleteZeroScore() {
+  let n
+  try {
+    n = await countZeroScore()
+  } catch (e) {
+    error.value = '统计失败，请点刷新后重试'
+    return
+  }
+  if (!n) {
+    lastTitle.value = '没有 0 分岗位可删'
+    return
+  }
+  const ok = confirm(
+    `即将删除 ${n} 个 0 分岗位。\n\n` +
+    `· 「已投递」的一个都不会动\n` +
+    `· 删除后无法恢复\n` +
+    `· 插件下次抓到它们，会当成没见过的新岗位重新收进来\n\n` +
+    `确定删除？`
+  )
+  if (!ok) return
+  try {
+    const res = await request.post('/leads/delete-below', { below: 1 })
+    error.value = ''
+    offset.value = 0
+    await load()
+    lastTitle.value = `已删除 ${res.data.deleted} 个 0 分岗位`
+  } catch (e) {
+    error.value = e.response?.data?.detail || '批量删除失败'
   }
 }
 
@@ -201,6 +267,8 @@ function tone(score) {
 }
 
 watch(minShow, () => { offset.value = 0; load() })
+// 换排序方式要回到第一页，否则会停在一个不存在的页码上。
+watch(order, () => { offset.value = 0; load() })
 </script>
 
 <template>
@@ -244,6 +312,10 @@ watch(minShow, () => { offset.value = 0; load() })
       <button class="btn ghost" :disabled="running" @click="unmarkAll">
         ↩ 全部撤销待投
       </button>
+
+      <button class="btn danger" :disabled="running" @click="deleteZeroScore">
+        🗑 清理 0 分岗位
+      </button>
       <div v-if="running || lastTitle" class="progress">
         <span v-if="running" class="dot"></span>
         <span v-if="doneCount">已完成 {{ doneCount }} 个</span>
@@ -266,6 +338,12 @@ watch(minShow, () => { offset.value = 0; load() })
       <label class="minshow">
         分数 ≥
           <ScorePicker v-model="minShow" />
+      </label>
+      <label class="minshow">
+        排序
+        <select class="sort" v-model="order">
+          <option v-for="o in ORDER_OPTIONS" :key="o" :value="o">{{ o }}</option>
+        </select>
       </label>
       <button class="chip" :disabled="offset === 0 || loading"
         @click="offset = Math.max(0, offset - pageSize); load()">
@@ -342,6 +420,12 @@ watch(minShow, () => { offset.value = 0; load() })
             :disabled="running"
             @click="setStatus(l, '待投递')"
           >要投</button>
+          <button
+            v-if="l.status !== '已投递'"
+            class="mini del"
+            :disabled="running"
+            @click="removeLead(l)"
+          >删除</button>
         </div>
       </li>
     </ul>
@@ -393,6 +477,8 @@ select { min-width: 190px; }
 .btn.ghost { background: transparent; color: #35c48a; }
 .btn.stop { background: #8a2f2f; border-color: #8a2f2f; }
 .btn.go { background: #1d5fb8; border-color: #1d5fb8; }
+.btn.danger { background: transparent; border-color: #8a2f2f; color: #ff8a80; }
+.btn.danger:hover:not(:disabled) { background: #8a2f2f; color: #fff; }
 
 .progress { color: #9aa5bd; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
 .cur { color: #35c48a; }
@@ -413,6 +499,9 @@ select { min-width: 190px; }
   cursor: pointer;
   font-size: 12px;
 }
+.minshow { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9aa5bd; }
+/* 筛选条上的下拉框要窄，不能用上面 select 的 190px */
+.sort { min-width: 96px; padding: 6px 8px; font-size: 12px; }
 .chip.on { border-color: #0b7a4b; background: #0b7a4b; color: #fff; }
 .chip:disabled { opacity: .35; cursor: default; }
 .n { opacity: .75; margin-left: 4px; }
@@ -480,5 +569,6 @@ select { min-width: 190px; }
 }
 .mini:hover { border-color: #3d4863; color: #c3ccdf; }
 .mini.go:hover { border-color: #0b7a4b; color: #35c48a; }
+.mini.del:hover { border-color: #8a2f2f; color: #ff8a80; }
 .mini:disabled { opacity: .4; cursor: default; }
 </style>

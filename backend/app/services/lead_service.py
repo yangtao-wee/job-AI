@@ -37,8 +37,16 @@ def save_leads(db:Session,user_id:int,leads:list[LeadIn])->dict:
     return {'added':added,'updated':updated,'total':len(uniq)}
 
 
+# 排序方式：网页传哪个名字，就用哪一组排序规则。
+ORDERS = {
+    '分数高': (JobLead.quick_score.desc(), JobLead.id.desc()),
+    '分数低': (JobLead.quick_score.asc(), JobLead.id.desc()),
+    '最新': (JobLead.id.desc(),),
+}
+
 def list_leads(db:Session,user_id:int,status:str|None=None,
-               offset:int=0,limit:int=50,min_score:int=0)->tuple[list[JobLead],int]:
+               offset:int=0,limit:int=50,min_score:int=0,
+               order:str='分数高')->tuple[list[JobLead],int]:
     q=db.query(JobLead).filter(JobLead.user_id==user_id)
     if status:
         q=q.filter(JobLead.status==status)
@@ -46,7 +54,7 @@ def list_leads(db:Session,user_id:int,status:str|None=None,
         q=q.filter(JobLead.quick_score>=min_score)
     total=q.count()
     rows=(
-        q.order_by(JobLead.quick_score.desc(),JobLead.id.desc())
+        q.order_by(*ORDERS.get(order, ORDERS['分数高']))
         .offset(offset).limit(limit).all()
     )
     return rows,total
@@ -144,6 +152,36 @@ def update_status(db:Session,user_id:int,lead_id:int,status:str):
     db.refresh(lead)
     return lead
 
+
+def delete_lead(db:Session,user_id:int,lead_id:int)->str:
+    lead=db.query(JobLead).filter(
+        JobLead.id==lead_id,
+        JobLead.user_id==user_id
+    ).first()
+    if lead is None:
+        return '不存在'
+    if lead.status=='已投递':
+        return '已投递'
+    db.delete(lead)
+    try:
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise
+    return '成功'
+
+def delete_below(db:Session,user_id:int,below:int)->int:
+    n=db.query(JobLead).filter(
+        JobLead.user_id==user_id,
+        JobLead.quick_score<below,
+        JobLead.status!='已投递'
+    ).delete(synchronize_session=False)
+    try:
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise
+    return n
 
 def skip_below(db:Session,user_id:int,below:int)->int:
     n=db.query(JobLead).filter(

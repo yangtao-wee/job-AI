@@ -492,6 +492,13 @@ class LeadSkipRequest(BaseModel):
 class LeadSkipResult(BaseModel):
     skipped:int
 
+class LeadDeleteRequest(BaseModel):
+    below:int=Field(ge=1,le=100)
+
+
+class LeadDeleteResult(BaseModel):
+    deleted:int
+
 class LeadMarkRequest(BaseModel):
     above:int=Field(ge=1,le=100)
 

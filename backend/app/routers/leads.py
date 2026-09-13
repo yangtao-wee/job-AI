@@ -4,8 +4,8 @@ import logging
 from ..config import settings
 from ..dependencies import get_current_user,get_db,check_limit
 from ..models import User
-from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult,LeadUnmarkResult,LeadPage,LeadStats
-from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below,mark_above,unmark_all,lead_stats
+from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult,LeadUnmarkResult,LeadPage,LeadStats,LeadDeleteRequest,LeadDeleteResult
+from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below,mark_above,unmark_all,lead_stats,delete_lead,delete_below
 from ..services.cache_service import take_lock, free_lock
 
 log=logging.getLogger(__name__)
@@ -27,11 +27,12 @@ def my_leads(
     offset:int=Query(0,ge=0),
     limit:int|None=Query(None,ge=1,le=200),
     min_score:int=Query(0,ge=0,le=100),
+    order:str=Query('分数高'),
     current_user:User=Depends(get_current_user),
     db:Session=Depends(get_db)
 ):
     size=limit or settings.lead_page_size
-    rows,total=list_leads(db,current_user.id,status,offset,size,min_score)
+    rows,total=list_leads(db,current_user.id,status,offset,size,min_score,order)
     return {'items':rows,'total':total,'offset':offset,'limit':size}
 
 @router.get('/stats',response_model=LeadStats)
@@ -93,6 +94,19 @@ def update_lead(
     return row
 
 
+@router.delete('/{lead_id}')
+def remove_lead(
+    lead_id:int,
+    current_user:User=Depends(get_current_user),
+    db:Session=Depends(get_db)
+):
+    result=delete_lead(db,current_user.id,lead_id)
+    if result=='不存在':
+        raise HTTPException(status_code=404,detail='岗位不存在')
+    if result=='已投递':
+        raise HTTPException(status_code=409,detail='已投递的岗位不能删除，请先改成其他状态')
+    return {'deleted':lead_id}
+
 @router.post('/skip-below',response_model=LeadSkipResult)
 def skip_low_score(
     request:LeadSkipRequest,
@@ -100,6 +114,14 @@ def skip_low_score(
     db:Session=Depends(get_db)
 ):
     return {'skipped':skip_below(db,current_user.id,request.below)}
+
+@router.post('/delete-below',response_model=LeadDeleteResult)
+def delete_low_score(
+    request:LeadDeleteRequest,
+    current_user:User=Depends(get_current_user),
+    db:Session=Depends(get_db)
+):
+    return {'deleted':delete_below(db,current_user.id,request.below)}
 
 @router.post('/mark-above',response_model=LeadMarkResult)
 def mark_high_score(

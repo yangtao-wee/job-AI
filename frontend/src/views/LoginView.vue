@@ -45,7 +45,7 @@ async function handleLogin(){
         // setItem()：把数据放进储物柜。
         const userResponse = await request.get('/users/me')
         currentUser.value=userResponse.data
-        await router.push({name:'jobs'})
+        await router.push({name:'board'})
     }catch(error){
         errorMessage.value=error.response?.data?.detail || '登录失败,请稍后重试'
         // 某层数据不存在时不会再次报错。

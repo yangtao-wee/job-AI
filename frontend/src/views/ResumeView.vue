@@ -66,6 +66,51 @@
 
       <div class="section-heading">
         <span></span>
+        <h3>求职方案</h3>
+      </div>
+
+      <div class="positions-box">
+        <p class="positions-tip">
+          每个岗位按每套方案各打一次分，取分最高的那套，岗位池里会标出是哪套。每一栏一行写一个。<br />
+          「只投初级 / 助理」里的方向，岗位标题要带 初级、助理、应届 才给分；
+          JD 要求的经验达到「经验上限」就压到 50 分；加分词出现在标题、标签或 JD 里，每个加 5 分，最多 10 分。
+        </p>
+        <p v-if="!newestResume" class="empty-message">先上传简历并做一次 AI 分析。</p>
+        <template v-else>
+          <div v-for="(t, i) in targets" :key="i" class="target-card">
+            <div class="target-head">
+              <input v-model="t.name" class="target-name" maxlength="20" placeholder="方案名，比如 简历A" />
+              <label class="target-years">
+                经验上限
+                <input v-model.number="t.max_years" type="number" min="1" max="15" placeholder="按简历" />
+                年
+              </label>
+              <label class="target-years">
+                最低月薪
+                <input v-model.number="t.min_pay" type="number" min="1" max="100" placeholder="不限" />
+                K
+              </label>
+              <button class="target-remove" @click="targets.splice(i, 1)">删除这套</button>
+            </div>
+            <div class="target-grid">
+              <label>求职方向<textarea v-model="t.positions" rows="8" class="positions-input"></textarea></label>
+              <label>只投初级 / 助理<textarea v-model="t.junior" rows="8" class="positions-input"></textarea></label>
+              <label>备选方向（扣5分）<textarea v-model="t.backup" rows="8" class="positions-input"></textarea></label>
+              <label>加分词<textarea v-model="t.good_words" rows="8" class="positions-input"></textarea></label>
+            </div>
+          </div>
+          <div class="positions-actions">
+            <button v-if="targets.length < 5" class="target-add" @click="addTarget">加一套方案</button>
+            <button :disabled="savingTargets" @click="saveTargets">
+              {{ savingTargets ? '重新打分中，大约要一分钟…' : '保存并重新打分' }}
+            </button>
+            <span v-if="targetsMessage" class="positions-message">{{ targetsMessage }}</span>
+          </div>
+        </template>
+      </div>
+
+      <div class="section-heading">
+        <span></span>
         <h3>已上传简历</h3>
       </div>
 
@@ -209,11 +254,23 @@
           </section>
 
           <section>
-            <h4>提取的经历</h4>
+            <h4>工作经历</h4>
             <ul>
               <li
                 v-for="(item, index) in aiAnalysisResult.work_experience"
                 :key="index"
+              >
+                {{ item }}
+              </li>
+            </ul>
+          </section>
+
+          <section v-if="aiAnalysisResult.projects?.length">
+            <h4>项目经历</h4>
+            <ul>
+              <li
+                v-for="(item, index) in aiAnalysisResult.projects"
+                :key="`project-${index}`"
               >
                 {{ item }}
               </li>
@@ -263,7 +320,7 @@
 </template>
 
 <script setup>
-import {ref ,onMounted} from 'vue'
+import {ref ,onMounted, computed, watch} from 'vue'
 import request from '../api/request';
 
 const selectedFile=ref(null)
@@ -278,6 +335,78 @@ const analyzingId = ref(null)
 const analysisResult =ref(null)
 const aiAnalyzingId   = ref (null)
 const aiAnalysisResult =ref(null)
+
+// ---------- 求职方案 ----------
+const targets = ref([])
+const savingTargets = ref(false)
+const targetsMessage = ref('')
+// 插件用编号最大的那份简历，重新打分也用它读学历和年限
+const newestResume = computed(() =>
+  resumes.value.reduce((a, b) => (!a || b.id > a.id ? b : a), null)
+)
+
+// 输入框里一行一个 ↔ 接口里是列表
+const toText = list => (list || []).join('\n')
+const toList = text => text.split('\n').map(s => s.trim()).filter(Boolean)
+
+async function loadTargets() {
+  try {
+    const res = await request.get('/targets')
+    targets.value = res.data.targets.map(t => ({
+      name: t.name,
+      max_years: t.max_years ?? '',
+      min_pay: t.min_pay ?? '',
+      positions: toText(t.positions),
+      junior: toText(t.junior),
+      backup: toText(t.backup),
+      good_words: toText(t.good_words),
+    }))
+  } catch (error) {
+    const detail = error.response?.data?.detail
+    targetsMessage.value = typeof detail === 'string' ? detail : '读取求职方案失败'
+  }
+}
+
+function addTarget() {
+  targets.value.push({ name: `方案${targets.value.length + 1}`, max_years: '', min_pay: '', positions: '', junior: '', backup: '', good_words: '' })
+}
+
+async function saveTargets() {
+  const body = targets.value.map(t => ({
+    name: t.name.trim(),
+    max_years: t.max_years === '' || t.max_years == null ? null : Number(t.max_years),
+    min_pay: t.min_pay === '' || t.min_pay == null ? null : Number(t.min_pay),
+    positions: toList(t.positions),
+    junior: toList(t.junior),
+    backup: toList(t.backup),
+    good_words: toList(t.good_words),
+  }))
+  if (!body.length) {
+    targetsMessage.value = '至少留一套方案'
+    return
+  }
+  const empty = body.find(t => !t.positions.length)
+  if (empty) {
+    targetsMessage.value = `方案「${empty.name}」至少填一个求职方向`
+    return
+  }
+  savingTargets.value = true
+  targetsMessage.value = ''
+  try {
+    await request.put('/targets', { targets: body })
+    // 全部岗位重新打分要几十秒，单独放宽超时
+    const res = await request.post('/leads/rescore', { resume_id: newestResume.value.id }, { timeout: 300000 })
+    targetsMessage.value = `已保存。岗位池 ${res.data.total} 个岗位重新打分，60 分以上 ${res.data.passed} 个`
+    await loadTargets()
+  } catch (error) {
+    const detail = error.response?.data?.detail
+    targetsMessage.value = typeof detail === 'string' ? detail : '保存失败'
+  } finally {
+    savingTargets.value = false
+  }
+}
+
+loadTargets()
 
 
 function handleFileChange(event){
@@ -775,5 +904,53 @@ onMounted(getMyResumes)
     align-items: stretch;
     flex-direction: column;
   }
+}
+
+/* ---------- 求职方向 ---------- */
+.positions-box {
+  padding: 18px 20px;
+  border: 1px solid var(--border, #232c40);
+  border-radius: 14px;
+  background: var(--panel, #0e1320);
+  margin-bottom: 28px;
+}
+.positions-tip { margin: 0 0 10px; font-size: 12.5px; line-height: 1.8; color: var(--muted, #8a94ab); }
+.positions-for { margin: 0 0 8px; font-size: 13px; color: var(--text, #e8ecf5); }
+.positions-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border, #2a3348);
+  border-radius: 10px;
+  background: #0f1425;
+  color: #e8ecf5;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+  resize: vertical;
+}
+.positions-input:focus { outline: none; border-color: var(--primary, #35c48a); }
+.positions-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.positions-message { font-size: 13px; color: var(--muted, #8a94ab); }
+.target-card { padding: 14px 16px; border: 1px solid var(--border, #2a3348); border-radius: 12px; margin-bottom: 12px; }
+.target-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.target-name,
+.target-years input {
+  padding: 6px 10px;
+  border: 1px solid var(--border, #2a3348);
+  border-radius: 8px;
+  background: #0f1425;
+  color: #e8ecf5;
+  font: inherit;
+  font-size: 14px;
+}
+.target-name { flex: 1 1 160px; max-width: 220px; }
+.target-years { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted, #8a94ab); }
+.target-years input { width: 80px; }
+.target-remove { margin-left: auto; }
+.target-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.target-grid label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted, #8a94ab); }
+@media (max-width: 760px) {
+  .target-grid { grid-template-columns: 1fr; }
 }
 </style>

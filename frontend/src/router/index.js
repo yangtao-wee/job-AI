@@ -1,7 +1,6 @@
 import ResumePrintView from '../views/ResumePrintView.vue'
 import {createRouter,createWebHistory} from 'vue-router'
 // createRouter创建路由管理器。createWebHistory负责管理浏览器地址。
-import JobList from '../views/JobList.vue'
 import LoginView from '../views/LoginView.vue' 
 import RegisterView from '../views/RegisterView.vue'
 import ResumeView from '../views/ResumeView.vue'
@@ -24,15 +23,9 @@ history:createWebHistory(),
 
         
         {
+        // 旧的「岗位列表」页面已删除，老链接和浏览器历史里的 /jobs 跳到求职看板
         path:'/jobs',
-        name:'jobs',
-        component:JobList,
-        meta:{
-            requiresAuth:true
-// meta：给路由附加说明，像在办公室门上贴标签。
-// requiresAuth：表示该页面需要登录。
-// // true：确认必须检查登录状态。
-        }
+        redirect:'/board'
     },
         {
         path:'/board',

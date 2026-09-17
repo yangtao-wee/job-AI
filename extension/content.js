@@ -35,6 +35,16 @@ tip.textContent = '启动中…'
 
 function setDot(color) { dot.style.background = color }
 
+// 工资：列表卡片上一般是 .job-salary，详情页是 .salary；都找不到就在卡片文字里找「7-12K」这种写法
+// BOSS 可能用特殊字体显示数字，原样传给后端，由后端换回数字
+function readSalary(card) {
+  const el = card.querySelector('.job-salary, .salary, [class*="salary"]')
+  const text = el?.innerText?.trim()
+  if (text) return text.slice(0, 50)
+  const line = card.innerText.split('\n').find(s => /[\d\ue031-\ue03a]\s*[-~]\s*[\d\ue031-\ue03a]+\s*[Kk千]/.test(s))
+  return (line || '').trim().slice(0, 50)
+}
+
 function makeBtn(text, color) {
   const b = document.createElement('button')
   b.textContent = text
@@ -53,16 +63,25 @@ function makeBtn(text, color) {
 }
 
 const PASS = 60
+// 投递队列低于这个分才提醒：55 分以上是「可投可不投」，也算能投
+const APPLY_PASS = 55
 const DRY_RUN = false
-const DAILY_MAX = 150
+const DAILY_MAX = 1500
 const APPLY_MIN = 3
 const MAX_DEEP = 3
 const API = 'http://127.0.0.1:8000'
 const QUEUE_KEY = 'jm_apply_queue'
+// 补读 JD 队列：岗位池页面点「补读JD」交过来（bridge.js 存进来），插件挨个打开详情页读
+const READ_KEY = 'jm_read_queue'
+const READ_META = 'jm_read_meta'
 const APPLY_GAP = 10000
 const JD_GAP = 3000
-const JD_MAX = 10
-const SCROLL_GAP = 5000
+const JD_GAP_MAX = 5000
+const SCROLL_GAP = 2000
+// 连续获取岗位 10 分钟就停 1 分钟再接着抓：一直不停地翻页、点详情页最容易被风控
+const RUN_MS = 10 * 60 * 1000
+const REST_MS = 60 * 1000
+let runStart = 0
 let lastFirst = ''
 let TOKEN = ''
 let RESUME_ID = null
@@ -70,6 +89,7 @@ let SCAN_ON = false
 let SCANNING = false   
 let STOPPED = false
 let aborter = new AbortController()
+let scrollTimer = null
 
 // 重新开始。一个中断控制器只能用一次，所以要换新的。
 function resume() {
@@ -81,15 +101,26 @@ chrome.storage.local.get(['token', 'resume_id'])
   .then(async data => {
     TOKEN = data.token || ''
     RESUME_ID = data.resume_id || null
-    if (isDetailPage()) {
+    if (await guardRisk()) return
+    const rq = (await chrome.storage.local.get(READ_KEY))[READ_KEY] || []
+    if (rq.length) {
       addStopButton()
-      runQueue().catch(e => {
+      runReadQueue().catch(e => {
         if (STOPPED || e?.name === 'AbortError') return
-        tip.textContent = `[求职助手] 投递失败：${e.message}`
+        tip.textContent = `[求职助手] 补读JD出错：${e.message} · 刷新页面会接着读`
       })
       return
     }
     const q = (await chrome.storage.local.get(QUEUE_KEY))[QUEUE_KEY] || []
+    if (isDetailPage()) {
+      addStopButton()
+      const task = q.length ? runQueue() : saveCurrentJd()
+      task.catch(e => {
+        if (STOPPED || e?.name === 'AbortError') return
+        tip.textContent = `[求职助手] ${e.message}`
+      })
+      return
+    }
     if (q.length && location.pathname.includes('/chat')) {
       addStopButton()
       skipChatted().catch(e => {
@@ -121,6 +152,18 @@ chrome.storage.onChanged.addListener(changes => {
     : '[求职助手] 已退出登录 · 点插件图标登录'
 })
 
+// 跳到页面底部，让 BOSS 加载下一页，等 2 秒再自己扫一次。
+// 不靠「页面有没有变化」来触发，所以不会卡在「已全部处理」。
+function nextPage() {
+  if (!SCAN_ON || STOPPED || scrollTimer) return
+  scrollTimer = setTimeout(() => {
+    scrollTimer = null
+    if (!SCAN_ON || SCANNING) return
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+    setTimeout(scan, 2000)
+  }, SCROLL_GAP)
+}
+
 function scan() {
   if (!SCAN_ON || SCANNING) return
   if (!TOKEN){
@@ -134,10 +177,21 @@ function scan() {
     tip.textContent = '[求职助手] 请点插件图标选择一份简历'
     return
   }
+  if (riskPage()) {
+    guardRisk()
+    return
+  }
+  if (Date.now() - runStart >= RUN_MS) {
+    SCANNING = true
+    restIfDue().finally(() => { SCANNING = false; scan() })
+    return
+  }
   const cards = [...document.querySelectorAll('.job-card-box')]
     .filter(c => !c.dataset.jmDone)
   if (!cards.length) {
-    tip.textContent = '[求职助手] 当前已全部处理，往下滚动加载更多岗位'
+    const message = '[求职助手] 这一屏处理完了，正在翻下一页…'
+    if (tip.textContent !== message) tip.textContent = message
+    nextPage()
     return
   }
   cards.forEach(c => { c.dataset.jmDone = '1' })
@@ -147,7 +201,9 @@ function scan() {
     name: c.querySelector('.job-name')?.innerText,
     url: c.querySelector('.job-name')?.href || '',
     company:c.querySelector('.boss-name')?.innerText || '未知',
-    tags: [...c.querySelectorAll('.tag-list li')].map(li => li.innerText)
+    tags: [...c.querySelectorAll('.tag-list li')].map(li => li.innerText),
+    // 工资原文：BOSS 的数字用了特殊字体，原样传给后端换回数字
+    salary: readSalary(c)
   }))
   SCANNING = true  
   tip.textContent = `[求职助手] 正在给 ${list.length} 个岗位打分…`
@@ -159,7 +215,7 @@ function scan() {
     },
     body: JSON.stringify({
       resume_id: RESUME_ID,
-      jobs: list.map(j => ({ name: j.name, tags: j.tags }))
+      jobs: list.map(j => ({ name: j.name, tags: j.tags, salary: j.salary }))
     }),
     signal: aborter.signal
   })
@@ -169,16 +225,20 @@ function scan() {
     })
     .then(async scores => {
       scores.forEach((s, i) => mark(list[i].el, s))
-      tip.textContent = `[求职助手] 已打分 ${scores.length} 个岗位`
+      // 读到工资的个数：是 0 说明页面结构变了，工资规则用不上
+      const paid = list.filter(j => j.salary).length
+      tip.textContent = `[求职助手] 已打分 ${scores.length} 个岗位 · 读到工资 ${paid} 个`
+      let doneJd = []
       try {
-        const n = await uploadLeads(list, scores)
-        tip.textContent += ` · 入库 ${n} 个新岗位`
+        const saved = await uploadLeads(list, scores)
+        doneJd = saved.has_jd || []
+        tip.textContent += ` · 新增 ${saved.added} 个、更新 ${saved.updated} 个`
       } catch (e) {
         tip.textContent += ` · 入库失败：${e.message}`
       }
       try {
-        const n = await collectJds(list, scores)
-        tip.textContent = `[求职助手] 已入库 ${scores.length} 个岗位，补全 ${n} 份JD。去「岗位池」页面开始精判`
+        const n = await collectJds(list, scores, doneJd)
+        tip.textContent = `[求职助手] 已读取并重评 ${n} 份JD · 跳过已读 ${doneJd.length} 个 · 读到工资 ${paid} 个`
       } catch (e) {
         tip.textContent += ` · JD补全失败：${e.message}`
       }
@@ -190,28 +250,28 @@ function scan() {
       })
       .finally(() => {
         SCANNING = false
-        if (SCAN_ON) {
-          setTimeout(() => {
-            if (SCAN_ON && !SCANNING) {
-              window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })
-            }
-          }, SCROLL_GAP)
-        }
+        nextPage()
       })
 }
 
-function mark(el, s) {
+function mark(el, s, final = false) {
   el.querySelector('.jm-badge')?.remove()
 
-  el.style.borderLeft = s.score >= 60 ? '4px solid #0B7A4B'
-                      : s.score >= 30 ? '4px solid #B6791A'
-                      : '4px solid #ccc'
+  el.style.borderLeft = s.read_jd === false ? '4px solid #999'
+                      : final || s.screen === 'priority' ? '4px solid #0B7A4B'
+                      : '4px solid #B6791A'
 
   const b = document.createElement('div')
   b.className = 'jm-badge'
-   b.textContent = s.matched.length
-    ? `${s.score}分 · 命中 ${s.matched.join(' ')}`
-    : `${s.score}分 · 仅按职位名`
+  if (s.read_jd === false) {
+    b.textContent = `跳过 · ${s.reason || '明显不符合'}`
+  } else if (!final) {
+    const step = s.screen === 'priority' ? '标题符合 · 优先读JD' : '标题模糊 · 仍读JD'
+    b.textContent = `初筛 ${s.score}分 · ${step}`
+  } else {
+    const note = (s.flags?.length ? s.flags : s.hits || []).slice(0, 2).join('、')
+    b.textContent = `${s.score}分 · JD已读${note ? ` · ${note}` : ''}`
+  }
   b.style.cssText = 'font-size:12px;color:#0B7A4B;padding:2px 10px;font-weight:600'
   el.appendChild(b)
 }
@@ -223,19 +283,19 @@ async function uploadLeads(list, scores) {
       company: j.company === '未知' ? '' : j.company,
       url: j.url,
       tags: j.tags,
+      salary: j.salary,
       quick_score: scores[i].score
     }))
     .filter(l => l.title && l.url)
-  if (!leads.length) return 0
+  if (!leads.length) return { added: 0, updated: 0 }
   const r = await fetch('http://127.0.0.1:8000/leads/batch', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-    body: JSON.stringify({ leads }),
+    body: JSON.stringify({ leads, resume_id: RESUME_ID }),
     signal: aborter.signal
   })
   if (!r.ok) throw new Error(r.status === 401 ? '请点插件图标登录' : `HTTP ${r.status}`)
-  const d = await r.json()
-  return d.added
+  return r.json()
 }
 
 
@@ -250,42 +310,106 @@ function sleep(ms) {
   })
 }
 
-async function waitJd(prev) {
+function detailTitle() {
+  const selectors = [
+    '.job-detail-header .job-name',
+    '.job-detail-info .name',
+    '.job-detail-info h1',
+    '.job-detail-box h1',
+    'h1'
+  ]
+  for (const selector of selectors) {
+    const text = document.querySelector(selector)?.innerText?.trim()
+    if (text) return text
+  }
+  return ''
+}
+
+
+// 读岗位介绍：列表页右侧是 .job-detail-body；详情页结构不一样，
+// 找不到时从整页文字里截「职位描述」到「工作地址 / 竞争力分析 / 公司介绍」这一段（带上招聘者活跃状态）
+function readDetailJd() {
+  const panel = document.querySelector('.job-detail-body')?.innerText || ''
+  if (panel.trim().length > 50) return panel
+  const all = document.body.innerText
+  const start = all.indexOf('职位描述')
+  if (start >= 0) {
+    const rest = all.slice(start)
+    const end = rest.search(/\n(工作地址|竞争力分析|公司介绍|公司基本信息)/)
+    const text = end > 0 ? rest.slice(0, end) : rest.slice(0, 5000)
+    if (text.trim().length > 50) return text
+  }
+  return document.querySelector('.job-sec-text')?.innerText || ''
+}
+
+async function waitJd(prev, expectedTitle) {
   for (let i = 0; i < 20; i++) {
-    const jd = document.querySelector('.job-detail-body')?.innerText || ''
-    if (jd.length > 50 && jd !== prev) return jd
+    const jd = readDetailJd()
+    const currentTitle = detailTitle()
+    const isExpected = titleMatch(currentTitle, expectedTitle)
+    // 标题对上、正文也换了才算这个岗位的JD：BOSS 常常标题先变、正文还停在上一个岗位。
+    const ready = expectedTitle ? (isExpected && jd !== prev) : jd !== prev
+    if (jd.length > 50 && ready) return jd
     await sleep(300)
   }
   return null
 }
 
 
-async function collectJds(list, scores) {
-  const targets = list.filter((_, i) => scores[i].score >= PASS)
-  const items = []
+async function collectJds(list, scores, doneJd = []) {
+  // 已经读过 JD 的不再点开：重复点详情页是账号被风控的主要原因
+  const done = new Set(doneJd)
+  const targets = list
+    .map((item, i) => ({ ...item, screen: scores[i]?.screen || 'review', order: i }))
+    .filter((item, i) => item.url && !done.has(item.url) && scores[item.order]?.read_jd !== false)
+    .sort((a, b) => Number(b.screen === 'priority') - Number(a.screen === 'priority') || a.order - b.order)
+  let updated = 0
   let prev = document.querySelector('.job-detail-body')?.innerText || ''
-  for (let i = 0; i < targets.length && items.length < JD_MAX; i++) {
+  for (let i = 0; i < targets.length; i++) {
     if (STOPPED || !SCAN_ON) break
+    if (await guardRisk()) break
+    if (!(await restIfDue())) break
     const t = targets[i]
     if (!t.url) continue
-    tip.textContent = `[求职助手] 读取JD ${i + 1}/${targets.length}（只读 ${PASS} 分以上）`
-    await sleep(JD_GAP)
+    const step = t.screen === 'priority' ? '标题符合' : '标题模糊'
+    tip.textContent = `[求职助手] 读取JD ${i + 1}/${targets.length}（${step}）`
+    await sleep(jdGap())
     t.el.click()
-    const jd = await waitJd(prev)
+    const jd = await waitJd(prev, t.name)
     if (!jd || jd.length < 20) continue
     prev = jd
-    items.push({ url: t.url, jd_text: jd.slice(0, 20000) })
+    const saved = await uploadJds([{ url: t.url, jd_text: jd.slice(0, 20000) }])
+    updated += saved.updated
+    const final = saved.items?.find(item => item.url === t.url)
+    if (final?.skip) mark(t.el, { ...final, read_jd: false }, true)
+    else if (final) mark(t.el, { ...final, read_jd: true }, true)
+    tip.textContent = `[求职助手] 已读取并重评 ${i + 1}/${targets.length}`
   }
-  if (!items.length) return 0
+  return updated
+}
+
+async function uploadJds(items) {
   const r = await fetch('http://127.0.0.1:8000/leads/jd', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-    body: JSON.stringify({ items }),
+    body: JSON.stringify({ items, resume_id: RESUME_ID }),
     signal: aborter.signal
   })
   if (!r.ok) throw new Error(`HTTP ${r.status}`)
-  const d = await r.json()
-  return d.updated
+  return r.json()
+}
+
+async function saveCurrentJd() {
+  tip.textContent = '[求职助手] 正在读取当前JD…'
+  const title = detailTitle()
+  if (!title) throw new Error('未读到当前岗位标题')
+  const jd = await waitJd('', title)
+  if (!jd) throw new Error('未读到当前岗位介绍')
+  const url = location.href.split('?')[0].split('#')[0]
+  const saved = await uploadJds([{ url, jd_text: jd.slice(0, 20000) }])
+  tip.textContent = saved.missed
+    ? '岗位池未找到这个岗位，请先从列表页抓取'
+    : '当前JD已保存并重新评分'
 }
 
 
@@ -408,8 +532,67 @@ async function skipChatted() {
 }
 
 
+// 抓满 10 分钟就原地歇 1 分钟（倒计时显示在提示条上）；歇的时候点了停止就返回 false
+async function restIfDue() {
+  if (Date.now() - runStart < RUN_MS) return true
+  for (let left = REST_MS / 1000; left > 0; left--) {
+    if (STOPPED || !SCAN_ON) return false
+    tip.textContent = `[求职助手] 已连续获取 10 分钟，休息 ${left} 秒后自动继续`
+    await sleep(1000)
+  }
+  runStart = Date.now()
+  return !STOPPED && SCAN_ON
+}
+
+// 读 JD 的间隔随机 3-5 秒：固定节奏最容易被风控盯上
+function jdGap() {
+  return JD_GAP + Math.floor(Math.random() * (JD_GAP_MAX - JD_GAP + 1))
+}
+
+// BOSS 弹安全验证、或把账号登出了：立刻全停，继续点只会让风控升级
+const RISK_WORDS = ['安全验证', '完成验证', '账号可能存在异常', '异常访问行为', '访问过于频繁', '操作过于频繁', '请先登录', '重新登录', '登录已失效',
+  // 第三级：「访问受限 · 您的账户存在异常行为，已暂时被限制访问」
+  '访问受限', '限制访问', '存在异常行为', '暂时被限制', '恢复正常']
+function riskPage() {
+  const text = document.body?.innerText || ''
+  // 验证页和登录页内容都很短；正常列表页、详情页有几千字，避免把带这些字的 JD 误判
+  const hit = text.length < 2000 ? RISK_WORDS.find(w => text.includes(w)) : ''
+  if (hit) return hit
+  if (/^\/(login|safe|verify)/.test(location.pathname)) return '被跳到登录或验证页'
+  return ''
+}
+
+async function guardRisk() {
+  const hit = riskPage()
+  if (!hit) return false
+  await stopAll(`[求职助手] BOSS 触发风控（${hit}）· 已全部停止。请手动处理，缓一会儿再用插件。`)
+  return true
+}
+
+async function stopAll(message) {
+  STOPPED = true
+  SCAN_ON = false
+  SCANNING = false
+  aborter.abort()
+  clearTimeout(scanTimer)
+  clearTimeout(scrollTimer)
+  scrollTimer = null
+  await chrome.storage.local.remove([QUEUE_KEY, READ_KEY, READ_META])
+  setDot('#4a5570')
+  tip.textContent = message
+}
+
 function titleKey(s) {
   return (s || '').replace(/\s/g, '').slice(0, 10)
+}
+
+// 列表页标题常被截短：「海外项目技术支持」要能对上详情页的「海外项目技术支持（出差美国）」
+function titleMatch(a, b) {
+  const x = titleKey(a), y = titleKey(b)
+  if (!x || !y) return false
+  if (x === y) return true
+  const short = x.length <= y.length ? x : y
+  return short.length >= 6 && x.startsWith(short) && y.startsWith(short)
 }
 
 async function applyHere(expectTitle, leadId) {
@@ -420,7 +603,7 @@ async function applyHere(expectTitle, leadId) {
     h1 === 'Oops!' ||
     pageText.includes('您访问的页面不存在')
   if (missingPage) return '⏭岗位不存在'
-  if (titleKey(h1) !== titleKey(expectTitle)) return `⛔标题对不上：${h1}`
+  if (!titleMatch(h1, expectTitle)) return `⛔标题对不上：${h1}`
   if (document.body.innerText.includes('职位已关闭')) return '⏭岗位已关闭'
   const btn = document.querySelector('.btn-startchat')
   if (!btn) return '⛔没找到沟通按钮'
@@ -447,7 +630,13 @@ function addScanButton() {
     setDot(SCAN_ON ? '#35c48a' : '#4a5570')
     if (SCAN_ON) {
       resume()
+      runStart = Date.now()
       lastFirst = ''
+      // 清掉这一页上次打过分的标记，重新打分、重新入库（上次入库失败也能补回来）
+      document.querySelectorAll('.job-card-box').forEach(c => {
+        delete c.dataset.jmDone
+        c.querySelector('.jm-badge')?.remove()
+      })
       scan()
     } else {
       tip.textContent = '正在收尾，当前这个岗位读完就停'
@@ -457,16 +646,7 @@ function addScanButton() {
 
 function addStopButton() {
   const b = makeBtn('■ 全部停止', '#8a2f2f')
-  b.addEventListener('click', async () => {
-    STOPPED = true
-    SCAN_ON = false
-    SCANNING = false
-    aborter.abort()
-    clearTimeout(scanTimer)
-    await chrome.storage.local.remove(QUEUE_KEY)
-    setDot('#4a5570')
-    tip.textContent = '[求职助手] 已全部停止，投递队列已清空'
-  })
+  b.addEventListener('click', () => stopAll('[求职助手] 已全部停止，投递队列已清空'))
 }
 
 function addStartButton() {
@@ -493,9 +673,9 @@ async function startApply() {
     tip.textContent = '[求职助手] 没有「待投递」的岗位，先去岗位池标记'
     return
   }
-  const bad = list.filter(l => l.quick_score < 60)
+  const bad = list.filter(l => l.quick_score < APPLY_PASS)
   if (bad.length) {
-    tip.textContent = `⚠️队列里有 ${bad.length} 个 60 分以下的岗位（如「${bad[0].title}」），请回岗位池核对后再投`
+    tip.textContent = `⚠️队列里有 ${bad.length} 个 ${APPLY_PASS} 分以下的岗位（如「${bad[0].title}」），请回岗位池核对后再投`
     return
   }
   const left = Math.max(DAILY_MAX - usedToday(), 0)
@@ -540,6 +720,74 @@ async function runQueue() {
   await sleep(APPLY_GAP)
   if (STOPPED) return
   location.href = queue[0].url
+}
+
+// 补读 JD：在队列第一个岗位的详情页读 JD、存进岗位池（后端顺带重新打分），歇 3-5 秒跳下一个。
+// 连续读 10 分钟歇 1 分钟；岗位已关闭的标成「已跳过」；读不到的记一笔跳过，不卡住整个队列
+async function runReadQueue() {
+  const store = await chrome.storage.local.get([READ_KEY, READ_META])
+  const queue = store[READ_KEY] || []
+  const meta = { runStart: Date.now(), done: 0, closed: 0, failed: 0, ...store[READ_META] }
+  if (!queue.length) return
+  if (!TOKEN || !RESUME_ID) {
+    tip.textContent = '[求职助手] 补读JD要先点插件图标登录并选好简历'
+    return
+  }
+  setDot('#35c48a')
+  const cur = queue[0]
+  if (!location.href.startsWith(cur.url.split('?')[0])) {
+    // 还没到这个岗位的页面就跳过去；跳过去了还对不上（链接失效被 BOSS 转走），算没读到
+    if (meta.jumped !== cur.id) {
+      meta.jumped = cur.id
+      await chrome.storage.local.set({ [READ_META]: meta })
+      location.href = cur.url
+      return
+    }
+    meta.failed += 1
+  } else {
+    if (Date.now() - meta.runStart >= RUN_MS) {
+      for (let left = REST_MS / 1000; left > 0; left--) {
+        tip.textContent = `[求职助手] 已连续补读 10 分钟，休息 ${left} 秒后继续（还剩 ${queue.length} 个）`
+        await sleep(1000)
+      }
+      meta.runStart = Date.now()
+    }
+    tip.textContent = `[求职助手] 补读JD：${cur.title}（还剩 ${queue.length} 个）`
+    const st = await readHere(cur)
+    meta[st] += 1
+    if (st === 'closed') {
+      await fetch(`${API}/leads/${cur.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+        body: JSON.stringify({ status: '已跳过' })
+      }).catch(() => {})
+    }
+  }
+  queue.shift()
+  if (!queue.length) {
+    await chrome.storage.local.remove([READ_KEY, READ_META])
+    setDot('#4a5570')
+    tip.textContent = `[求职助手] 补读完成 · 读到 ${meta.done} 个 · 岗位已关闭 ${meta.closed} 个 · 没读到 ${meta.failed} 个`
+    return
+  }
+  meta.jumped = queue[0].id
+  await chrome.storage.local.set({ [READ_KEY]: queue, [READ_META]: meta })
+  tip.textContent = `[求职助手] 已读 ${meta.done} 个 · 几秒后读下一个（还剩 ${queue.length} 个）`
+  await sleep(jdGap())
+  if (await guardRisk()) return
+  location.href = queue[0].url
+}
+
+async function readHere(cur) {
+  const jd = await waitJd('', cur.title)
+  if (!jd) {
+    // 读不到 JD 时再看是不是岗位没了；先判「关闭」容易把正常页面误标成已跳过
+    const gone = document.querySelector('h1')?.innerText.trim() === 'Oops!' ||
+      /您访问的页面不存在|职位已关闭/.test(document.body.innerText)
+    return gone ? 'closed' : 'failed'
+  }
+  const saved = await uploadJds([{ url: cur.url, jd_text: jd.slice(0, 20000) }])
+  return saved.missed ? 'failed' : 'done'
 }
 
 async function tryApply(t) {

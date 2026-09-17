@@ -14,6 +14,7 @@ from ..services.resume_parser import extract_pdf_text
 from ..services.ai_resume_service import analyze_resume_with_ai
 from ..services.resume_analysis_service import save_resume_analysis
 from ..services.resume_build_service import build_profile
+from ..services.matching_service import get_user_resume_analysis
 
 log=logging.getLogger(__name__)
 router = APIRouter()

@@ -3,6 +3,7 @@ from sentence_transformers import SentenceTransformer
 MODEL='BAAI/bge-small-zh-v1.5'
 # MODEL：【自己命名】，模型地址常量；大写表示团队约定“不随便修改”。
 _model=None
+_vec_cache={}
 
 def get_model():
     global _model
@@ -27,8 +28,11 @@ def embed_many(texts:list[str])->dict[str,list[float]]:
     uniq=list(dict.fromkeys(t for t in texts if t and t.strip()))
     if not uniq:
         return {}
-    vecs=get_model().encode(uniq,normalize_embeddings=True)
-    return dict(zip(uniq,vecs.tolist()))
+    missing=[t for t in uniq if t not in _vec_cache]
+    if missing:
+        vecs=get_model().encode(missing,normalize_embeddings=True)
+        _vec_cache.update(zip(missing,vecs.tolist()))
+    return {t:_vec_cache[t] for t in uniq}
 
 
 def dot(a:list[float],b:list[float])->float:

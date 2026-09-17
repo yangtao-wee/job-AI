@@ -14,7 +14,7 @@ def test_agent_unauth():
 def fake_user():
     return NS(id=7)
 
-def fake_answer(goal,history=None):
+def fake_answer(goal,user_id,history=None):
     return f'测试Agent回答:{goal}'
 
 def test_agent_ok(monkeypatch):
@@ -28,8 +28,9 @@ def test_agent_ok(monkeypatch):
 
 def test_agent_forwards_history(monkeypatch):
     seen={}
-    def fake_history(goal,history=None):
+    def fake_history(goal,user_id,history=None):
         seen['goal']=goal
+        seen['user_id']=user_id
         seen['history']=history
         return '继续回答'
     app.dependency_overrides[get_current_user]=fake_user
@@ -42,6 +43,7 @@ def test_agent_forwards_history(monkeypatch):
     assert (res.status_code,res.json()['answer'])==(200,'继续回答')
     assert seen=={
         'goal':'继续优化',
+        'user_id':7,
         'history':[{'role':'user','content':'目标是AI工程师'}]
     }
 

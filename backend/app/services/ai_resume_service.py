@@ -24,12 +24,14 @@ def build_resume_analysis_prompt(resume_text: str) -> str:
 3. strengths：候选人优势
 4. improvement_suggestions：改进建议
 5. recommended_positions：推荐岗位
-6. work_experience：工作经历列表。
+6. work_experience：正式工作经历列表，不要放入个人项目或课程项目。
 每条经历要保留具体做了什么、使用什么工具，以及原文已有的成果。
 不要只返回公司、岗位和日期；职责与成果优先引用原文完整句子。
 公司、项目与职责只有在原文对应明确时才组合，无法确定时不要猜归属。
 保留“正在学习”“计划”“目标”等限定，不得改成已完成或熟练掌握。
 原文没有的工具、职责、数字和成果一律不要补充。
+7. projects：项目经历列表，保留项目名称、使用技术、本人完成的工作和量化结果。
+原文没有项目经历时返回空列表，不要把普通工作职责改写成项目。
 
 不要编造简历中不存在的经历。
 
@@ -49,6 +51,7 @@ def build_mock_resume_analysis(
         summary=f'模拟分析：已读取{len(resume_text)}个字符。',
         skills=['Python', 'FastAPI', 'Vue3'],
         work_experience=['模拟经历：负责Python接口开发和AI应用开发'],
+        projects=['模拟项目：使用FastAPI开发AI求职助手'],
         strengths=['具备完整项目开发实践'],
         improvement_suggestions=['补充可量化的项目成果'],
         recommended_positions=['Python后端开发工程师', 'AI应用开发工程师']

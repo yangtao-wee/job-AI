@@ -14,15 +14,15 @@ def test_list_leads_returns_page(monkeypatch):
     db=object()
     app.dependency_overrides[get_current_user]=lambda:NS(id=7)
     app.dependency_overrides[get_db]=lambda:db
-    run=MagicMock(return_value=([],3))
+    run=MagicMock(return_value=([],3,{'kinds':{'全部':3},'tiers':{'全部':3}}))
     monkeypatch.setattr(leads,'list_leads',run)
 
-    response=client.get('/leads?status=待投递&offset=1&limit=2')
+    response=client.get('/leads?status=待投递&offset=1&limit=2&q=亚马逊&kind=跨境电商&tier=建议投&in_jd=true')
     app.dependency_overrides.clear()
 
     assert response.status_code==200
-    assert response.json()=={'items':[],'total':3,'offset':1,'limit':2}
-    run.assert_called_once_with(db,7,'待投递',1,2,0,'分数高')
+    assert response.json()=={'items':[],'total':3,'offset':1,'limit':2,'kinds':{'全部':3},'tiers':{'全部':3}}
+    run.assert_called_once_with(db,7,'待投递',1,2,0,'分数高','亚马逊','跨境电商','建议投',True)
 
 def test_list_leads_rejects_large_limit(monkeypatch):
     app.dependency_overrides[get_current_user]=lambda:NS(id=7)
@@ -35,6 +35,21 @@ def test_list_leads_rejects_large_limit(monkeypatch):
 
     assert response.status_code==422
     run.assert_not_called()
+
+
+def test_delete_without_jd_uses_current_user(monkeypatch):
+    db=object()
+    app.dependency_overrides[get_current_user]=lambda:NS(id=7)
+    app.dependency_overrides[get_db]=lambda:db
+    run=MagicMock(return_value=12)
+    monkeypatch.setattr(leads,'delete_without_jd',run)
+
+    response=client.post('/leads/delete-without-jd')
+    app.dependency_overrides.clear()
+
+    assert response.status_code==200
+    assert response.json()=={'deleted':12}
+    run.assert_called_once_with(db,7)
 
 
 def test_analyze_busy_skips_model(monkeypatch,caplog):

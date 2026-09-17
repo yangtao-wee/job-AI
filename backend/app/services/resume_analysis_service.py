@@ -22,6 +22,7 @@ def save_resume_analysis(
     record.summary = analysis.summary
     record.skills = analysis.skills
     record.work_experience=analysis.work_experience
+    record.projects = analysis.projects
     record.strengths = analysis.strengths
     record.improvement_suggestions=(
         analysis.improvement_suggestions

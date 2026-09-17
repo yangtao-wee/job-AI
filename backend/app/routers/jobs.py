@@ -3,11 +3,13 @@ from fastapi import Query
 from sqlalchemy.orm  import Session
 from pathlib import Path
 from sqlalchemy.exc import SQLAlchemyError
+from datetime import date
+from ..services.lead_service import load_proofs
 from ..database import SessionLocal
 from ..dependencies import get_current_user,get_db,check_limit
 from ..models import Job,User,Resume
 from ..schemas import JobMatchRequest,JobMatchResponse,JobRequirementResult,SemMatch,JobAssistRequest,JobAssistResponse,Report,ReportBoag,ReportDeta,ApplyCreate,ApplyUpdate,ApplyOut,ApplyItem,QuickScoreRequest,QuickScoreItem,ReportSaved
-from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref,build_job_requirements,quick_score
+from ..services.matching_service import calculate_skill_score,get_user_resume_analysis,calculate_keyword_score,calculate_required_skill_score,merge_job_skills,calculate_experience_score,score_role,score_pref,build_job_requirements,read_profile,load_targets,score_jobs
 from ..services.job_service import get_all_jobs
 from ..services.semantic_service import calc_sim,MODEL
 from ..services.ai_match_service import explain
@@ -223,4 +225,17 @@ def quick_score_jobs(
      )
      if not analysis:
           raise HTTPException(status_code=404,detail='简历分析不存在')
-     return quick_score(analysis,request.jobs)
+     try:
+          lines=load_proofs(db,current_user.id,request.resume_id)
+     except (ValueError,OSError):
+          lines=[]
+     profile=read_profile(lines,date.today())
+     # 每套求职方案各打一次，返回分最高的那套
+     best=score_jobs(analysis,load_targets(current_user.job_targets,analysis),request.jobs,profile)
+     return [
+          QuickScoreItem(
+               name=job.name,score=b['score'],matched=b['matched'],target=b['target'],
+               read_jd=b['read_jd'],screen=b['screen'],reason=b['reason']
+          )
+          for job,b in zip(request.jobs,best)
+     ]

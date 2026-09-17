@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from .schemas import JobSchema
 from .database import engine
-from .routers import jobs,users,resumes,rag,agent,leads
+from .routers import jobs,users,resumes,rag,agent,leads,targets
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from .services.cache_service import cache_ready
@@ -61,6 +61,12 @@ app.include_router(
     leads.router,
     prefix='/leads',
     tags=['leads']
+)
+
+app.include_router(
+    targets.router,
+    prefix='/targets',
+    tags=['targets']
 )
 app.add_middleware(
     CORSMiddleware,

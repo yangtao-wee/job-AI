@@ -275,3 +275,20 @@ def test_make_report_mock_skips_llm(monkeypatch):
     )
     result=assist.make_report('负责Python开发，要求掌握FastAPI。',['Python项目'])
     assert result.proofs==['Python项目']
+
+def test_get_checks_fast_splits(monkeypatch):
+    from app.schemas import Need, Needs, Check, Checks
+    calls = []
+    def fake(part, proofs):
+        calls.append([n.id for n in part.items])
+        return Checks(items=[
+            Check(need_id=n.id, status='未找到依据', proof_ids=[], note='无')
+            for n in reversed(part.items)
+        ])
+    monkeypatch.setattr(assist, 'get_checks', fake)
+    needs = Needs(items=[
+        Need(id=i, text=f'要求{i}', kind='技能', quote=f'要求{i}') for i in range(20)
+    ])
+    result = assist.get_checks_fast(needs, ['Python项目'])
+    assert sorted(calls) == [list(range(0, 8)), list(range(8, 16)), list(range(16, 20))]
+    assert [c.need_id for c in result.items] == list(range(20))

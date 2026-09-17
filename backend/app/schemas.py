@@ -1,6 +1,7 @@
-from pydantic import BaseModel,ConfigDict,Field
+from pydantic import BaseModel,ConfigDict,Field,field_validator
 from datetime import datetime
 from typing import Literal
+from .utils.pay import decode_pay
 # BaseModel：Pydantic提供的数据模型基类，负责检查和转换数据。
 # ConfigDict：Pydantic提供的模型配置工具，负责设置整个类的验证规则。
 # Field：Pydantic提供的字段配置工具，负责设置长度、范围等验证条件。
@@ -58,7 +59,8 @@ class ResumeAIAnalysis(BaseModel):
     resume_id:int  # 被分析的简历编号，最终应由后端可信数据覆盖。
     summary:str  # 简历总体总结。
     skills:list[str]  # 从简历中识别出的技能列表。
-    work_experience:list[str]  # 从简历中识别出的工作或项目经历。
+    work_experience:list[str]  # 从简历中识别出的正式工作经历。
+    projects:list[str]=Field(default_factory=list)  # 从简历中提取的项目经历。
     strengths:list[str]  # 候选人的优势列表。
     improvement_suggestions:list[str]  # 简历改进建议列表。
     recommended_positions:list[str]  # 推荐岗位列表。
@@ -71,6 +73,25 @@ class ResumeAnalysisResponse(ResumeAIAnalysis):
     created_at:datetime  # 分析结果创建时间。
     # 允许从数据库简历分析对象中读取字段。
     model_config=ConfigDict(from_attributes=True)
+
+
+# 求职方案：一套方向 + 只投初级的方向 + 经验上限 + 加分词。岗位按每套方案打分，取最高的那套。
+class JobTarget(BaseModel):
+    name:str=Field(min_length=1,max_length=20)
+    positions:list[str]=Field(min_length=1,max_length=30)
+    # 这些方向只给标题带 初级 / 助理 / 应届 的岗位打分
+    junior:list[str]=Field(default_factory=list,max_length=30)
+    # 备选方向：对上这些方向的岗位扣 5 分，排在主投方向后面
+    backup:list[str]=Field(default_factory=list,max_length=30)
+    # JD 要求的经验达到这个年数就不符合；不填按简历里的年限
+    max_years:int|None=Field(default=None,ge=1,le=15)
+    # 月薪下限低于这个数（K）就不要；不填不限
+    min_pay:int|None=Field(default=None,ge=1,le=100)
+    good_words:list[str]=Field(default_factory=list,max_length=20)
+
+
+class JobTargets(BaseModel):
+    targets:list[JobTarget]=Field(min_length=1,max_length=5)
 
 
 # 岗位匹配请求：规定计算一份简历与一个已有岗位的匹配度时需要的数据。
@@ -357,6 +378,8 @@ class ApplyItem(ApplyOut):
 class QuickJob(BaseModel):
     name:str=Field(min_length=1,max_length=200)
     tags:list[str]=Field(default_factory=list,max_length=30)
+    # 列表页的工资原文，读不到就是空
+    salary:str|None=Field(default=None,max_length=50)
 
 class QuickScoreRequest(BaseModel):
     resume_id:int=Field(gt=0)
@@ -366,6 +389,16 @@ class QuickScoreItem(BaseModel):
     name:str
     score:int=Field(ge=0,le=100)
     matched:list[str]
+    # 分数最高的是哪套求职方案
+    target:str|None=None
+    # False 表示标题/经验标签已经能确定不投，不再点开岗位读取 JD。
+    read_jd:bool=True
+    # skip=明确不合适；priority=标题符合；review=标题模糊但仍需读取JD。
+    screen:str=Field(default='review',pattern='^(skip|priority|review)$')
+    reason:str|None=None
+    # 岗位池上显示的合适 / 不合适的点
+    pros:list[str]=Field(default_factory=list)
+    cons:list[str]=Field(default_factory=list)
 
 
 class ProfileWork(BaseModel):
@@ -417,11 +450,14 @@ class LeadIn(BaseModel):
     company:str=Field(default='',max_length=200)
     url:str=Field(min_length=1,max_length=500)
     tags:list[str]=Field(default_factory=list,max_length=30)
+    salary:str|None=Field(default=None,max_length=50)
     quick_score:int=Field(default=0,ge=0,le=100)
 
 
 class LeadBatch(BaseModel):
     leads:list[LeadIn]=Field(min_length=1,max_length=50)
+    # 带上简历编号，后端按求职方案重新打分（含工资）；旧插件不带也能入库
+    resume_id:int|None=None
 
 
 class LeadOut(BaseModel):
@@ -431,27 +467,46 @@ class LeadOut(BaseModel):
     company:str
     url:str
     tags:list[str]
+    salary:str|None=None
     quick_score:int
     deep_ok:int
     deep_part:int
     deep_total:int
     report_id:int|None=None
     deep_at:datetime|None=None
+    # 只看标题和标签的分；和 quick_score 对比能看出 JD 加减了多少
+    base_score:int|None=None
+    jd_flags:list[str]|None=None
+    jd_hits:list[str]|None=None
+    pros:list[str]|None=None
+    cons:list[str]|None=None
+    target:str|None=None
     has_jd:bool=False
     status:str
     created_at:datetime
     updated_at:datetime
+
+    # 库里存的是插件抓到的原文（BOSS 特殊字体字符），给网页看的时候换成「15-20K」
+    @field_validator('salary')
+    @classmethod
+    def readable_salary(cls,value:str|None)->str|None:
+        return decode_pay(value) if value else value
 
 class LeadPage(BaseModel):
     items:list[LeadOut]
     total:int
     offset:int
     limit:int
+    # 岗位池筛选条上每个方向、每个分档有多少个岗位
+    kinds:dict[str,int]=Field(default_factory=dict)
+    tiers:dict[str,int]=Field(default_factory=dict)
 
 class LeadSaveResult(BaseModel):
     added:int
     updated:int
     total:int
+    # 这批里已经读过 JD 的链接，插件据此跳过、不再点开
+    has_jd:list[str]=Field(default_factory=list)
 
 class LeadJdIn(BaseModel):
     url:str=Field(min_length=1,max_length=500)
@@ -460,11 +515,34 @@ class LeadJdIn(BaseModel):
 
 class LeadJdBatch(BaseModel):
     items:list[LeadJdIn]=Field(min_length=1,max_length=20)
+    resume_id:int|None=None
+
+
+class LeadJdScore(BaseModel):
+    url:str
+    score:int=Field(ge=0,le=100)
+    base:int=Field(ge=0,le=100)
+    hits:list[str]=Field(default_factory=list)
+    flags:list[str]=Field(default_factory=list)
+    target:str|None=None
+    skip:bool=False
+    reason:str|None=None
 
 
 class LeadJdResult(BaseModel):
     updated:int
     missed:int
+    items:list[LeadJdScore]=Field(default_factory=list)
+
+
+# 改了求职方案后，把岗位池全部重新打分
+class LeadRescoreRequest(BaseModel):
+    resume_id:int=Field(gt=0)
+
+
+class LeadRescoreResult(BaseModel):
+    total:int
+    passed:int
 
 
 class LeadAnalyzeRequest(BaseModel):
@@ -493,7 +571,7 @@ class LeadSkipResult(BaseModel):
     skipped:int
 
 class LeadDeleteRequest(BaseModel):
-    below:int=Field(ge=1,le=100)
+    status:Literal['新抓取','待投递','已跳过']|None=None
 
 
 class LeadDeleteResult(BaseModel):
@@ -512,6 +590,7 @@ class LeadUnmarkResult(BaseModel):
 class LeadStats(BaseModel):
     total:int
     with_jd:int
+    without_jd:int
     passed:int
     analyzed:int
     to_apply:int
@@ -523,3 +602,18 @@ class LeadStats(BaseModel):
     need_total:int
     need_ok:int
     need_part:int
+    # 值得补读 JD 的岗位数（没读过 JD、没投没跳过、标题阶段没判 0 分）
+    unread_jd:int=0
+
+
+class LeadReadItem(BaseModel):
+    model_config=ConfigDict(from_attributes=True)
+    id:int
+    url:str
+    title:str
+    quick_score:int
+
+
+class LeadReadList(BaseModel):
+    total:int
+    items:list[LeadReadItem]

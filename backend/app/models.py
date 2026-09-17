@@ -85,6 +85,8 @@ class User(Base):
         String(255)
     )
     token_version = Column(Integer, nullable=False, server_default='0')
+    # 求职方案：[{name, positions, junior, max_years, good_words}]，岗位按每套方案打分、取最高
+    job_targets = Column(JSON, nullable=True)
 class Resume(Base):
     __tablename__ = 'resumes'
 
@@ -112,6 +114,7 @@ class ResumeAnalysis(Base):
     summary = Column(Text,nullable=False)
     skills = Column(JSON,nullable=False)
     work_experience = Column(JSON,nullable=False,default=list)
+    projects = Column(JSON, nullable=False, default=list)
     strengths = Column(JSON,nullable=False)
     improvement_suggestions = Column(JSON,nullable=False)
     recommended_positions = Column(JSON,nullable=False)
@@ -166,5 +169,24 @@ class JobLead(Base):
     deep_total = Column(Integer, nullable=False, server_default='0')
     report_id = Column(Integer, ForeignKey('saved_reports.id', name='fk_lead_report'), nullable=True)
     deep_at = Column(DateTime, nullable=True)
+    # 原始分（只看标题和标签）；空着表示和 quick_score 一样
+    base_score = Column(Integer, nullable=True)
+    # JD 命中的门槛，比如 ['要全日制本科']
+    jd_flags = Column(JSON, nullable=True)
+    # JD 命中的能力项，比如 ['Python', 'API/接口']；用于解释粗筛分数。
+    jd_hits = Column(JSON, nullable=True)
+    # 岗位池上显示的合适 / 不合适的点，比如 ['方向对上：亚马逊运营助理', 'HR刚刚活跃']、['要外语/粤语（最高50）']
+    pros = Column(JSON, nullable=True)
+    cons = Column(JSON, nullable=True)
+    # JD 扣了几分
+    jd_cut = Column(Integer, nullable=False, server_default='0')
+    # 分数来自哪套求职方案，比如「简历A」
+    target = Column(String(20), nullable=True)
+    # 列表页的工资原文，比如「8-13K·14薪」（数字可能是 BOSS 的特殊字体字符）
+    salary = Column(String(50), nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    @property
+    def has_jd(self):
+        return bool((self.jd_text or '').strip())

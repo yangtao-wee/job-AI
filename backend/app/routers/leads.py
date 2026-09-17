@@ -4,8 +4,8 @@ import logging
 from ..config import settings
 from ..dependencies import get_current_user,get_db,check_limit
 from ..models import User
-from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult,LeadUnmarkResult,LeadPage,LeadStats,LeadDeleteRequest,LeadDeleteResult
-from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below,mark_above,unmark_all,lead_stats,delete_lead,delete_below
+from ..schemas import LeadBatch,LeadOut,LeadSaveResult,LeadJdBatch,LeadJdResult,LeadAnalyzeRequest,LeadAnalyzeResult,LeadStatusUpdate,LeadSkipRequest,LeadSkipResult,LeadMarkRequest,LeadMarkResult,LeadUnmarkResult,LeadPage,LeadStats,LeadDeleteRequest,LeadDeleteResult,LeadRescoreRequest,LeadRescoreResult,LeadReadList
+from ..services.lead_service import save_leads,list_leads,save_jd,load_proofs,analyze_next,update_status,skip_below,mark_above,unmark_all,lead_stats,delete_lead,delete_unapplied,delete_without_jd,score_context,rescore_all,list_unread_jd
 from ..services.cache_service import take_lock, free_lock
 
 log=logging.getLogger(__name__)
@@ -18,7 +18,9 @@ def upload_leads(
     current_user:User=Depends(get_current_user),
     db:Session=Depends(get_db)
 ):
-    return save_leads(db,current_user.id,request.leads)
+    # 带了简历编号就按求职方案重新打分（含工资）；没带就只存插件给的标题分
+    ctx=score_context(db,current_user,request.resume_id) if request.resume_id else None
+    return save_leads(db,current_user.id,request.leads,ctx)
 
 
 @router.get('',response_model=LeadPage)
@@ -28,12 +30,16 @@ def my_leads(
     limit:int|None=Query(None,ge=1,le=200),
     min_score:int=Query(0,ge=0,le=100),
     order:str=Query('分数高'),
+    q:str=Query('',max_length=50),
+    kind:str=Query('',max_length=20),
+    tier:str=Query('',max_length=20),
+    in_jd:bool=Query(False),
     current_user:User=Depends(get_current_user),
     db:Session=Depends(get_db)
 ):
     size=limit or settings.lead_page_size
-    rows,total=list_leads(db,current_user.id,status,offset,size,min_score,order)
-    return {'items':rows,'total':total,'offset':offset,'limit':size}
+    rows,total,facets=list_leads(db,current_user.id,status,offset,size,min_score,order,q,kind,tier,in_jd)
+    return {'items':rows,'total':total,'offset':offset,'limit':size,**facets}
 
 @router.get('/stats',response_model=LeadStats)
 def read_stats(
@@ -43,13 +49,38 @@ def read_stats(
     return lead_stats(db,current_user.id)
 
 
+@router.get('/unread-jd',response_model=LeadReadList)
+def unread_jd_leads(
+    limit:int=Query(50,ge=1,le=500),
+    current_user:User=Depends(get_current_user),
+    db:Session=Depends(get_db)
+):
+    # 岗位池「补读JD」按钮：把要读的岗位交给插件，插件挨个打开详情页读
+    return list_unread_jd(db,current_user.id,limit)
+
+
 @router.post('/jd',response_model=LeadJdResult)
 def upload_jd(
     request:LeadJdBatch,
     current_user:User=Depends(get_current_user),
     db:Session=Depends(get_db)
 ):
-    return save_jd(db,current_user.id,request.items)
+    # 读不到简历或简历分析，就只保存 JD，不打分
+    ctx=score_context(db,current_user,request.resume_id) if request.resume_id else None
+    return save_jd(db,current_user.id,request.items,ctx)
+
+
+@router.post('/rescore',response_model=LeadRescoreResult)
+def rescore_leads(
+    request:LeadRescoreRequest,
+    current_user:User=Depends(get_current_user),
+    db:Session=Depends(get_db)
+):
+    check_limit('lead_rescore', current_user.id, 20, 3600)
+    ctx=score_context(db,current_user,request.resume_id)
+    if ctx is None:
+        raise HTTPException(status_code=404,detail='简历或简历分析不存在，请先上传简历并做 AI 分析')
+    return rescore_all(db,current_user.id,ctx)
 
 @router.post('/analyze',response_model=LeadAnalyzeResult)
 def analyze_lead(
@@ -115,13 +146,21 @@ def skip_low_score(
 ):
     return {'skipped':skip_below(db,current_user.id,request.below)}
 
-@router.post('/delete-below',response_model=LeadDeleteResult)
-def delete_low_score(
+@router.post('/delete-unapplied',response_model=LeadDeleteResult)
+def delete_unapplied_leads(
     request:LeadDeleteRequest,
     current_user:User=Depends(get_current_user),
     db:Session=Depends(get_db)
 ):
-    return {'deleted':delete_below(db,current_user.id,request.below)}
+    return {'deleted':delete_unapplied(db,current_user.id,request.status)}
+
+
+@router.post('/delete-without-jd',response_model=LeadDeleteResult)
+def delete_leads_without_jd(
+    current_user:User=Depends(get_current_user),
+    db:Session=Depends(get_db)
+):
+    return {'deleted':delete_without_jd(db,current_user.id)}
 
 @router.post('/mark-above',response_model=LeadMarkResult)
 def mark_high_score(

@@ -244,14 +244,17 @@ def test_save_jd_screens(monkeypatch):
         result = service.save_jd(db, 1, [LeadJdIn(url='u1', jd_text=jd)], fake_ctx(monkeypatch))
         assert (result['updated'], result['missed']) == (1, 0)
         assert result['items'][0]['url'] == 'u1'
-        assert result['items'][0]['score'] == 50
+        # 统招本科不再压到 50：扣 10 分，JD 能力项照常加
+        from app.services.matching_service import requirement_hits
+        expected = 70 - 10 + min(requirement_hits(jd)[1], 30)
+        assert result['items'][0]['score'] == expected
         row = db.query(JobLead).one()
-        assert (row.jd_flags, row.target, row.base_score, row.quick_score) == (['要全日制本科'], 'B', 70, 50)
+        assert (row.jd_flags, row.target, row.base_score, row.quick_score) == (['要全日制本科'], 'B', 70, expected)
 
         # 读过 JD 的岗位，插件再传标题分也不覆盖
         assert save_leads(db, 1, [LeadIn(title='电商运营助理', company='A', url='u1', quick_score=70)])['updated'] == 0
         db.refresh(row)
-        assert row.quick_score == 50
+        assert row.quick_score == expected
 
 
 def test_save_jd_returns_stale_hr_skip(monkeypatch):

@@ -297,7 +297,8 @@ def test_screen_jd():
     # 「精通」可以及格，不再标出来
     assert flags == ['要全日制本科', '要3年电商经验']
     # 「3 年以上电商运营经验」「精通 Excel」写得太深，这两项不算加分
-    assert cut == 0
+    # 统招本科扣 10 分（用户 2026-09-18：不再压到 50）
+    assert cut == 10
     assert apply_jd(80, flags, cut) == 50
 
 
@@ -711,6 +712,107 @@ def test_software_dev_direction_and_language():
     assert '开发语言不是Python/JS' in screen_jd(jd, [], p, 'C++ 客户端开发工程师（AI Coding）', t)[0]
     assert '开发语言不是Python/JS' in screen_jd(jd, [], p, '客户端开发工程师', t)[0]
     assert '开发语言不是Python/JS' not in screen_jd('使用 C++/Qt 开发' + chr(10) + '熟悉 Python', [], p, '客户端开发工程师', t)[0]
+
+
+def test_unlearned_tech_costs_three_each():
+    t = SimpleNamespace(max_years=3, min_pay=5, good_words=[])
+    p = {'edu': 3, 'full': 2, 'elite': False, 'years': 2.75, 'age': 26, 'text': 'python fastapi vue mysql redis docker'}
+    flags, cut = screen_jd('熟悉 Java、Kafka', [], p, '后端开发工程师', t)
+    assert '没学过：Java、Kafka/MQ' in flags and cut == 6
+    # 加分项里的、简历上有的不算；读不到简历不判
+    assert not any(f.startswith('没学过') for f in screen_jd('会 Python' + chr(10) + '加分项' + chr(10) + '了解 Java', [], p, '开发工程师', t)[0])
+    assert not any(f.startswith('没学过') for f in screen_jd('熟悉 Java', [], dict(p, text=''), '开发工程师', t)[0])
+    # 最多扣 15 分
+    many = '要求：Java、Go语言、C++、PHP、React、Kafka、MongoDB'
+    assert screen_jd(many, [], p, '后端开发', t)[1] == 15
+
+
+def test_agent_python_track_starts_at_seventy(monkeypatch):
+    monkeypatch.setattr('app.services.matching_service.embed_many', lambda texts: {t: [1.0, 0.0] for t in texts})
+    analysis = SimpleNamespace(skills=[], recommended_positions=[])
+    targets = load_targets([{'name': 'A', 'positions': ['Agent应用开发', '业务自动化', '软件开发', '电商运营助理'],
+                             'backup': ['电商运营助理'], 'max_years': 3, 'min_pay': 5}], analysis)
+    p = {'edu': 3, 'full': 2, 'elite': False, 'years': 2.75, 'age': 26, 'text': 'python fastapi agent 大模型 api'}
+    NL = chr(10)
+
+    def score(title, jd, salary='8-12K', tags=None):
+        job = SimpleNamespace(name=title, tags=tags or ['1-3年', '本科'], jd=jd, salary=salary)
+        return score_jobs(analysis, targets, [job], p)[0]
+
+    # 开头的关键词标签（Java、C++）不算；会的 Python、FastAPI、Agent、大模型、API 各 +1；「其中一种」都不会只扣 1
+    jd = NL.join(['职位描述', 'Java', 'C++', '岗位职责：', '用 Python 和 FastAPI 开发 Agent，调用大模型 API',
+                  '任职要求：', '熟悉 n8n、Dify、Coze 中的一种', '王女士', '在线'])
+    got = score('AI自动化工程师（AI Agent）', jd)
+    assert got['score'] == 70 + 5 - 1
+    assert got['pros'][0] == 'Agent/Python岗（起步70）'
+    assert got['cons'] == ['没学过：n8n/Dify/Coze（-1）']
+    # 要 2 年经验 -10；初级 +10；工资下限 ≥20K -15
+    jd2 = NL.join(['岗位职责：', '负责 Python 自动化脚本开发', '任职要求：', '2年以上工作经验', '在线'])
+    assert score('Python自动化开发', jd2)['score'] == 70 + 1 - 10
+    assert score('初级Python自动化开发', jd2)['score'] == 70 + 1 - 10 + 10
+    assert score('Python自动化开发', jd2, salary='20-30K')['score'] == 70 + 1 - 10 - 15
+    # 不是这类岗位（产品岗、电商运营）照原规则，不从 70 起步
+    assert not score('AI产品经理助理', jd2)['pros'][:1] == ['Agent/Python岗（起步70）']
+    assert score('电商运营助理', jd2)['pros'][0] != 'Agent/Python岗（起步70）'
+
+
+def test_negated_requirements_and_second_year_number():
+    t = SimpleNamespace(max_years=3, min_pay=5, good_words=[])
+    p = {'edu': 3, 'full': 2, 'elite': False, 'years': 2.75, 'age': 26, 'text': 'python'}
+    # 「不是算法岗、不要求 PyTorch」：不算偏算法，也不算没学过 PyTorch
+    flags = screen_jd('本岗位不是大模型算法/训练岗，不要求PyTorch/CUDA/模型训练经验', [], p, 'AI自动化开发工程师', t)[0]
+    assert '偏算法/模型训练' not in flags and not any(f.startswith('没学过') for f in flags)
+    assert '偏算法/模型训练' in screen_jd('负责大模型预训练和算法研究', [], p, '算法工程师', t)[0]
+    # 一句里两个年限取大的：要 3 年
+    flags = screen_jd('1年以上跨境电商行业经验及3年以上全栈技术工程经验', [], p, 'AI自动化开发工程师', t)[0]
+    assert any(f.startswith('要3年') for f in flags)
+
+
+def test_agent_ops_jobs_by_jd_content(monkeypatch):
+    monkeypatch.setattr('app.services.matching_service.embed_many', lambda texts: {t: [1.0, 0.0] for t in texts})
+    analysis = SimpleNamespace(skills=[], recommended_positions=[])
+    targets = load_targets([{'name': 'A', 'positions': ['Agent应用开发', '本地生活运营'], 'max_years': 3, 'min_pay': 5}], analysis)
+    p = {'edu': 3, 'full': 2, 'elite': False, 'years': 2.75, 'age': 26, 'text': 'python agent 大模型'}
+    NL = chr(10)
+
+    def score(title, jd, tags=None):
+        job = SimpleNamespace(name=title, tags=tags or ['1-3年', '大专'], jd=jd, salary='7-12K')
+        return score_jobs(analysis, targets, [job], p)[0]
+
+    # 标题是「文案专员」，但 JD 里调智能体、打磨提示词、搭知识库：算智能体运营岗，从 70 起步
+    jd = NL.join(['岗位职责：', '负责豆包智能体的调试优化，打磨系统提示词', '搭建门店知识库', '任职要求：', '无需代码基础', '在线'])
+    got = score('AI 智能体优化文案专员', jd)
+    assert got['pros'][0].startswith('智能体运营岗') and got['score'] >= 70
+    # 只有一类信号不算；视频类标题不算
+    one = NL.join(['岗位职责：', '负责搭建客服知识库', '在线'])
+    assert not score('AI训练师', one)['pros'][:1] or not score('AI训练师', one)['pros'][0].startswith('智能体运营岗')
+    assert not score('AI视频制作', jd)['pros'][0].startswith('智能体运营岗')
+    # Agent/Python 岗要硕士：最高 50
+    jd2 = NL.join(['岗位职责：', '用 Python 开发 Agent', '在线'])
+    assert score('Agent应用开发工程师', jd2, ['1-3年', '硕士'])['score'] <= 50
+
+
+def test_ai_tool_mention_floors_at_sixty(monkeypatch):
+    monkeypatch.setattr('app.services.matching_service.embed_many', lambda texts: {t: [1.0, 0.0] for t in texts})
+    analysis = SimpleNamespace(skills=[], recommended_positions=[])
+    targets = load_targets([{'name': 'A', 'positions': ['电商运营助理'], 'max_years': 3, 'min_pay': 5}], analysis)
+    p = {'edu': 3, 'full': 2, 'elite': False, 'years': 2.75, 'age': 26, 'text': 'python'}
+    NL = chr(10)
+
+    def score(title, jd, salary='8-12K'):
+        return score_jobs(analysis, targets, [SimpleNamespace(name=title, tags=['1-3年'], jd=jd, salary=salary)], p)[0]
+
+    # HR 超过 3 天没上线本来是 0 分：提到 DeepSeek、Claude 就保底 60，合适标签里写明
+    stale = NL.join(['岗位职责：', '会用 DeepSeek、Claude 做运营提效', '王女士', '半年前活跃'])
+    got = score('电商运营助理', stale)
+    assert got['score'] == 60 and got['pros'][0] == '提到AI工具：Claude、DeepSeek（保底60）'
+    # 本来就高于 60 的不动
+    jd = NL.join(['岗位职责：', '熟练使用 ChatGPT 做运营提效', '在线'])
+    high = score('电商运营助理', jd)
+    assert high['score'] > 60 and not high['pros'][0].startswith('提到AI工具')
+    # 标题排除词（销售）、工资不到下限：照样 0 分
+    assert score('AI软件销售', jd)['score'] == 0
+    assert score('电商运营助理', jd, salary='3-4K')['score'] == 0
 
 
 def test_short_keywords_need_word_boundary():

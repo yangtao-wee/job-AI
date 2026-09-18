@@ -310,7 +310,9 @@ function consOf(l) {
 // 分数怎么来的：先按标题打分，读过 JD 再按 JD 加减
 function scoreNote(l) {
   if (l.base_score == null || !l.quick_score) return ''
-  return l.has_jd ? `标题${l.base_score}分 → 看完JD ${l.quick_score}分` : `标题${l.base_score}分，读了JD才算数`
+  // Agent / Python 岗从 70 分起步，不是标题分
+  const start = (l.pros || []).some(p => p.startsWith('Agent/Python岗') || p.startsWith('智能体运营岗')) ? '起步' : '标题'
+  return l.has_jd ? `${start}${l.base_score}分 → 看完JD ${l.quick_score}分` : `${start}${l.base_score}分，读了JD才算数`
 }
 
 async function markAbove() {

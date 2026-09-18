@@ -103,6 +103,14 @@ YEARS_NEED = re.compile(r'(?<![第\d.])([1-9]\d?|[一两二三四五六七八九
 YEARS_UPPER = re.compile(r'(?:不超过|少于|低于|不满|未满|至多)\s*[一两二三四五六七八九十\d]+\s*年|[一两二三四五六七八九十\d]+\s*年(?:以下|以内)')
 YEARS_AFTER = re.compile(r'(?:工作经验|相关经验|工作年限).{0,8}?(?:不少于|至少|最低|要求)?\s*([1-9]\d?|[一两二三四五六七八九十])\s*年')
 CN_NUM = {'一': 1, '两': 2, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10}
+# 否定句：「不是大模型算法岗，不要求 PyTorch」这种句子里的词不算要求
+NEGATED = re.compile(r'不是|并非|不要求|无需|不需要|不必|不用')
+
+
+def top_years(c):
+    # 一句里写了几个年限（「1年以上跨境经验及3年以上全栈经验」），取最大的那个
+    found = list(YEARS_NEED.finditer(c)) + list(YEARS_AFTER.finditer(c))
+    return max(found, key=lambda m: CN_NUM.get(m.group(1)) or int(m.group(1)), default=None)
 # 句首序号「2.」「（3）」「-」，不去掉会把「2.3 年以上」读漏
 LIST_NO = re.compile(r'^\s*(?:[（(]\s*\d{1,2}\s*[)）]|\d{1,2}\s*[.、．)）]|[-•·●])\s*')
 # 我简历里做过的领域（抖音本地生活运营）：年限要求写的是这些，才按经验上限比
@@ -133,7 +141,7 @@ GRAD_SOFT = '面向应届生'
 GRAD_CUT = 10
 # 硬门槛：命中就把分数压到 50，不再推荐（另外「要N年…经验」也算；「HR超过3天未活跃」「薪资上限不超过…」直接 0 分）
 HARD_FLAGS = (
-    '要985/211', '要全日制本科', '要硕士', '疑似销售岗', '偏硬件/现场',
+    '要985/211', '要硕士', '疑似销售岗', '偏硬件/现场',
     '要证书', '要打电话', '内容岗没要求AI工具', '偏算法/模型训练',
     '需独立负责大型项目', '偏高级基础设施', '偏工业/产品设计', '只招应届', '要外语/粤语', '要百万级操盘案例',
     '偏客服/中控', '不收新手', '要独立运营经验', '超出年龄要求', '偏剪辑/设计',
@@ -143,12 +151,99 @@ HARD_FLAGS = (
 OTHER_LANG = re.compile(r'java(?!\s*script)|golang|go\s*语言|(?:使用|熟悉|精通|掌握|熟练)\s*go(?![a-z])|c\+\+|c#|\.net|php|kotlin|swift|objective-c|android|ios开发|嵌入式|单片机|verilog|fpga', re.I)
 MY_LANG = re.compile(r'python|javascript|typescript|(?<![a-z])js(?![a-z])|vue|react|node', re.I)
 DEV_LANG_FLAG = '开发语言不是Python/JS'
+# 没学过的技术（用户 2026-09-18）：JD 硬要求里（加分项不算）每有一种简历上没出现过的技术扣 3 分，最多扣 15 分。
+# 简历上有的（Python、FastAPI、Vue、MySQL、Redis、Docker、RAG、Agent…）不在这张表里也不会扣；
+# 和已会技术相近的（Django/Flask、PostgreSQL、TypeScript）用户选了照样算没学过
+TECH_TERMS = {
+    'Java': r'java(?!\s*script)|spring\s*boot|springboot|spring\s*cloud|mybatis',
+    'Go': r'golang|go\s*语言|(?:使用|熟悉|精通|掌握|熟练)\s*go(?![a-z])',
+    'C/C++': r'c\+\+|(?<![a-z])c语言',
+    'C#/.NET': r'c#|\.net(?![a-z])',
+    'PHP': r'(?<![a-z])php',
+    'TypeScript': r'typescript|(?<![a-z])ts(?![a-z])',
+    'React': r'react(?!\s*native)',
+    'Angular': r'angular',
+    '安卓/iOS': r'android|安卓开发|(?<![a-z])ios开发|kotlin|swift(?![a-z])|objective-c',
+    'Flutter/RN': r'flutter|react\s*native',
+    '小程序开发': r'小程序开发|uni-?app|taro',
+    'Node.js': r'node\.?js|express\.?js|nestjs',
+    'Django/Flask': r'django|flask',
+    'K8s': r'kubernetes|k8s',
+    'Kafka/MQ': r'kafka|rabbitmq|rocketmq|消息队列',
+    'Elasticsearch': r'elasticsearch|elastic\s*search',
+    'MongoDB': r'mongodb|mongo(?![a-z])',
+    'PostgreSQL': r'postgresql|postgres(?![a-z])|pgsql',
+    'Oracle/SQL Server': r'oracle|sql\s*server|mssql',
+    '大数据(Spark/Hadoop/Flink)': r'spark|hadoop|flink|hive(?![a-z])|数仓',
+    'PyTorch/TensorFlow': r'pytorch|tensorflow|paddle',
+    '模型训练/微调': r'模型训练|微调|fine-?tun|lora(?![a-z])|sft(?![a-z])|rlhf',
+    'LangChain/LlamaIndex': r'langchain|langgraph|llamaindex|llama\s*index',
+    '向量数据库': r'milvus|faiss|chroma(?![a-z])|pinecone|weaviate|qdrant|向量数据库',
+    '爬虫框架': r'scrapy|selenium|playwright|puppeteer',
+    '云平台(AWS/Azure)': r'(?<![a-z])aws(?![a-z])|azure|gcp(?![a-z])',
+    'BI工具': r'power\s*bi|tableau|帆软|finebi',
+    'MCP': r'(?<![a-z])mcp(?![a-z])',
+    'n8n/Dify/Coze': r'n8n|dify|coze|扣子',
+}
+TECH_RE = {name: re.compile(pattern, re.I) for name, pattern in TECH_TERMS.items()}
+TECH_FLAG = '没学过：'
+TECH_EACH, TECH_CAP = 3, 15
+# 「熟悉 n8n、Dify、Coze 其中一种」：会其中一种就不扣，都不会只算一种
+ANY_OF = re.compile(r'一种|之一|任一|任意|其一|或')
+# JD 正文从这类小标题开始；前面那排是 BOSS 的关键词标签（招聘方随手勾的），不算要求
+JD_SECTION = re.compile(r'^\s*(?:\d[、.．]?\s*)?(?:岗位职责|工作职责|职位职责|工作内容|岗位描述|职位描述[:：]|任职要求|职位要求|岗位要求|任职资格)')
+
+# Agent / Python / AI 自动化岗（用户 2026-09-18）：起步 70 分，JD 里每有一种会的技术 +1、没学过的 -1，
+# 要 2 年经验 -10、3 年以上 -25，初级 / 有人带 +10；学历、高薪、硬门槛、HR 活跃照常算
+TRACK_DIRS = ['Agent应用开发', 'AI开发助理', 'AI应用助理', 'AI实施助理', 'AI技术支持', 'Python自动化', '业务自动化', 'RPA助理', '电商自动化']
+TRACK_BASE = 70
+TRACK_HIT = 'Agent/Python岗'
+# 智能体运营 / 调优岗（用户 2026-09-18）：标题五花八门（文案专员、训练师、运维工程师…），按 JD 内容认：
+# 职责和要求里至少出现两类——调智能体、写提示词、搭知识库、用智能体平台；也从 70 起步，但只加分不降分
+OPS_HIT = '智能体运营岗'
+OPS_SIGNALS = {
+    '智能体': re.compile(r'智能体[^，,。；;\n]{0,8}(?:搭建|调优|调试|优化|迭代|配置|运营|训练|开发|编排|实施|部署|落地)|(?:搭建|调优|调试|优化|迭代|配置|编排|实施|部署|落地)[^，,。；;\n]{0,6}(?:智能体|agent)', re.I),
+    '提示词': re.compile(r'(?:提示词|prompt)[^，,。；;\n]{0,6}(?:调优|优化|设计|编写|撰写|工程|迭代)|(?:编写|撰写|优化|调优|设计|打磨|迭代)[^，,。；;\n]{0,6}(?:提示词|prompt)', re.I),
+    '知识库': re.compile(r'知识库[^，,。；;\n]{0,6}(?:搭建|建设|维护|优化|配置|构建|更新|整理)|(?:搭建|建设|维护|构建|整理)[^，,。；;\n]{0,8}知识库', re.I),
+    '平台': re.compile(r'coze|扣子|dify|hiagent|n8n|fastgpt|maxkb|豆包[^，,。；;\n]{0,4}智能体|千问', re.I),
+}
+OPS_MIN = 2
+# 这些标题不算：视频生图类、销售外呼、数据标注质检、老师、算法硬件、要硕博
+OPS_NOT = re.compile(r'视频|漫剧|短剧|生图|剪辑|设计|美工|导演|编导|主播|销售|外呼|标注|质检|老师|讲师|算法|硬件|嵌入式|博士|硕士|招商|客服(?!机器人)', re.I)
+# 这些标题不算：产品、测试、运维、算法、质检标注、硬件、销售客服、要硕博的
+TRACK_NOT = re.compile(r'电气|plc|机械|设备|工控|非标|机器人|硬件|嵌入式|训练师|标注|质检|剪辑|设计|美工|主播|销售|客服|讲师|老师|老板|产品|算法|运维|测试|博士|硕士', re.I)
+# 泛开发岗（软件开发方向）得写了 Python / AI / Agent 才算
+TRACK_PY = re.compile(r'python|(?<![a-z])ai(?![a-z])|agent|智能体|大模型|自动化|rpa', re.I)
+# 用户简历上会的技术（用户 2026-09-18 给的清单）
+MY_SKILLS = {
+    'Python': r'python', 'FastAPI': r'fastapi', 'Pydantic/SQLAlchemy': r'pydantic|sqlalchemy|alembic',
+    'SQL/MySQL': r'mysql|(?<![a-z])sql(?![a-z])', 'Redis': r'redis', 'JWT': r'jwt',
+    'API/接口': r'restful|(?<![a-z])api(?![a-z])|接口', 'JSON': r'json', 'Vue': r'vue',
+    'JavaScript': r'javascript|(?<![a-z])js(?![a-z])|axios', 'Git': r'(?<![a-z])git(?![a-z])|github',
+    'Docker': r'docker', 'Nginx': r'nginx', 'pytest': r'pytest|单元测试',
+    '大模型/LLM': r'llm|大模型|大语言模型', 'Prompt': r'prompt|提示词', '结构化输出': r'structured\s*output|结构化输出',
+    'Embedding/向量': r'embedding|bge(?![a-z])|向量(?!数据库)|相似度|similarity',
+    'RAG/检索': r'(?<![a-z])rag(?![a-z])|检索|知识库|chunk|分块', 'Tool Calling': r'tool\s*call|function\s*call|工具调用',
+    'Agent': r'agent|智能体', 'AI编程工具': r'codex|chatgpt|claude|cursor|copilot',
+}
+MY_SKILL_RE = {name: re.compile(pattern, re.I) for name, pattern in MY_SKILLS.items()}
+SKILL_EACH, SKILL_MAX = 1, 15
+TRACK_TECH_EACH, TRACK_TECH_MAX = 1, 10
+TRACK_YEAR2, TRACK_YEAR3 = 10, 25
+TRACK_JUNIOR = 10
+TRACK_EDU = 20
+TRACK_PAY20, TRACK_PAY15 = 15, 8
+JUNIOR_TITLE = re.compile(r'初级|助理|应届|培训生|管培|学徒')
+JUNIOR_JD = re.compile(r'接受无经验|可无经验|无经验可|零基础|0基础|接受小白|有人带|专人带|带教|手把手|包教')
 # 标题直接写明的语言：「C++ 客户端开发工程师」「Java开发」「Android研发」
 TITLE_LANG = re.compile(r'java(?!\s*script)|golang|(?<![a-z])go(?![a-z])|c\+\+|c#|\.net|php|kotlin|swift|android|安卓|(?<![a-z])ios(?![a-z])|嵌入式|单片机|(?<![a-z])qt(?![a-z])', re.I)
 # JD 里「加分项」小标题：后面几行是加分，不是硬要求
 BONUS_HEAD = re.compile(r'^(?:加分项?|加分条件|优先条件|优先考虑|以下优先|有以下.{0,10}优先)\s*[:：]?$')
 SECTION_HEAD = re.compile(r'^(?:岗位职责|工作职责|职位描述|任职要求|岗位要求|任职资格)')
 HARD_CAP = 50
+# 统招 / 全日制本科（用户 2026-09-18）：用户是全日制大专 + 成人本科，不压到 50，扣 10 分，照样可以投
+FULLTIME = '要全日制本科'
+FULLTIME_CUT = 10
 # 工资下限在期望下方 1K 以内（6-10K）：轻扣 5 分
 PAY_SOFT_CUT = 5
 # 没读过 JD 的岗位最高 54 分：只看了标题不算数，排在「可投可不投」的 55 分以下
@@ -169,6 +264,13 @@ MENTOR_FLOOR = 60
 # 标题分太低（完全不像你的方向，比如 PMC 计划员）的，写了带教也不保底
 MENTOR_TITLE_MIN = 30
 MENTOR_HIT = '有人带/可培养'
+# JD 正文提到 Codex / Claude / ChatGPT / DeepSeek（用户 2026-09-18：全部算合格）：至少 60 分，
+# HR 不活跃、要英语、要 3 年以上、硬门槛也照样保底；只有标题排除词（实习 / 销售…）、管理岗、工资不到下限仍是 0
+AI_TOOL = re.compile(r'codex|claude|chat\s*gpt|deepseek', re.I)
+AI_TOOL_FLOOR = 60
+AI_TOOL_HIT = '提到AI工具'
+AI_TOOL_NAMES = {'Codex': re.compile(r'codex', re.I), 'Claude': re.compile(r'claude', re.I),
+                 'ChatGPT': re.compile(r'chat\s*gpt', re.I), 'DeepSeek': re.compile(r'deepseek', re.I)}
 # 公司想用 AI 提效 / 接入 AI：JD 写了「用 AI 工具提升效率」「接入大模型」「搭建 Coze/Dify 工作流」这类，+10 分
 AI_TERM = r'(?<![a-z])ai(?![a-z])|人工智能|大模型|aigc|智能体|agent|llm'
 AI_WANT = re.compile(
@@ -706,6 +808,8 @@ def read_profile(lines, today):
         'elite': read_elite(lines),
         'years': read_years(lines, today),
         'age': read_age(lines, today),
+        # 简历全文（小写）：JD 要的技术在简历里出现过才算学过
+        'text': '\n'.join(lines).lower(),
     }
 
 def edu_cut(tags, my_edu):
@@ -830,7 +934,7 @@ def screen_jd(jd, tags, p, title='', target=None, salary=None):
             c = LIST_NO.sub('', c)
             if not c.strip():
                 continue
-            m = None if YEARS_UPPER.search(c) else (YEARS_NEED.search(c) or YEARS_AFTER.search(c))
+            m = None if YEARS_UPPER.search(c) else top_years(c)
             half = HALF_YEAR.search(c)
             said_years = said_years or bool(m or half)
             # 这条要求所在的整行，用来看旁边有没有写「应届生也可接受」
@@ -851,7 +955,7 @@ def screen_jd(jd, tags, p, title='', target=None, salary=None):
                 if ELITE.search(c) and not p['elite']:
                     flags.append('要985/211')
                 if re.search(r'全日制|统招', c) and re.search(r'本科|学士', c) and '大专' not in c and p['full'] < 3:
-                    flags.append('要全日制本科')
+                    flags.append(FULLTIME)
                 if re.search(r'硕士(及以上|以上|学历|学位)|研究生(及以上|以上|学历)', c) and not re.search(r'本科|学士|大专', c) and p['edu'] < 4:
                     flags.append('要硕士')
                 if LANG.search(c):
@@ -950,11 +1054,11 @@ def screen_jd(jd, tags, p, title='', target=None, salary=None):
         flags.append('内容岗没要求AI工具')
     if dev_lang_miss(title, jd):
         flags.append(DEV_LANG_FLAG)
-    if CORE_MODEL_RISK.search(jd):
+    if risk_hit(CORE_MODEL_RISK, jd):
         flags.append('偏算法/模型训练')
-    if LARGE_PROJECT_RISK.search(jd):
+    if risk_hit(LARGE_PROJECT_RISK, jd):
         flags.append('需独立负责大型项目')
-    if ADVANCED_INFRA_RISK.search(jd):
+    if risk_hit(ADVANCED_INFRA_RISK, jd):
         flags.append('偏高级基础设施')
     active = read_active(jd)
     recent_cut = 0
@@ -984,7 +1088,14 @@ def screen_jd(jd, tags, p, title='', target=None, salary=None):
         lang_cut = LANG_TAG_CUT
     # 公司想用 AI 提效 / 接入 AI：+10
     ai_bonus = AI_BONUS if ai_bonus_ok(jd, title, salary) else 0
-    cut = -fit - good + recent_cut + new_cut + grad_cut + lang_cut - ai_bonus
+    # 没学过的技术：简历没读到就不判
+    gap = tech_gap(title, jd, p.get('text'))
+    tech_cut = 0
+    if gap:
+        flags.append(TECH_FLAG + '、'.join(gap))
+        tech_cut = min(TECH_EACH * len(gap), TECH_CAP)
+    full_cut = FULLTIME_CUT if FULLTIME in flags else 0
+    cut = -fit - good + recent_cut + new_cut + grad_cut + lang_cut - ai_bonus + tech_cut + full_cut
     return flags, cut
 
 
@@ -1002,6 +1113,11 @@ def need_new_cut(flag, title, salary, target):
     return NEW_FIELD_CUT - NEW_FIELD_EASE * int(rule)
 
 
+def risk_hit(pattern, jd):
+    # 按句子看；写了「不是…岗」「不要求…」的句子不算
+    return any(pattern.search(s) and not NEGATED.search(s) for s in re.split(r'[。；;\n！!]', jd or ''))
+
+
 def flag_note(flag, title, salary, target):
     # 岗位池上「不合适」的标签：后面注明这一条对分数的影响
     if flag.startswith((STALE_HR, LOW_PAY, LOW_FLOOR, PIECE_PAY)):
@@ -1016,6 +1132,10 @@ def flag_note(flag, title, salary, target):
         return f'{flag}（-{GRAD_CUT}）'
     if flag == LANG_TAG_FLAG:
         return f'{flag}（-{LANG_TAG_CUT}）'
+    if flag == FULLTIME:
+        return f'{flag}（-{FULLTIME_CUT}）'
+    if flag.startswith(TECH_FLAG):
+        return f'{flag}（-{min(TECH_EACH * (flag.count("、") + 1), TECH_CAP)}）'
     if flag.startswith(NEED_NEW):
         cut = need_new_cut(flag, title, salary, target)
         return f'{flag}（-{cut}）' if cut else f'{flag}（不扣分）'
@@ -1035,6 +1155,164 @@ def required_text(jd):
         if not bonus and not PREFER.search(s):
             out.append(s)
     return '\n'.join(out)
+
+
+def jd_body(jd):
+    # 去掉 BOSS 详情页开头那排关键词标签：有「岗位职责」这类小标题就从它开始；没有就跳过开头的短词行
+    rows = (jd or '').splitlines()
+    start = next((i for i, line in enumerate(rows) if JD_SECTION.match(line)), None)
+    if start is not None:
+        return '\n'.join(rows[start:])
+    out, head = [], True
+    for line in rows:
+        s = line.strip()
+        if head and (not s or s in ('职位描述', '举报', '微信扫码分享') or (len(s) <= 20 and not re.search(r'[，,。；;：:、]', s))):
+            continue
+        head = False
+        out.append(line)
+    return '\n'.join(out)
+
+
+def my_skills(text):
+    return [name for name, pattern in MY_SKILL_RE.items() if pattern.search(text or '')]
+
+
+def tech_gap(title, jd, resume_text):
+    # 标题和 JD 正文硬要求里（关键词标签、加分项、写了优先的不算）要的、简历上没出现过的技术
+    if not resume_text:
+        return []
+    miss = []
+    for line in re.split(r'[\n；;。]', (title or '') + '\n' + required_text(jd_body(jd))):
+        names = [name for name, pattern in TECH_RE.items() if pattern.search(line) and not pattern.search(resume_text)]
+        if not names or NEGATED.search(line):
+            continue
+        if ANY_OF.search(line):
+            if my_skills(line):
+                continue
+            names = names[:1]
+        miss += [name for name in names if name not in miss]
+    return miss
+
+
+def ops_signals(title, jd):
+    # 智能体运营 / 调优的信号：JD 正文里出现了哪几类
+    if not jd or OPS_NOT.search(title or ''):
+        return []
+    body = jd_body(jd)
+    return [name for name, pattern in OPS_SIGNALS.items() if pattern.search(body)]
+
+
+def track_kind(title, jd, target):
+    # 'title'：标题就是 Agent / Python / AI 自动化岗；'ops'：标题不像，但 JD 内容是智能体运营 / 调优；都不是返回 None
+    backup = set(getattr(target, 'backup', []) or [])
+    positions = [p for p in getattr(target, 'positions', []) if p not in backup]
+    dirs = [p for p in TRACK_DIRS if p in positions]
+    if not TRACK_NOT.search(title or ''):
+        if dirs and title_rule_match(title, dirs) is True:
+            return 'title'
+        if '软件开发' in positions and title_rule_match(title, ['软件开发']) is True:
+            if TRACK_PY.search(title) or (jd and re.search(r'python', required_text(jd_body(jd)), re.I)):
+                return 'title'
+    if dirs and len(ops_signals(title, jd)) >= OPS_MIN:
+        return 'ops'
+    return None
+
+
+def track_job(title, jd, target):
+    # Agent / Python / AI 自动化岗：标题对上主投的这几个方向；或者是开发岗、标题或 JD 要求里写了 Python / AI / Agent
+    return track_kind(title, jd, target) == 'title'
+
+
+def jd_years(text):
+    # JD 硬要求里写的最低年限（「2年以上Python开发经验」→ 2）；「3年以下」「经验不限」不算
+    n = 0
+    for c in re.split(r'[，,。；;\n]', text or ''):
+        if YEARS_UPPER.search(c) or YEARS_SOFT.search(c):
+            continue
+        m = top_years(c)
+        if m and re.search(r'经验|开发|工作|从事', c):
+            n = max(n, CN_NUM.get(m.group(1)) or int(m.group(1)))
+    return n if n <= 15 else 0
+
+
+def track_soft_cut(flag):
+    if flag.startswith('HR') and not flag.startswith(STALE_HR):
+        return HR_RECENT_CUT
+    if flag == GRAD_SOFT:
+        return GRAD_CUT
+    if flag == LANG_TAG_FLAG:
+        return LANG_TAG_CUT
+    if flag.startswith('薪资下限低于'):
+        return PAY_SOFT_CUT
+    if flag == FULLTIME:
+        return FULLTIME_CUT
+    return 0
+
+
+def track_result(job, it, flags, jd, target, profile, pros, easy):
+    # Agent / Python 岗、智能体运营岗单独算分：起步 70，逐项加减；不是这类岗位返回 None，照原规则
+    kind = track_kind(job.name, jd, target)
+    if kind is None:
+        return None
+    salary = getattr(job, 'salary', None)
+    # 标题阶段就排除的（高级 / 资深 / 实习 / 销售 / 工资太低…）照样 0 分；只有「经验标签 3 年起」改成扣分
+    if it.score == 0 and not (it.reason or '').startswith('经验标签从'):
+        return None
+    zero = next((f for f in flags if f.startswith((STALE_HR, LOW_PAY, LOW_FLOOR, PIECE_PAY))), None)
+    if zero:
+        return 0, TRACK_BASE, [], [flag_note(zero, job.name, salary, target)], kind
+    body = jd_body(jd) if jd else ''
+    score = TRACK_BASE
+    hit = TRACK_HIT if kind == 'title' else OPS_HIT + '：' + '、'.join(ops_signals(job.name, jd))
+    new_pros, new_cons = [f'{hit}（起步{TRACK_BASE}）'], []
+    have = my_skills(job.name + '\n' + body)
+    plus = min(len(have) * SKILL_EACH, SKILL_MAX)
+    if plus:
+        score += plus
+        new_pros.append(f'会的技术（+{plus}）：' + '、'.join(have))
+    miss = tech_gap(job.name, jd, profile.get('text')) if jd else []
+    minus = min(len(miss) * TRACK_TECH_EACH, TRACK_TECH_MAX)
+    if minus:
+        score -= minus
+        new_cons.append(f'{TECH_FLAG}{"、".join(miss)}（-{minus}）')
+    tags = [int(m.group(1) or m.group(2)) for t in job.tags if (m := re.fullmatch(r'(\d+)-\d+年|(\d+)年以上', t))]
+    flag_years = [int(m.group(1)) for f in flags if (m := re.match(r'要(\d+)年', f))]
+    n = max(tags + flag_years + [jd_years(required_text(body))])
+    if n >= 3:
+        score -= TRACK_YEAR3
+        new_cons.append(f'要{n}年以上经验（-{TRACK_YEAR3}）')
+    elif n == 2:
+        score -= TRACK_YEAR2
+        new_cons.append(f'要2年经验（-{TRACK_YEAR2}）')
+    if JUNIOR_TITLE.search(job.name) or JUNIOR_JD.search(body):
+        score += TRACK_JUNIOR
+        new_pros.append(f'初级/有人带（+{TRACK_JUNIOR}）')
+    # 学历要求比你高（要硕士、博士）：扣 20 分，而且最高 50
+    edu_gap = edu_cut(job.tags, profile.get('edu'))
+    if edu_gap:
+        score -= TRACK_EDU
+        new_cons.append(f'学历要求高于你（-{TRACK_EDU}，最高{HARD_CAP}）')
+    pay = parse_pay_range(salary)
+    if pay and pay[0] >= 20:
+        score -= TRACK_PAY20
+        new_cons.append(f'工资下限≥20K，多半要资深（-{TRACK_PAY20}）')
+    elif pay and pay[0] >= SENIOR_PAY:
+        score -= TRACK_PAY15
+        new_cons.append(f'工资下限≥15K，偏资深（-{TRACK_PAY15}）')
+    # JD 门槛：硬门槛最高 50；HR 1-3 天活跃、面向应届生、英语标签、工资下限略低照常扣；年限、没学过的上面算过了
+    hard = False
+    for f in flags:
+        if f.startswith((TECH_FLAG, '需1年', '需半年')) or re.match(r'要\d+年', f):
+            continue
+        new_cons.append(flag_note(f, job.name, salary, target))
+        if is_hard(f):
+            hard = True
+        else:
+            score -= track_soft_cut(f)
+    if hard or edu_gap:
+        score = min(score, HARD_CAP)
+    keep = [x for x in pros if x.startswith(('方向对上', '工资达标', '学历符合', '经验要求符合', 'HR', '只要'))]
+    return max(min(score, 100), 0), TRACK_BASE, list(dict.fromkeys(new_pros + keep)), new_cons, kind
 
 
 def dev_lang_miss(title, jd):
@@ -1264,15 +1542,30 @@ def score_jobs(analysis, targets, jobs, profile):
             if (jd and 0 < score < MENTOR_FLOOR and it.score >= MENTOR_TITLE_MIN and mentor_ok(jd)
                     and not any(is_hard(f) for f in flags)
                     and not any(f.startswith(NEED_NEW) and f not in easy for f in flags)
-                    and not any(f.startswith((GRAD_SOFT, STALE_HR, LOW_PAY, LOW_FLOOR, PIECE_PAY)) for f in flags)):
+                    and not any(f.startswith((GRAD_SOFT, STALE_HR, LOW_PAY, LOW_FLOOR, PIECE_PAY, TECH_FLAG, FULLTIME)) for f in flags)):
                 score = MENTOR_FLOOR
                 jd_hits = list(jd_hits) + [MENTOR_HIT]
                 pros.append(f'{MENTOR_HIT}（保底{MENTOR_FLOOR}）')
-            if best[i] is None or (it.read_jd, score, it.score) > (
+            # Agent / Python 岗：起步 70 分单独算，替换上面的分数和标签
+            base = it.score
+            track = track_result(job, it, flags, jd, t, profile, pros, easy)
+            # 智能体运营岗是按 JD 内容认出来的：新算法分更高才换，只加分不降分
+            if track is not None and (track[4] == 'title' or track[0] > score):
+                score, base, pros, cons, _ = track
+                cut = base - score
+            # 提到 Codex / Claude / ChatGPT / DeepSeek：保底 60（标题排除词、管理岗、工资不到下限除外）
+            tools = [name for name, pattern in AI_TOOL_NAMES.items() if jd and pattern.search(jd_body(jd))]
+            title_zero = it.score == 0 and not (it.reason or '').startswith('经验标签从')
+            pay_zero = any(f.startswith((LOW_PAY, LOW_FLOOR, PIECE_PAY)) for f in flags)
+            if tools and score < AI_TOOL_FLOOR and not title_zero and not pay_zero:
+                score = AI_TOOL_FLOOR
+                cut = base - score
+                pros = [f'{AI_TOOL_HIT}：{"、".join(tools)}（保底{AI_TOOL_FLOOR}）'] + list(pros)
+            if best[i] is None or (it.read_jd, score, base) > (
                 best[i]['read_jd'], best[i]['score'], best[i]['base']
             ):
                 best[i] = {
-                    'target': t.name, 'base': it.score, 'flags': flags, 'cut': cut,
+                    'target': t.name, 'base': base, 'flags': flags, 'cut': cut,
                     'score': score, 'matched': it.matched, 'hits': jd_hits,
                     'read_jd': it.read_jd, 'reason': it.reason,
                     'pros': list(dict.fromkeys(pros)), 'cons': list(dict.fromkeys(cons)),
